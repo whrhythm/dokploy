@@ -26,18 +26,27 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 import { api } from "@/utils/api";
 import { AddUserPermissions } from "./add-permissions";
 import { ChangeRole } from "./change-role";
 
 export const ShowUsers = () => {
+	const { t } = useTranslation();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
 	const { data, isPending, refetch } = api.user.all.useQuery();
 	const { mutateAsync } = api.user.remove.useMutation();
 
 	const utils = api.useUtils();
 	const { data: session } = authClient.useSession();
+
+	const getRoleLabel = (role: string) => {
+		if (role === "owner") return t("user.owner");
+		if (role === "admin") return t("user.admin");
+		if (role === "member") return t("user.member");
+		return role;
+	};
 
 	return (
 		<div className="w-full">
@@ -46,16 +55,14 @@ export const ShowUsers = () => {
 					<CardHeader className="">
 						<CardTitle className="text-xl flex flex-row gap-2">
 							<Users className="size-6 text-muted-foreground self-center" />
-							Users
+							{t("users.title")}
 						</CardTitle>
-						<CardDescription>
-							Add your users to your Dokploy account.
-						</CardDescription>
+						<CardDescription>{t("users.description")}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2 py-8 border-t">
 						{isPending ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[25vh]">
-								<span>Loading...</span>
+								<span>{t("loading")}</span>
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
@@ -64,7 +71,7 @@ export const ShowUsers = () => {
 									<div className="flex flex-col items-center gap-3  min-h-[25vh] justify-center">
 										<Users className="size-8 self-center text-muted-foreground" />
 										<span className="text-base text-muted-foreground">
-											Invite users to your Dokploy account
+											{t("users.empty")}
 										</span>
 									</div>
 								) : (
@@ -72,14 +79,22 @@ export const ShowUsers = () => {
 										<Table>
 											<TableHeader>
 												<TableRow>
-													<TableHead className="w-[100px]">Email</TableHead>
-													<TableHead className="text-center">Role</TableHead>
-													<TableHead className="text-center">2FA</TableHead>
+													<TableHead className="w-[100px]">
+														{t("form.email")}
+													</TableHead>
+													<TableHead className="text-center">
+														{t("users.role")}
+													</TableHead>
+													<TableHead className="text-center">
+														{t("users.twoFactor")}
+													</TableHead>
 
 													<TableHead className="text-center">
-														Created At
+														{t("users.createdAt")}
 													</TableHead>
-													<TableHead className="text-right">Actions</TableHead>
+													<TableHead className="text-right">
+														{t("users.actions")}
+													</TableHead>
 												</TableRow>
 											</TableHeader>
 											<TableBody>
@@ -143,13 +158,13 @@ export const ShowUsers = () => {
 																			: "secondary"
 																	}
 																>
-																	{member.role}
+																	{getRoleLabel(member.role)}
 																</Badge>
 															</TableCell>
 															<TableCell className="text-center">
 																{member.user.twoFactorEnabled
-																	? "Enabled"
-																	: "Disabled"}
+																	? t("common.enabled")
+																	: t("common.disabled")}
 															</TableCell>
 															<TableCell className="text-center">
 																<span className="text-sm text-muted-foreground">
@@ -166,14 +181,14 @@ export const ShowUsers = () => {
 																				className="h-8 w-8 p-0"
 																			>
 																				<span className="sr-only">
-																					Open menu
+																					{t("users.openMenu")}
 																				</span>
 																				<MoreHorizontal className="h-4 w-4" />
 																			</Button>
 																		</DropdownMenuTrigger>
 																		<DropdownMenuContent align="end">
 																			<DropdownMenuLabel>
-																				Actions
+																				{t("users.actions")}
 																			</DropdownMenuLabel>
 
 																			{canChangeRole && (
@@ -194,8 +209,10 @@ export const ShowUsers = () => {
 
 																			{canDelete && (
 																				<DialogAction
-																					title="Delete User"
-																					description="Are you sure you want to delete this user?"
+																					title={t("users.deleteTitle")}
+																					description={t(
+																						"users.deleteDescription",
+																					)}
 																					type="destructive"
 																					onClick={async () => {
 																						await mutateAsync({
@@ -203,14 +220,14 @@ export const ShowUsers = () => {
 																						})
 																							.then(() => {
 																								toast.success(
-																									"User deleted successfully",
+																									t("users.deleteSuccess"),
 																								);
 																								refetch();
 																							})
 																							.catch((err) => {
 																								toast.error(
 																									err?.message ||
-																										"Error deleting user",
+																										t("users.deleteError"),
 																								);
 																							});
 																					}}
@@ -219,15 +236,17 @@ export const ShowUsers = () => {
 																						className="w-full cursor-pointer text-red-500 hover:!text-red-600"
 																						onSelect={(e) => e.preventDefault()}
 																					>
-																						Delete User
+																						{t("users.deleteAction")}
 																					</DropdownMenuItem>
 																				</DialogAction>
 																			)}
 
 																			{canUnlink && (
 																				<DialogAction
-																					title="Unlink User"
-																					description="Are you sure you want to unlink this user?"
+																					title={t("users.unlinkTitle")}
+																					description={t(
+																						"users.unlinkDescription",
+																					)}
 																					type="destructive"
 																					onClick={async () => {
 																						if (!isCloud) {
@@ -244,13 +263,13 @@ export const ShowUsers = () => {
 																								})
 																									.then(() => {
 																										toast.success(
-																											"User deleted successfully",
+																											t("users.deleteSuccess"),
 																										);
 																										refetch();
 																									})
 																									.catch(() => {
 																										toast.error(
-																											"Error deleting user",
+																											t("users.deleteError"),
 																										);
 																									});
 																								return;
@@ -266,12 +285,12 @@ export const ShowUsers = () => {
 
 																						if (!error) {
 																							toast.success(
-																								"User unlinked successfully",
+																								t("users.unlinkSuccess"),
 																							);
 																							refetch();
 																						} else {
 																							toast.error(
-																								"Error unlinking user",
+																								t("users.unlinkError"),
 																							);
 																						}
 																					}}
@@ -280,7 +299,7 @@ export const ShowUsers = () => {
 																						className="w-full cursor-pointer text-red-500 hover:!text-red-600"
 																						onSelect={(e) => e.preventDefault()}
 																					>
-																						Unlink User
+																						{t("users.unlinkAction")}
 																					</DropdownMenuItem>
 																				</DialogAction>
 																			)}
@@ -293,7 +312,7 @@ export const ShowUsers = () => {
 																		disabled
 																	>
 																		<span className="sr-only">
-																			No actions available
+																			{t("users.noActions")}
 																		</span>
 																		<MoreHorizontal className="h-4 w-4 text-muted-foreground" />
 																	</Button>

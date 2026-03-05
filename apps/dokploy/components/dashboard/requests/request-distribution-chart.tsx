@@ -12,6 +12,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 export interface RequestDistributionChartProps {
@@ -21,19 +22,10 @@ export interface RequestDistributionChartProps {
 	};
 }
 
-const chartConfig = {
-	views: {
-		label: "Page Views",
-	},
-	count: {
-		label: "Count",
-		color: "hsl(var(--chart-1))",
-	},
-} satisfies ChartConfig;
-
 export const RequestDistributionChart = ({
 	dateRange,
 }: RequestDistributionChartProps) => {
+	const { t } = useTranslation();
 	const { data: stats } = api.settings.readStats.useQuery(
 		{
 			dateRange: dateRange
@@ -47,6 +39,16 @@ export const RequestDistributionChart = ({
 			refetchInterval: 1333,
 		},
 	);
+
+	const chartConfig: ChartConfig = {
+		views: {
+			label: t("requests.chart.pageViews"),
+		},
+		count: {
+			label: t("requests.chart.count"),
+			color: "hsl(var(--chart-1))",
+		},
+	};
 
 	return (
 		<div className="w-full h-[200px] overflow-hidden">

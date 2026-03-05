@@ -10,12 +10,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { ShowModalLogs } from "../../web-server/show-modal-logs";
 import { TerminalModal } from "../../web-server/terminal-modal";
 import { GPUSupportModal } from "../gpu-support-modal";
 
 export const ShowDokployActions = () => {
+	const { t } = useTranslation();
 	const { mutateAsync: reloadServer, isPending } =
 		api.settings.reloadServer.useMutation();
 
@@ -28,36 +30,36 @@ export const ShowDokployActions = () => {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild disabled={isPending}>
 				<Button isLoading={isPending} variant="outline">
-					Server
+					{t("serverActions.server")}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56" align="start">
-				<DropdownMenuLabel>Actions</DropdownMenuLabel>
+				<DropdownMenuLabel>{t("serverActions.actions")}</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem
 						onClick={async () => {
 							await reloadServer()
 								.then(async () => {
-									toast.success("Server Reloaded");
+									toast.success(t("serverActions.serverReloaded"));
 								})
 								.catch(() => {
-									toast.success("Server Reloaded");
+									toast.success(t("serverActions.serverReloaded"));
 								});
 						}}
 						className="cursor-pointer"
 					>
-						<span>Reload</span>
+						<span>{t("serverActions.reload")}</span>
 					</DropdownMenuItem>
 					<TerminalModal serverId="local">
-						<span>Terminal</span>
+						<span>{t("serverActions.terminal")}</span>
 					</TerminalModal>
 					<ShowModalLogs appName="dokploy">
 						<DropdownMenuItem
 							className="cursor-pointer"
 							onSelect={(e) => e.preventDefault()}
 						>
-							View Logs
+							{t("serverActions.viewLogs")}
 						</DropdownMenuItem>
 					</ShowModalLogs>
 					<GPUSupportModal />
@@ -66,7 +68,7 @@ export const ShowDokployActions = () => {
 							className="cursor-pointer"
 							onSelect={(e) => e.preventDefault()}
 						>
-							Update Server IP
+							{t("serverActions.updateServerIp")}
 						</DropdownMenuItem>
 					</UpdateServerIp>
 
@@ -75,14 +77,14 @@ export const ShowDokployActions = () => {
 						onClick={async () => {
 							await cleanRedis()
 								.then(async () => {
-									toast.success("Redis cleaned");
+									toast.success(t("serverActions.redisCleaned"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning Redis");
+									toast.error(t("serverActions.redisCleanError"));
 								});
 						}}
 					>
-						Clean Redis
+						{t("serverActions.cleanRedis")}
 					</DropdownMenuItem>
 
 					<DropdownMenuItem
@@ -90,14 +92,14 @@ export const ShowDokployActions = () => {
 						onClick={async () => {
 							await cleanAllDeploymentQueue()
 								.then(() => {
-									toast.success("Deployment queue cleaned");
+									toast.success(t("serverActions.deploymentQueueCleaned"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning deployment queue");
+									toast.error(t("serverActions.deploymentQueueCleanError"));
 								});
 						}}
 					>
-						Clean all deployment queue
+						{t("serverActions.cleanDeploymentQueue")}
 					</DropdownMenuItem>
 
 					<DropdownMenuItem
@@ -105,14 +107,14 @@ export const ShowDokployActions = () => {
 						onClick={async () => {
 							await reloadRedis()
 								.then(async () => {
-									toast.success("Redis reloaded");
+									toast.success(t("serverActions.redisReloaded"));
 								})
 								.catch(() => {
-									toast.error("Error reloading Redis");
+									toast.error(t("serverActions.redisReloadError"));
 								});
 						}}
 					>
-						Reload Redis
+						{t("serverActions.reloadRedis")}
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 			</DropdownMenuContent>

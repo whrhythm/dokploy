@@ -31,43 +31,46 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const addServerDomain = z
-	.object({
-		domain: z.string().trim().toLowerCase(),
-		letsEncryptEmail: z.string(),
-		https: z.boolean().optional(),
-		certificateType: z.enum(["letsencrypt", "none", "custom"]),
-	})
-	.superRefine((data, ctx) => {
-		if (data.https && !data.certificateType) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["certificateType"],
-				message: "Required",
-			});
-		}
-		if (
-			data.https &&
-			data.certificateType === "letsencrypt" &&
-			!data.letsEncryptEmail
-		) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message:
-					"LetsEncrypt email is required when certificate type is letsencrypt",
-				path: ["letsEncryptEmail"],
-			});
-		}
-	});
+const createServerDomainSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			domain: z.string().trim().toLowerCase(),
+			letsEncryptEmail: z.string(),
+			https: z.boolean().optional(),
+			certificateType: z.enum(["letsencrypt", "none", "custom"]),
+		})
+		.superRefine((data, ctx) => {
+			if (data.https && !data.certificateType) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["certificateType"],
+					message: t("webDomain.validation.required"),
+				});
+			}
+			if (
+				data.https &&
+				data.certificateType === "letsencrypt" &&
+				!data.letsEncryptEmail
+			) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: t("webDomain.validation.letsEncryptEmailRequired"),
+					path: ["letsEncryptEmail"],
+				});
+			}
+		});
 
-type AddServerDomain = z.infer<typeof addServerDomain>;
+type AddServerDomain = z.infer<ReturnType<typeof createServerDomainSchema>>;
 
 export const WebDomain = () => {
+	const { t } = useTranslation();
 	const { data, refetch } = api.settings.getWebServerSettings.useQuery();
 	const { mutateAsync, isPending } =
 		api.settings.assignDomainServer.useMutation();
+	const addServerDomain = createServerDomainSchema(t);
 
 	const form = useForm<AddServerDomain>({
 		defaultValues: {
@@ -102,10 +105,10 @@ export const WebDomain = () => {
 		})
 			.then(async () => {
 				await refetch();
-				toast.success("Domain Assigned");
+				toast.success(t("webDomain.assigned"));
 			})
 			.catch(() => {
-				toast.error("Error assigning the domain");
+				toast.error(t("webDomain.assignError"));
 			});
 	};
 
@@ -117,11 +120,9 @@ export const WebDomain = () => {
 						<div className="flex flex-col gap-1">
 							<CardTitle className="text-xl flex flex-row gap-2">
 								<GlobeIcon className="size-6 text-muted-foreground self-center" />
-								Server Domain
+								{t("webDomain.title")}
 							</CardTitle>
-							<CardDescription>
-								Add a domain to your server application.
-							</CardDescription>
+							<CardDescription>{t("webDomain.description")}</CardDescription>
 						</div>
 					</CardHeader>
 					<CardContent className="space-y-2 py-6 border-t">
@@ -129,12 +130,10 @@ export const WebDomain = () => {
 						{hasChanged && (
 							<AlertBlock type="warning">
 								<div className="space-y-2">
-									<p className="font-medium">⚠️ Important: URL Change Impact</p>
-									<p>
-										If you change the Dokploy Server URL make sure to update
-										your Github Apps to keep the auto-deploy working and preview
-										deployments working.
+									<p className="font-medium">
+										{t("webDomain.changeWarningTitle")}
 									</p>
+									<p>{t("webDomain.changeWarningDesc")}</p>
 								</div>
 							</AlertBlock>
 						)}
@@ -149,7 +148,7 @@ export const WebDomain = () => {
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Domain</FormLabel>
+												<FormLabel>{t("webDomain.domain")}</FormLabel>
 												<FormControl>
 													<Input
 														className="w-full"
@@ -169,7 +168,7 @@ export const WebDomain = () => {
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Let's Encrypt Email</FormLabel>
+												<FormLabel>{t("webDomain.letsEncryptEmail")}</FormLabel>
 												<FormControl>
 													<Input
 														className="w-full"
@@ -190,7 +189,7 @@ export const WebDomain = () => {
 											<div className="space-y-0.5">
 												<FormLabel>HTTPS</FormLabel>
 												<FormDescription>
-													Automatically provision SSL Certificate.
+													{t("webDomain.httpsDesc")}
 												</FormDescription>
 												<FormMessage />
 											</div>
@@ -210,20 +209,26 @@ export const WebDomain = () => {
 										render={({ field }) => {
 											return (
 												<FormItem className="md:col-span-2">
-													<FormLabel>Certificate Provider</FormLabel>
+													<FormLabel>
+														{t("webDomain.certificateProvider")}
+													</FormLabel>
 													<Select
 														onValueChange={field.onChange}
 														value={field.value}
 													>
 														<FormControl>
 															<SelectTrigger>
-																<SelectValue placeholder="Select a certificate" />
+																<SelectValue
+																	placeholder={t("webDomain.selectCertificate")}
+																/>
 															</SelectTrigger>
 														</FormControl>
 														<SelectContent>
-															<SelectItem value={"none"}>None</SelectItem>
+															<SelectItem value={"none"}>
+																{t("common.none")}
+															</SelectItem>
 															<SelectItem value={"letsencrypt"}>
-																Let's Encrypt
+																{t("webDomain.letsEncrypt")}
 															</SelectItem>
 														</SelectContent>
 													</Select>
@@ -236,7 +241,7 @@ export const WebDomain = () => {
 
 								<div className="flex w-full justify-end col-span-2">
 									<Button isLoading={isPending} type="submit">
-										Save
+										{t("button.save")}
 									</Button>
 								</div>
 							</form>

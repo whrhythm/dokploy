@@ -97,12 +97,14 @@ export const extractExpirationDate = (certData: string): Date | null => {
 export const getExpirationStatus = (certData: string) => {
 	const expirationDate = extractExpirationDate(certData);
 
-	if (!expirationDate)
+	if (!expirationDate) {
 		return {
 			status: "unknown" as const,
 			className: "text-muted-foreground",
-			message: "Could not determine expiration",
+			expirationDate: null as Date | null,
+			daysUntilExpiration: null as number | null,
 		};
+	}
 
 	const now = new Date();
 	const daysUntilExpiration = Math.ceil(
@@ -113,11 +115,8 @@ export const getExpirationStatus = (certData: string) => {
 		return {
 			status: "expired" as const,
 			className: "text-red-500",
-			message: `Expired on ${expirationDate.toLocaleDateString([], {
-				year: "numeric",
-				month: "long",
-				day: "numeric",
-			})}`,
+			expirationDate,
+			daysUntilExpiration,
 		};
 	}
 
@@ -125,18 +124,16 @@ export const getExpirationStatus = (certData: string) => {
 		return {
 			status: "warning" as const,
 			className: "text-yellow-500",
-			message: `Expires in ${daysUntilExpiration} days`,
+			expirationDate,
+			daysUntilExpiration,
 		};
 	}
 
 	return {
 		status: "valid" as const,
 		className: "text-muted-foreground",
-		message: `Expires ${expirationDate.toLocaleDateString([], {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		})}`,
+		expirationDate,
+		daysUntilExpiration,
 	};
 };
 

@@ -27,16 +27,32 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 import { api } from "@/utils/api";
 import { AddInvitation } from "./add-invitation";
 
 export const ShowInvitations = () => {
+	const { t } = useTranslation();
 	const { data, isPending, refetch } =
 		api.organization.allInvitations.useQuery();
 
 	const { mutateAsync: removeInvitation } =
 		api.organization.removeInvitation.useMutation();
+
+	const getRoleLabel = (role: string) => {
+		if (role === "owner") return t("user.owner");
+		if (role === "admin") return t("user.admin");
+		if (role === "member") return t("user.member");
+		return role;
+	};
+
+	const getStatusLabel = (status: string) => {
+		if (status === "pending") return t("invitations.status.pending");
+		if (status === "canceled") return t("invitations.status.canceled");
+		if (status === "accepted") return t("invitations.status.accepted");
+		return status;
+	};
 
 	return (
 		<div className="w-full">
@@ -45,16 +61,14 @@ export const ShowInvitations = () => {
 					<CardHeader className="">
 						<CardTitle className="text-xl flex flex-row gap-2">
 							<Mail className="size-6 text-muted-foreground self-center" />
-							Invitations
+							{t("invitations.title")}
 						</CardTitle>
-						<CardDescription>
-							Create invitations to your organization.
-						</CardDescription>
+						<CardDescription>{t("invitations.description")}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2 py-8 border-t">
 						{isPending ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[25vh]">
-								<span>Loading...</span>
+								<span>{t("loading")}</span>
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
@@ -63,23 +77,31 @@ export const ShowInvitations = () => {
 									<div className="flex flex-col items-center gap-3  min-h-[25vh] justify-center">
 										<Users className="size-8 self-center text-muted-foreground" />
 										<span className="text-base text-muted-foreground">
-											Invite users to your organization
+											{t("invitations.empty")}
 										</span>
 										<AddInvitation />
 									</div>
 								) : (
 									<div className="flex flex-col gap-4  min-h-[25vh]">
 										<Table>
-											<TableCaption>See all invitations</TableCaption>
+											<TableCaption>{t("invitations.caption")}</TableCaption>
 											<TableHeader>
 												<TableRow>
-													<TableHead className="w-[100px]">Email</TableHead>
-													<TableHead className="text-center">Role</TableHead>
-													<TableHead className="text-center">Status</TableHead>
-													<TableHead className="text-center">
-														Expires At
+													<TableHead className="w-[100px]">
+														{t("form.email")}
 													</TableHead>
-													<TableHead className="text-right">Actions</TableHead>
+													<TableHead className="text-center">
+														{t("users.role")}
+													</TableHead>
+													<TableHead className="text-center">
+														{t("invitations.status")}
+													</TableHead>
+													<TableHead className="text-center">
+														{t("invitations.expiresAt")}
+													</TableHead>
+													<TableHead className="text-right">
+														{t("users.actions")}
+													</TableHead>
 												</TableRow>
 											</TableHeader>
 											<TableBody>
@@ -100,7 +122,7 @@ export const ShowInvitations = () => {
 																			: "secondary"
 																	}
 																>
-																	{invitation.role}
+																	{getRoleLabel(invitation.role)}
 																</Badge>
 															</TableCell>
 															<TableCell className="text-center">
@@ -113,14 +135,14 @@ export const ShowInvitations = () => {
 																				: "default"
 																	}
 																>
-																	{invitation.status}
+																	{getStatusLabel(invitation.status)}
 																</Badge>
 															</TableCell>
 															<TableCell className="text-center">
 																{format(new Date(invitation.expiresAt), "PPpp")}{" "}
 																{isExpired ? (
 																	<span className="text-muted-foreground">
-																		(Expired)
+																		({t("invitations.expired")})
 																	</span>
 																) : null}
 															</TableCell>
@@ -132,13 +154,15 @@ export const ShowInvitations = () => {
 																			variant="ghost"
 																			className="h-8 w-8 p-0"
 																		>
-																			<span className="sr-only">Open menu</span>
+																			<span className="sr-only">
+																				{t("users.openMenu")}
+																			</span>
 																			<MoreHorizontal className="h-4 w-4" />
 																		</Button>
 																	</DropdownMenuTrigger>
 																	<DropdownMenuContent align="end">
 																		<DropdownMenuLabel>
-																			Actions
+																			{t("users.actions")}
 																		</DropdownMenuLabel>
 																		{!isExpired && (
 																			<>
@@ -150,11 +174,11 @@ export const ShowInvitations = () => {
 																								`${origin}/invitation?token=${invitation.id}`,
 																							);
 																							toast.success(
-																								"Invitation Copied to clipboard",
+																								t("invitations.copied"),
 																							);
 																						}}
 																					>
-																						Copy Invitation
+																						{t("invitations.copyAction")}
 																					</DropdownMenuItem>
 																				)}
 
@@ -175,13 +199,13 @@ export const ShowInvitations = () => {
 																								);
 																							} else {
 																								toast.success(
-																									"Invitation deleted",
+																									t("invitations.canceled"),
 																								);
 																								refetch();
 																							}
 																						}}
 																					>
-																						Cancel Invitation
+																						{t("invitations.cancelAction")}
 																					</DropdownMenuItem>
 																				)}
 																			</>
@@ -193,11 +217,13 @@ export const ShowInvitations = () => {
 																					invitationId: invitation.id,
 																				}).then(() => {
 																					refetch();
-																					toast.success("Invitation removed");
+																					toast.success(
+																						t("invitations.removed"),
+																					);
 																				});
 																			}}
 																		>
-																			Remove Invitation
+																			{t("invitations.removeAction")}
 																		</DropdownMenuItem>
 																	</DropdownMenuContent>
 																</DropdownMenu>

@@ -12,6 +12,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useHealthCheckAfterMutation } from "@/hooks/use-health-check-after-mutation";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { EditTraefikEnv } from "../../web-server/edit-traefik-env";
 import { ManageTraefikPorts } from "../../web-server/manage-traefik-ports";
@@ -21,6 +22,7 @@ interface Props {
 	serverId?: string;
 }
 export const ShowTraefikActions = ({ serverId }: Props) => {
+	const { t } = useTranslation();
 	const { mutateAsync: reloadTraefik, isPending: reloadTraefikIsLoading } =
 		api.settings.reloadTraefik.useMutation();
 
@@ -38,7 +40,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 	} = useHealthCheckAfterMutation({
 		initialDelay: 5000,
 		pollInterval: 4000,
-		successMessage: "Traefik dashboard updated successfully",
+		successMessage: t("traefikActions.dashboardUpdated"),
 		onSuccess: () => {
 			refetchDashboard();
 		},
@@ -50,7 +52,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 	} = useHealthCheckAfterMutation({
 		initialDelay: 5000,
 		pollInterval: 4000,
-		successMessage: "Traefik Reloaded",
+		successMessage: t("traefikActions.reloaded"),
 	});
 
 	return (
@@ -77,7 +79,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56" align="start">
-				<DropdownMenuLabel>Actions</DropdownMenuLabel>
+				<DropdownMenuLabel>{t("traefikActions.actions")}</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem
@@ -88,15 +90,14 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 								);
 							} catch (error) {
 								const errorMessage =
-									(error as Error)?.message ||
-									"Failed to reload Traefik. Please try again.";
+									(error as Error)?.message || t("traefikActions.reloadError");
 								toast.error(errorMessage);
 							}
 						}}
 						className="cursor-pointer"
 						disabled={isReloadHealthCheckExecuting}
 					>
-						<span>Reload</span>
+						<span>{t("traefikActions.reload")}</span>
 					</DropdownMenuItem>
 					<ShowModalLogs
 						appName="dokploy-traefik"
@@ -107,7 +108,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 							onSelect={(e) => e.preventDefault()}
 							className="cursor-pointer"
 						>
-							View Logs
+							{t("serverActions.viewLogs")}
 						</DropdownMenuItem>
 					</ShowModalLogs>
 					<EditTraefikEnv serverId={serverId}>
@@ -115,27 +116,27 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 							onSelect={(e) => e.preventDefault()}
 							className="cursor-pointer"
 						>
-							<span>Modify Environment</span>
+							<span>{t("traefikActions.modifyEnvironment")}</span>
 						</DropdownMenuItem>
 					</EditTraefikEnv>
 
 					<DialogAction
 						title={
 							haveTraefikDashboardPortEnabled
-								? "Disable Traefik Dashboard"
-								: "Enable Traefik Dashboard"
+								? t("traefikActions.disableDashboardTitle")
+								: t("traefikActions.enableDashboardTitle")
 						}
 						description={
 							<div className="space-y-4">
 								<AlertBlock type="warning">
-									The Traefik container will be recreated from scratch. This
-									means the container will be deleted and created again, which
-									may cause downtime in your applications.
+									{t("traefikActions.warning")}
 								</AlertBlock>
 								<p>
-									Are you sure you want to{" "}
-									{haveTraefikDashboardPortEnabled ? "disable" : "enable"} the
-									Traefik dashboard?
+									{t("traefikActions.togglePrompt")}{" "}
+									{haveTraefikDashboardPortEnabled
+										? t("traefikActions.disable")
+										: t("traefikActions.enable")}{" "}
+									{t("traefikActions.dashboard")}
 								</p>
 							</div>
 						}
@@ -149,8 +150,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 								);
 							} catch (error) {
 								const errorMessage =
-									(error as Error)?.message ||
-									"Failed to toggle dashboard. Please check if port 8080 is available.";
+									(error as Error)?.message || t("traefikActions.toggleError");
 								toast.error(errorMessage);
 							}
 						}}
@@ -162,8 +162,10 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 							className="w-full cursor-pointer space-x-3"
 						>
 							<span>
-								{haveTraefikDashboardPortEnabled ? "Disable" : "Enable"}{" "}
-								Dashboard
+								{haveTraefikDashboardPortEnabled
+									? t("traefikActions.disable")
+									: t("traefikActions.enable")}{" "}
+								{t("traefikActions.dashboard")}
 							</span>
 						</DropdownMenuItem>
 					</DialogAction>
@@ -172,7 +174,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 							onSelect={(e) => e.preventDefault()}
 							className="cursor-pointer"
 						>
-							<span>Additional Port Mappings</span>
+							<span>{t("traefikPorts.title")}</span>
 						</DropdownMenuItem>
 					</ManageTraefikPorts>
 				</DropdownMenuGroup>

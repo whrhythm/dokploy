@@ -1,5 +1,6 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { Settings } from "lucide-react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -18,14 +19,13 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
-const Schema = z.object({
-	port: z.number().min(1, "Port must be higher than 0"),
-	username: z.string().min(1, "Username is required"),
-});
-
-type Schema = z.infer<typeof Schema>;
+type Schema = {
+	port: number;
+	username: string;
+};
 
 const DEFAULT_LOCAL_SERVER_DATA: Schema = {
 	port: 22,
@@ -51,9 +51,21 @@ interface Props {
 }
 
 const LocalServerConfig = ({ onSave }: Props) => {
+	const { t } = useTranslation();
+	const schema = useMemo(
+		() =>
+			z.object({
+				port: z.number().min(1, t("localServer.validation.portRequired")),
+				username: z
+					.string()
+					.min(1, t("localServer.validation.usernameRequired")),
+			}),
+		[t],
+	);
+
 	const form = useForm<Schema>({
 		defaultValues: getLocalServerData(),
-		resolver: zodResolver(Schema),
+		resolver: zodResolver(schema),
 	});
 
 	const onSubmit = (data: Schema) => {
@@ -74,7 +86,9 @@ const LocalServerConfig = ({ onSave }: Props) => {
 					<div className="flex flex-row items-center gap-2 justify-between w-full">
 						<div className="flex flex-row gap-2 items-center">
 							<Settings className="h-4 w-4" />
-							<span className="dark:hover:text-white">Connection settings</span>
+							<span className="dark:hover:text-white">
+								{t("localServer.connectionSettings")}
+							</span>
 						</div>
 					</div>
 				</AccordionTrigger>
@@ -91,7 +105,7 @@ const LocalServerConfig = ({ onSave }: Props) => {
 								name="port"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Port</FormLabel>
+										<FormLabel>{t("form.port")}</FormLabel>
 										<FormControl>
 											<Input
 												{...field}
@@ -119,7 +133,7 @@ const LocalServerConfig = ({ onSave }: Props) => {
 								name="username"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Username</FormLabel>
+										<FormLabel>{t("form.username")}</FormLabel>
 										<FormControl>
 											<Input placeholder="root" {...field} />
 										</FormControl>
@@ -137,7 +151,7 @@ const LocalServerConfig = ({ onSave }: Props) => {
 						className="ml-auto"
 						disabled={!form.formState.isDirty}
 					>
-						Save
+						{t("button.save")}
 					</Button>
 				</AccordionContent>
 			</AccordionItem>

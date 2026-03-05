@@ -20,7 +20,7 @@ import {
 	Key,
 	KeyRound,
 	Loader2,
-	LogIn,
+	// LogIn,
 	type LucideIcon,
 	Package,
 	PieChart,
@@ -148,13 +148,13 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Deployments",
+			title: "部署",
 			url: "/dashboard/deployments",
 			icon: Rocket,
 		},
 		{
 			isSingle: true,
-			title: "Monitoring",
+			title: "监控",
 			url: "/dashboard/monitoring",
 			icon: BarChartHorizontalBigIcon,
 			// Only enabled in non-cloud environments
@@ -162,7 +162,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Schedules",
+			title: "定时任务",
 			url: "/dashboard/schedules",
 			icon: Clock,
 			// Only enabled in non-cloud environments
@@ -171,7 +171,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Traefik File System",
+			title: "Traefik文件系统",
 			url: "/dashboard/traefik",
 			icon: GalleryVerticalEnd,
 			// Only enabled for admins and users with access to Traefik files in non-cloud environments
@@ -286,7 +286,7 @@ const MENU: Menu = {
 	settings: [
 		{
 			isSingle: true,
-			title: "Web Server",
+			title: "Web 服务器",
 			url: "/dashboard/settings/server",
 			icon: Activity,
 			// Only enabled for admins in non-cloud environments
@@ -311,7 +311,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Users",
+			title: "用户管理",
 			icon: Users,
 			url: "/dashboard/settings/users",
 			// Only enabled for admins
@@ -344,7 +344,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Registry",
+			title: "镜像仓库",
 			url: "/dashboard/settings/registry",
 			icon: Package,
 			// Only enabled for admins
@@ -353,7 +353,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "S3 Destinations",
+			title: "S3 存储",
 			url: "/dashboard/settings/destinations",
 			icon: Database,
 			// Only enabled for admins
@@ -363,7 +363,7 @@ const MENU: Menu = {
 
 		{
 			isSingle: true,
-			title: "Certificates",
+			title: "证书管理",
 			url: "/dashboard/settings/certificates",
 			icon: ShieldCheck,
 			// Only enabled for admins
@@ -372,7 +372,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Cluster",
+			title: "集群",
 			url: "/dashboard/settings/cluster",
 			icon: Boxes,
 			// Only enabled for admins in non-cloud environments
@@ -381,7 +381,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Notifications",
+			title: "通知",
 			url: "/dashboard/settings/notifications",
 			icon: Bell,
 			// Only enabled for admins
@@ -404,15 +404,15 @@ const MENU: Menu = {
 			// Only enabled for admins in non-cloud environments
 			isEnabled: ({ auth: _auth, isCloud: _isCloud }) => false,
 		},
-		{
-			isSingle: true,
-			title: "SSO",
-			url: "/dashboard/settings/sso",
-			icon: LogIn,
-			// Enabled for admins in both cloud and self-hosted (enterprise)
-			isEnabled: ({ auth }) =>
-				!!(auth?.role === "owner" || auth?.role === "admin"),
-		},
+		// {
+		// 	isSingle: true,
+		// 	title: "SSO",
+		// 	url: "/dashboard/settings/sso",
+		// 	icon: LogIn,
+		// 	// Enabled for admins in both cloud and self-hosted (enterprise)
+		// 	isEnabled: ({ auth }) =>
+		// 		!!(auth?.role === "owner" || auth?.role === "admin"),
+		// },
 	],
 
 	help: [

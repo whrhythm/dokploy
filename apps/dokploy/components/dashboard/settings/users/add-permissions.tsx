@@ -26,6 +26,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { api, type RouterOutputs } from "@/utils/api";
 
 /** Shape returned by project.allForPermissions (admin only). Used for the permissions UI. */
@@ -176,6 +177,7 @@ interface Props {
 }
 
 export const AddUserPermissions = ({ userId }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const { data: projects } = api.project.allForPermissions.useQuery(undefined, {
 		enabled: isOpen,
@@ -253,12 +255,12 @@ export const AddUserPermissions = ({ userId }: Props) => {
 			canCreateEnvironments: data.canCreateEnvironments,
 		})
 			.then(async () => {
-				toast.success("Permissions updated");
+				toast.success(t("users.permissions.updated"));
 				refetch();
 				setIsOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error updating the permissions");
+				toast.error(t("users.permissions.updateError"));
 			});
 	};
 	return (
@@ -268,13 +270,15 @@ export const AddUserPermissions = ({ userId }: Props) => {
 					className="w-full cursor-pointer"
 					onSelect={(e) => e.preventDefault()}
 				>
-					Add Permissions
+					{t("users.permissions.addAction")}
 				</DropdownMenuItem>
 			</DialogTrigger>
 			<DialogContent className="max-h-[85vh]  sm:max-w-4xl">
 				<DialogHeader>
-					<DialogTitle>Permissions</DialogTitle>
-					<DialogDescription>Add or remove permissions</DialogDescription>
+					<DialogTitle>{t("users.permissions.title")}</DialogTitle>
+					<DialogDescription>
+						{t("users.permissions.description")}
+					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
@@ -290,9 +294,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Create Projects</FormLabel>
+										<FormLabel>
+											{t("users.permissions.createProjects")}
+										</FormLabel>
 										<FormDescription>
-											Allow the user to create projects
+											{t("users.permissions.createProjectsDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -310,9 +316,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Delete Projects</FormLabel>
+										<FormLabel>
+											{t("users.permissions.deleteProjects")}
+										</FormLabel>
 										<FormDescription>
-											Allow the user to delete projects
+											{t("users.permissions.deleteProjectsDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -330,9 +338,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Create Services</FormLabel>
+										<FormLabel>
+											{t("users.permissions.createServices")}
+										</FormLabel>
 										<FormDescription>
-											Allow the user to create services
+											{t("users.permissions.createServicesDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -350,9 +360,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Delete Services</FormLabel>
+										<FormLabel>
+											{t("users.permissions.deleteServices")}
+										</FormLabel>
 										<FormDescription>
-											Allow the user to delete services
+											{t("users.permissions.deleteServicesDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -370,9 +382,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Create Environments</FormLabel>
+										<FormLabel>
+											{t("users.permissions.createEnvironments")}
+										</FormLabel>
 										<FormDescription>
-											Allow the user to create environments
+											{t("users.permissions.createEnvironmentsDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -390,9 +404,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Delete Environments</FormLabel>
+										<FormLabel>
+											{t("users.permissions.deleteEnvironments")}
+										</FormLabel>
 										<FormDescription>
-											Allow the user to delete environments
+											{t("users.permissions.deleteEnvironmentsDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -410,9 +426,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Access to Traefik Files</FormLabel>
+										<FormLabel>
+											{t("users.permissions.accessTraefikFiles")}
+										</FormLabel>
 										<FormDescription>
-											Allow the user to access to the Traefik Tab Files
+											{t("users.permissions.accessTraefikFilesDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -430,9 +448,9 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Access to Docker</FormLabel>
+										<FormLabel>{t("users.permissions.accessDocker")}</FormLabel>
 										<FormDescription>
-											Allow the user to access to the Docker Tab
+											{t("users.permissions.accessDockerDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -450,9 +468,9 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Access to API/CLI</FormLabel>
+										<FormLabel>{t("users.permissions.accessApiCli")}</FormLabel>
 										<FormDescription>
-											Allow the user to access to the API/CLI
+											{t("users.permissions.accessApiCliDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -470,9 +488,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Access to SSH Keys</FormLabel>
+										<FormLabel>
+											{t("users.permissions.accessSshKeys")}
+										</FormLabel>
 										<FormDescription>
-											Allow to users to access to the SSH Keys section
+											{t("users.permissions.accessSshKeysDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -490,9 +510,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Access to Git Providers</FormLabel>
+										<FormLabel>
+											{t("users.permissions.accessGitProviders")}
+										</FormLabel>
 										<FormDescription>
-											Allow to users to access to the Git Providers section
+											{t("users.permissions.accessGitProvidersDesc")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -510,14 +532,16 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={() => (
 								<FormItem className="md:col-span-2">
 									<div className="mb-4">
-										<FormLabel className="text-base">xiangmu</FormLabel>
+										<FormLabel className="text-base">
+											{t("users.permissions.projects")}
+										</FormLabel>
 										<FormDescription>
-											Select the Projects that the user can access
+											{t("users.permissions.projectsDesc")}
 										</FormDescription>
 									</div>
 									{projects?.length === 0 && (
 										<p className="text-sm text-muted-foreground">
-											No projects found
+											{t("users.permissions.noProjects")}
 										</p>
 									)}
 									<div className="grid md:grid-cols-1 gap-4">
@@ -611,7 +635,7 @@ export const AddUserPermissions = ({ userId }: Props) => {
 																<div className="ml-6 w-full space-y-3">
 																	{project.environments.length === 0 && (
 																		<p className="text-sm text-muted-foreground">
-																			No environments found
+																			{t("users.permissions.noEnvironments")}
 																		</p>
 																	)}
 																	{project.environments.map(
@@ -704,7 +728,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 																										{environment.name}
 																									</FormLabel>
 																									<span className="text-xs text-muted-foreground">
-																										({services.length} services)
+																										({services.length}{" "}
+																										{t(
+																											"users.permissions.services",
+																										)}
+																										)
 																									</span>
 																								</div>
 																							</FormItem>
@@ -715,7 +743,9 @@ export const AddUserPermissions = ({ userId }: Props) => {
 																					<div className="ml-4 space-y-2">
 																						{services.length === 0 && (
 																							<p className="text-xs text-muted-foreground">
-																								No services found
+																								{t(
+																									"users.permissions.noServices",
+																								)}
 																							</p>
 																						)}
 																						{services.map(
@@ -816,7 +846,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 																														{service.name}
 																													</FormLabel>
 																													<span className="text-xs text-muted-foreground/70 capitalize">
-																														({service.type})
+																														(
+																														{t(
+																															`users.permissions.serviceType.${service.type}`,
+																														)}
+																														)
 																													</span>
 																												</div>
 																											</FormItem>
@@ -849,7 +883,7 @@ export const AddUserPermissions = ({ userId }: Props) => {
 								form="hook-form-add-permissions"
 								type="submit"
 							>
-								Update
+								{t("button.update")}
 							</Button>
 						</DialogFooter>
 					</form>

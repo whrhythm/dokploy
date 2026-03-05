@@ -16,6 +16,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 interface DataTableFacetedFilterProps {
@@ -35,6 +36,7 @@ export function DataTableFacetedFilter({
 	title,
 	options,
 }: DataTableFacetedFilterProps) {
+	const { t } = useTranslation();
 	const selectedValues = new Set(value as string[]);
 
 	return (
@@ -58,7 +60,7 @@ export function DataTableFacetedFilter({
 										variant="secondary"
 										className="rounded-sm px-1 font-normal"
 									>
-										{selectedValues.size} selected
+										{selectedValues.size} {t("requests.selected")}
 									</Badge>
 								) : (
 									options
@@ -80,9 +82,9 @@ export function DataTableFacetedFilter({
 			</PopoverTrigger>
 			<PopoverContent className="w-[200px] p-0" align="start">
 				<Command>
-					<CommandInput placeholder={title} />
+					<CommandInput placeholder={t("requests.filterPlaceholder")} />
 					<CommandList>
-						<CommandEmpty>No results found.</CommandEmpty>
+						<CommandEmpty>{t("search.noResults")}</CommandEmpty>
 						<CommandGroup>
 							{options.map((option) => {
 								const isSelected = selectedValues.has(option.value);
@@ -125,7 +127,7 @@ export function DataTableFacetedFilter({
 										onSelect={() => setValue?.([])}
 										className="justify-center text-center"
 									>
-										Clear filters
+										{t("requests.clearFilters")}
 									</CommandItem>
 								</CommandGroup>
 							</>

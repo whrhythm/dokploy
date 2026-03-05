@@ -1,6 +1,6 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { HelpCircle, PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -39,6 +39,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const certificateDataHolder =
@@ -47,17 +48,23 @@ const certificateDataHolder =
 const privateKeyDataHolder =
 	"-----BEGIN PRIVATE KEY-----\nMIIFRDCCAyygAwIBAgIUEPOR47ys6VDwMVB9tYoeEka83uQwDQYJKoZIhvcNAQELBQAwGTEXMBUGA1UEAwwObWktZG9taW5pby5jb20wHhcNMjQwMzExMDQyNzU3WhcN\n-----END PRIVATE KEY-----";
 
-const addCertificate = z.object({
-	name: z.string().min(1, "Name is required"),
-	certificateData: z.string().min(1, "Certificate data is required"),
-	privateKey: z.string().min(1, "Private key is required"),
-	autoRenew: z.boolean().optional(),
-	serverId: z.string().optional(),
-});
+const createAddCertificateSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, t("certificates.validation.nameRequired")),
+		certificateData: z
+			.string()
+			.min(1, t("certificates.validation.certificateDataRequired")),
+		privateKey: z
+			.string()
+			.min(1, t("certificates.validation.privateKeyRequired")),
+		autoRenew: z.boolean().optional(),
+		serverId: z.string().optional(),
+	});
 
-type AddCertificate = z.infer<typeof addCertificate>;
+type AddCertificate = z.infer<ReturnType<typeof createAddCertificateSchema>>;
 
 export const AddCertificate = () => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const utils = api.useUtils();
 
@@ -71,6 +78,11 @@ export const AddCertificate = () => {
 	// Self-hosted: show only if there are remote servers (Dokploy is default, hide if no remote servers)
 	const shouldShowServerDropdown = hasServers;
 
+	const addCertificateSchema = useMemo(
+		() => createAddCertificateSchema(t),
+		[t],
+	);
+
 	const form = useForm<AddCertificate>({
 		defaultValues: {
 			name: "",
@@ -78,7 +90,7 @@ export const AddCertificate = () => {
 			privateKey: "",
 			autoRenew: false,
 		},
-		resolver: zodResolver(addCertificate),
+		resolver: zodResolver(addCertificateSchema),
 	});
 	useEffect(() => {
 		form.reset();
@@ -94,12 +106,12 @@ export const AddCertificate = () => {
 			organizationId: "",
 		})
 			.then(async () => {
-				toast.success("Certificate Created");
+				toast.success(t("certificates.createSuccess"));
 				await utils.certificates.all.invalidate();
 				setOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error creating the Certificate");
+				toast.error(t("certificates.createError"));
 			});
 	};
 	return (
@@ -108,14 +120,14 @@ export const AddCertificate = () => {
 				<Button>
 					{" "}
 					<PlusIcon className="h-4 w-4" />
-					Add Certificate
+					{t("certificates.addButton")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Add New Certificate</DialogTitle>
+					<DialogTitle>{t("certificates.dialogTitle")}</DialogTitle>
 					<DialogDescription>
-						Upload or generate a certificate to secure your application
+						{t("certificates.dialogDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -132,9 +144,12 @@ export const AddCertificate = () => {
 							render={({ field }) => {
 								return (
 									<FormItem>
-										<FormLabel>Certificate Name</FormLabel>
+										<FormLabel>{t("certificates.nameLabel")}</FormLabel>
 										<FormControl>
-											<Input placeholder={"My Certificate"} {...field} />
+											<Input
+												placeholder={t("certificates.namePlaceholder")}
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -147,7 +162,7 @@ export const AddCertificate = () => {
 							render={({ field }) => (
 								<FormItem>
 									<div className="space-y-0.5">
-										<FormLabel>Certificate Data</FormLabel>
+										<FormLabel>{t("certificates.certificateData")}</FormLabel>
 									</div>
 									<FormControl>
 										<Textarea
@@ -166,7 +181,7 @@ export const AddCertificate = () => {
 							render={({ field }) => (
 								<FormItem>
 									<div className="space-y-0.5">
-										<FormLabel>Private Key</FormLabel>
+										<FormLabel>{t("certificates.privateKey")}</FormLabel>
 									</div>
 									<FormControl>
 										<Textarea
@@ -189,7 +204,8 @@ export const AddCertificate = () => {
 											<Tooltip>
 												<TooltipTrigger asChild>
 													<FormLabel className="break-all w-fit flex flex-row gap-1 items-center">
-														Select a Server {!isCloud && "(Optional)"}
+														{t("certificates.selectServer")}{" "}
+														{!isCloud && `(${t("common.optional")})`}
 														<HelpCircle className="size-4 text-muted-foreground" />
 													</FormLabel>
 												</TooltipTrigger>
@@ -204,7 +220,11 @@ export const AddCertificate = () => {
 										>
 											<SelectTrigger>
 												<SelectValue
-													placeholder={!isCloud ? "Dokploy" : "Select a Server"}
+													placeholder={
+														!isCloud
+															? t("certificates.serverDefault")
+															: t("certificates.selectServer")
+													}
 												/>
 											</SelectTrigger>
 											<SelectContent>
@@ -212,9 +232,9 @@ export const AddCertificate = () => {
 													{!isCloud && (
 														<SelectItem value="dokploy">
 															<span className="flex items-center gap-2 justify-between w-full">
-																<span>Dokploy</span>
+																<span>{t("certificates.serverDefault")}</span>
 																<span className="text-muted-foreground text-xs self-center">
-																	Default
+																	{t("certificates.default")}
 																</span>
 															</span>
 														</SelectItem>
@@ -233,7 +253,8 @@ export const AddCertificate = () => {
 														</SelectItem>
 													))}
 													<SelectLabel>
-														Servers ({servers?.length + (!isCloud ? 1 : 0)})
+														{t("certificates.servers")} (
+														{servers?.length + (!isCloud ? 1 : 0)})
 													</SelectLabel>
 												</SelectGroup>
 											</SelectContent>
@@ -251,7 +272,7 @@ export const AddCertificate = () => {
 							form="hook-form-add-certificate"
 							type="submit"
 						>
-							Create
+							{t("button.create")}
 						</Button>
 					</DialogFooter>
 				</Form>

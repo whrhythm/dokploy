@@ -39,7 +39,7 @@ const MyApp = ({
 				`}
 			</style>
 			<Head>
-				<title>Dokploy</title>
+				<title>振宁科技</title>
 			</Head>
 			<TranslationProvider>
 				<ThemeProvider

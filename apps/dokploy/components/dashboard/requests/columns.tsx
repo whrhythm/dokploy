@@ -24,13 +24,6 @@ export const getStatusColor = (status: number) => {
 	return "destructive";
 };
 
-const formatStatusLabel = (status: number) => {
-	if (status === 0) {
-		return "N/A";
-	}
-	return status;
-};
-
 const formatDuration = (nanos: number) => {
 	const ms = nanos / 1000000;
 	if (ms < 1) {
@@ -42,77 +35,90 @@ const formatDuration = (nanos: number) => {
 	return `${(ms / 1000).toFixed(2)} s`;
 };
 
-export const columns: ColumnDef<LogEntry>[] = [
-	{
-		accessorKey: "level",
-		header: () => {
-			return <Button variant="ghost">Level</Button>;
+export const getRequestColumns = (
+	t: (key: string) => string,
+): ColumnDef<LogEntry>[] => {
+	const formatStatusLabel = (status: number) => {
+		if (status === 0) {
+			return t("requests.notAvailable");
+		}
+		return status;
+	};
+
+	return [
+		{
+			accessorKey: "level",
+			header: () => {
+				return <Button variant="ghost">{t("requests.level")}</Button>;
+			},
+			cell: ({ row }) => {
+				return <div>{row.original.level}</div>;
+			},
 		},
-		cell: ({ row }) => {
-			return <div>{row.original.level}</div>;
-		},
-	},
-	{
-		accessorKey: "RequestPath",
-		header: ({ column }) => {
-			return (
-				<Button
-					variant="ghost"
-					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-				>
-					Message
-					<ArrowUpDown className="ml-2 h-4 w-4" />
-				</Button>
-			);
-		},
-		cell: ({ row }) => {
-			const log = row.original;
-			return (
-				<div className="flex flex-col gap-2">
-					<div className="flex items-center flex-row gap-3 ">
-						{log.RequestMethod}{" "}
-						<div className="inline-flex items-center gap-2 bg-muted px-1.5 py-1 rounded-lg">
-							<span>{log.RequestAddr}</span>
+		{
+			accessorKey: "RequestPath",
+			header: ({ column }) => {
+				return (
+					<Button
+						variant="ghost"
+						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+					>
+						{t("requests.message")}
+						<ArrowUpDown className="ml-2 h-4 w-4" />
+					</Button>
+				);
+			},
+			cell: ({ row }) => {
+				const log = row.original;
+				return (
+					<div className="flex flex-col gap-2">
+						<div className="flex items-center flex-row gap-3 ">
+							{log.RequestMethod}{" "}
+							<div className="inline-flex items-center gap-2 bg-muted px-1.5 py-1 rounded-lg">
+								<span>{log.RequestAddr}</span>
+							</div>
+							{log.RequestPath.length > 100
+								? `${log.RequestPath.slice(0, 82)}...`
+								: log.RequestPath}
 						</div>
-						{log.RequestPath.length > 100
-							? `${log.RequestPath.slice(0, 82)}...`
-							: log.RequestPath}
+						<div className="flex flex-row gap-3 w-full">
+							<Badge variant={getStatusColor(log.OriginStatus)}>
+								{t("requests.status")}: {formatStatusLabel(log.OriginStatus)}
+							</Badge>
+							<Badge variant="secondary">
+								{t("requests.execTime")}: {formatDuration(log.Duration)}
+							</Badge>
+							<Badge variant="secondary">
+								{t("requests.ip")}: {log.ClientAddr}
+							</Badge>
+						</div>
 					</div>
-					<div className="flex flex-row gap-3 w-full">
-						<Badge variant={getStatusColor(log.OriginStatus)}>
-							Status: {formatStatusLabel(log.OriginStatus)}
-						</Badge>
-						<Badge variant={"secondary"}>
-							Exec Time: {formatDuration(log.Duration)}
-						</Badge>
-						<Badge variant={"secondary"}>IP: {log.ClientAddr}</Badge>
+				);
+			},
+		},
+		{
+			accessorKey: "time",
+			header: ({ column }) => {
+				return (
+					<Button
+						variant="ghost"
+						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+					>
+						{t("requests.time")}
+						<ArrowUpDown className="ml-2 h-4 w-4" />
+					</Button>
+				);
+			},
+			cell: ({ row }) => {
+				const log = row.original;
+				return (
+					<div className="flex flex-col gap-2">
+						<div className="flex flex-row gap-3 w-full">
+							{format(new Date(log.StartUTC), "yyyy-MM-dd HH:mm:ss")}
+						</div>
 					</div>
-				</div>
-			);
+				);
+			},
 		},
-	},
-	{
-		accessorKey: "time",
-		header: ({ column }) => {
-			return (
-				<Button
-					variant="ghost"
-					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-				>
-					Time
-					<ArrowUpDown className="ml-2 h-4 w-4" />
-				</Button>
-			);
-		},
-		cell: ({ row }) => {
-			const log = row.original;
-			return (
-				<div className="flex flex-col gap-2">
-					<div className="flex flex-row gap-3 w-full">
-						{format(new Date(log.StartUTC), "yyyy-MM-dd HH:mm:ss")}
-					</div>
-				</div>
-			);
-		},
-	},
-];
+	];
+};

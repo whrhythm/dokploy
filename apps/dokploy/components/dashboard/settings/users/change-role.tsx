@@ -31,6 +31,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const changeRoleSchema = z.object({
@@ -46,6 +47,7 @@ interface Props {
 }
 
 export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const utils = api.useUtils();
 
@@ -73,12 +75,12 @@ export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
 			role: data.role,
 		})
 			.then(async () => {
-				toast.success("Role updated successfully");
+				toast.success(t("users.roleUpdated"));
 				await utils.user.all.invalidate();
 				setIsOpen(false);
 			})
 			.catch((error) => {
-				toast.error(error?.message || "Error updating role");
+				toast.error(error?.message || t("users.roleUpdateError"));
 			});
 	};
 
@@ -89,14 +91,14 @@ export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
 					className="w-full cursor-pointer"
 					onSelect={(e) => e.preventDefault()}
 				>
-					Change Role
+					{t("users.changeRoleAction")}
 				</DropdownMenuItem>
 			</DialogTrigger>
 			<DialogContent className="max-h-[85vh] sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Change User Role</DialogTitle>
+					<DialogTitle>{t("users.changeRoleTitle")}</DialogTitle>
 					<DialogDescription>
-						Change the role for <strong>{userEmail}</strong>
+						{t("users.changeRoleDescription")} <strong>{userEmail}</strong>
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -112,29 +114,30 @@ export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
 							name="role"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Role</FormLabel>
+									<FormLabel>{t("users.role")}</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value}
 									>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select a role" />
+												<SelectValue placeholder={t("users.selectRole")} />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="admin">Admin</SelectItem>
-											<SelectItem value="member">Member</SelectItem>
+											<SelectItem value="admin">{t("user.admin")}</SelectItem>
+											<SelectItem value="member">{t("user.member")}</SelectItem>
 										</SelectContent>
 									</Select>
 									<FormDescription>
-										<strong>Admin:</strong> Can manage users and settings.
+										<strong>{t("user.admin")}:</strong>{" "}
+										{t("users.roleDescAdmin")}
 										<br />
-										<strong>Member:</strong> Limited permissions, can be
-										customized.
+										<strong>{t("user.member")}:</strong>{" "}
+										{t("users.roleDescMember")}
 										<br />
 										<em className="text-muted-foreground text-xs">
-											Note: Owner role is intransferible.
+											{t("users.roleNote")}
 										</em>
 									</FormDescription>
 									<FormMessage />
@@ -150,7 +153,7 @@ export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
 						form="hook-form-change-role"
 						type="submit"
 					>
-						Update Role
+						{t("users.updateRole")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

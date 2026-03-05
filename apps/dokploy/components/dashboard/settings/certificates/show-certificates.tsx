@@ -10,14 +10,38 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { AddCertificate } from "./add-certificate";
 import { getCertificateChainInfo, getExpirationStatus } from "./utils";
 
 export const ShowCertificates = () => {
+	const { t } = useTranslation();
 	const { mutateAsync, isPending: isRemoving } =
 		api.certificates.remove.useMutation();
 	const { data, isPending, refetch } = api.certificates.all.useQuery();
+
+	const formatExpirationMessage = (
+		expiration: ReturnType<typeof getExpirationStatus>,
+	) => {
+		if (expiration.status === "unknown") {
+			return t("certificates.expirationUnknown");
+		}
+		const dateLabel = expiration.expirationDate
+			? expiration.expirationDate.toLocaleDateString("zh-CN", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				})
+			: "";
+		if (expiration.status === "expired") {
+			return `${t("certificates.expiredOn")} ${dateLabel}`.trim();
+		}
+		if (expiration.status === "warning") {
+			return `${t("certificates.expiresIn")} ${expiration.daysUntilExpiration} ${t("certificates.days")}`.trim();
+		}
+		return `${t("certificates.expiresOn")} ${dateLabel}`.trim();
+	};
 
 	return (
 		<div className="w-full">
@@ -26,23 +50,16 @@ export const ShowCertificates = () => {
 					<CardHeader className="">
 						<CardTitle className="text-xl flex flex-row gap-2">
 							<ShieldCheck className="size-6 text-muted-foreground self-center" />
-							Certificates
+							{t("certificates.title")}
 						</CardTitle>
-						<CardDescription>
-							Create certificates in the Traefik directory
-						</CardDescription>
+						<CardDescription>{t("certificates.description")}</CardDescription>
 
-						<AlertBlock type="warning">
-							Certificates are created in the Traefik directory. Traefik uses
-							these certificates to secure your applications. Using invalid
-							certificates can break your Traefik instance, preventing access to
-							your applications.
-						</AlertBlock>
+						<AlertBlock type="warning">{t("certificates.warning")}</AlertBlock>
 					</CardHeader>
 					<CardContent className="space-y-2 py-8 border-t">
 						{isPending ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[25vh]">
-								<span>Loading...</span>
+								<span>{t("loading")}</span>
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
@@ -51,7 +68,7 @@ export const ShowCertificates = () => {
 									<div className="flex flex-col items-center gap-3  min-h-[25vh] justify-center">
 										<ShieldCheck className="size-8 self-center text-muted-foreground" />
 										<span className="text-base text-muted-foreground text-center">
-											You don't have any certificates created
+											{t("certificates.empty")}
 										</span>
 										<AddCertificate />
 									</div>
@@ -80,7 +97,8 @@ export const ShowCertificates = () => {
 																		<div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted/50">
 																			<Link className="size-3 text-muted-foreground" />
 																			<span className="text-xs text-muted-foreground">
-																				Chain ({chainInfo.count})
+																				{t("certificates.chain")} (
+																				{chainInfo.count})
 																			</span>
 																		</div>
 																	)}
@@ -90,11 +108,11 @@ export const ShowCertificates = () => {
 																		{expiration.status !== "valid" && (
 																			<AlertCircle className="size-3" />
 																		)}
-																		{expiration.message}
+																		{formatExpirationMessage(expiration)}
 																		{certificate.autoRenew &&
 																			expiration.status !== "valid" && (
 																				<span className="text-xs text-emerald-500 ml-1">
-																					(Auto-renewal enabled)
+																					({t("certificates.autoRenewEnabled")})
 																				</span>
 																			)}
 																	</div>
@@ -103,8 +121,10 @@ export const ShowCertificates = () => {
 
 															<div className="flex flex-row gap-1">
 																<DialogAction
-																	title="Delete Certificate"
-																	description="Are you sure you want to delete this certificate?"
+																	title={t("certificates.deleteTitle")}
+																	description={t(
+																		"certificates.deleteDescription",
+																	)}
 																	type="destructive"
 																	onClick={async () => {
 																		await mutateAsync({
@@ -112,13 +132,13 @@ export const ShowCertificates = () => {
 																		})
 																			.then(() => {
 																				toast.success(
-																					"Certificate deleted successfully",
+																					t("certificates.deleteSuccess"),
 																				);
 																				refetch();
 																			})
 																			.catch(() => {
 																				toast.error(
-																					"Error deleting certificate",
+																					t("certificates.deleteError"),
 																				);
 																			});
 																	}}

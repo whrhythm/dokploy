@@ -24,6 +24,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { useHealthCheckAfterMutation } from "@/hooks/use-health-check-after-mutation";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const schema = z.object({
@@ -38,6 +39,7 @@ interface Props {
 }
 
 export const EditTraefikEnv = ({ children, serverId }: Props) => {
+	const { t } = useTranslation();
 	const [canEdit, setCanEdit] = useState(true);
 
 	const { data } = api.settings.readTraefikEnv.useQuery({
@@ -52,7 +54,7 @@ export const EditTraefikEnv = ({ children, serverId }: Props) => {
 		isExecuting: isHealthCheckExecuting,
 	} = useHealthCheckAfterMutation({
 		initialDelay: 5000,
-		successMessage: "Traefik Env Updated",
+		successMessage: t("traefikEnv.updated"),
 	});
 
 	const form = useForm<Schema>({
@@ -80,7 +82,7 @@ export const EditTraefikEnv = ({ children, serverId }: Props) => {
 				}),
 			);
 		} catch {
-			toast.error("Error updating the Traefik env");
+			toast.error(t("traefikEnv.updateError"));
 		}
 	};
 
@@ -104,10 +106,8 @@ export const EditTraefikEnv = ({ children, serverId }: Props) => {
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="sm:max-w-4xl">
 				<DialogHeader>
-					<DialogTitle>Update Traefik Environment</DialogTitle>
-					<DialogDescription>
-						Update the traefik environment variables
-					</DialogDescription>
+					<DialogTitle>{t("traefikEnv.title")}</DialogTitle>
+					<DialogDescription>{t("traefikEnv.description")}</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
@@ -123,7 +123,7 @@ export const EditTraefikEnv = ({ children, serverId }: Props) => {
 								name="env"
 								render={({ field }) => (
 									<FormItem className="relative">
-										<FormLabel>Env</FormLabel>
+										<FormLabel>{t("traefikEnv.envLabel")}</FormLabel>
 										<FormControl>
 											<CodeEditor
 												language="properties"
@@ -152,7 +152,9 @@ TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_HTTP_CHALLENGE_DNS_PROVIDER=cloudflare
 													setCanEdit(!canEdit);
 												}}
 											>
-												{canEdit ? "Unlock" : "Lock"}
+												{canEdit
+													? t("traefikEnv.unlock")
+													: t("traefikEnv.lock")}
 											</Button>
 										</div>
 									</FormItem>
@@ -168,7 +170,7 @@ TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_HTTP_CHALLENGE_DNS_PROVIDER=cloudflare
 							form="hook-form-update-server-traefik-config"
 							type="submit"
 						>
-							Update
+							{t("button.update")}
 						</Button>
 					</DialogFooter>
 				</Form>

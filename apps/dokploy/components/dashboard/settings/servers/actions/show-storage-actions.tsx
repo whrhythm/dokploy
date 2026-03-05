@@ -9,12 +9,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface Props {
 	serverId?: string;
 }
 export const ShowStorageActions = ({ serverId }: Props) => {
+	const { t } = useTranslation();
 	const { mutateAsync: cleanAll, isPending: cleanAllIsLoading } =
 		api.settings.cleanAll.useMutation();
 
@@ -67,11 +69,11 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 					}
 					variant="outline"
 				>
-					Space
+					{t("storageActions.space")}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-64" align="start">
-				<DropdownMenuLabel>Actions</DropdownMenuLabel>
+				<DropdownMenuLabel>{t("storageActions.actions")}</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem
@@ -81,14 +83,14 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 								serverId: serverId,
 							})
 								.then(async () => {
-									toast.success("Cleaned images");
+									toast.success(t("storageActions.cleanedImages"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning images");
+									toast.error(t("storageActions.cleanImagesError"));
 								});
 						}}
 					>
-						<span>Clean unused images</span>
+						<span>{t("storageActions.cleanUnusedImages")}</span>
 					</DropdownMenuItem>
 					<DropdownMenuItem
 						className="w-full cursor-pointer"
@@ -97,14 +99,14 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 								serverId: serverId,
 							})
 								.then(async () => {
-									toast.success("Cleaned volumes");
+									toast.success(t("storageActions.cleanedVolumes"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning volumes");
+									toast.error(t("storageActions.cleanVolumesError"));
 								});
 						}}
 					>
-						<span>Clean unused volumes</span>
+						<span>{t("storageActions.cleanUnusedVolumes")}</span>
 					</DropdownMenuItem>
 
 					<DropdownMenuItem
@@ -114,14 +116,14 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 								serverId: serverId,
 							})
 								.then(async () => {
-									toast.success("Stopped containers cleaned");
+									toast.success(t("storageActions.cleanedStoppedContainers"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning stopped containers");
+									toast.error(t("storageActions.cleanStoppedContainersError"));
 								});
 						}}
 					>
-						<span>Clean stopped containers</span>
+						<span>{t("storageActions.cleanStoppedContainers")}</span>
 					</DropdownMenuItem>
 
 					<DropdownMenuItem
@@ -131,14 +133,14 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 								serverId: serverId,
 							})
 								.then(async () => {
-									toast.success("Cleaned Patch Caches");
+									toast.success(t("storageActions.cleanedPatchCaches"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning Patch Caches");
+									toast.error(t("storageActions.cleanPatchCachesError"));
 								});
 						}}
 					>
-						<span>Clean Patch Caches</span>
+						<span>{t("storageActions.cleanPatchCaches")}</span>
 					</DropdownMenuItem>
 
 					<DropdownMenuItem
@@ -148,14 +150,14 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 								serverId: serverId,
 							})
 								.then(async () => {
-									toast.success("Cleaned Docker Builder");
+									toast.success(t("storageActions.cleanedDockerBuilder"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning Docker Builder");
+									toast.error(t("storageActions.cleanDockerBuilderError"));
 								});
 						}}
 					>
-						<span>Clean Docker Builder & System</span>
+						<span>{t("storageActions.cleanDockerBuilder")}</span>
 					</DropdownMenuItem>
 					{!serverId && (
 						<DropdownMenuItem
@@ -163,14 +165,14 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 							onClick={async () => {
 								await cleanMonitoring()
 									.then(async () => {
-										toast.success("Cleaned Monitoring");
+										toast.success(t("storageActions.cleanedMonitoring"));
 									})
 									.catch(() => {
-										toast.error("Error cleaning Monitoring");
+										toast.error(t("storageActions.cleanMonitoringError"));
 									});
 							}}
 						>
-							<span>Clean Monitoring</span>
+							<span>{t("storageActions.cleanMonitoring")}</span>
 						</DropdownMenuItem>
 					)}
 
@@ -181,14 +183,14 @@ export const ShowStorageActions = ({ serverId }: Props) => {
 								serverId: serverId,
 							})
 								.then(async () => {
-									toast.success("Cleaning in progress... Please wait");
+									toast.success(t("storageActions.cleanAllInProgress"));
 								})
 								.catch(() => {
-									toast.error("Error cleaning all");
+									toast.error(t("storageActions.cleanAllError"));
 								});
 						}}
 					>
-						<span>Clean all</span>
+						<span>{t("storageActions.cleanAll")}</span>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 			</DropdownMenuContent>

@@ -21,6 +21,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { badgeStateColor } from "../../application/logs/show";
 
@@ -47,6 +48,7 @@ export const ShowModalLogs = ({
 	serverId,
 	type = "swarm",
 }: Props) => {
+	const { t } = useTranslation();
 	const { data, isPending } = api.docker.getContainersByAppLabel.useQuery(
 		{
 			appName,
@@ -69,20 +71,24 @@ export const ShowModalLogs = ({
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="max-h-[85vh]  sm:max-w-7xl">
 				<DialogHeader>
-					<DialogTitle>View Logs</DialogTitle>
-					<DialogDescription>View the logs for {appName}</DialogDescription>
+					<DialogTitle>{t("logs.viewTitle")}</DialogTitle>
+					<DialogDescription>
+						{t("logs.viewDescription")} {appName}
+					</DialogDescription>
 				</DialogHeader>
 				<div className="flex flex-col gap-4 pt-2.5">
-					<Label>Select a container to view logs</Label>
+					<Label>{t("logs.selectContainer")}</Label>
 					<Select onValueChange={setContainerId} value={containerId}>
 						<SelectTrigger>
 							{isPending ? (
 								<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground">
-									<span>Loading...</span>
+									<span>{t("loading")}</span>
 									<Loader2 className="animate-spin size-4" />
 								</div>
 							) : (
-								<SelectValue placeholder="Select a container" />
+								<SelectValue
+									placeholder={t("logs.selectContainerPlaceholder")}
+								/>
 							)}
 						</SelectTrigger>
 						<SelectContent>
@@ -98,7 +104,9 @@ export const ShowModalLogs = ({
 										</Badge>
 									</SelectItem>
 								))}
-								<SelectLabel>Containers ({data?.length})</SelectLabel>
+								<SelectLabel>
+									{t("logs.containers")} ({data?.length})
+								</SelectLabel>
 							</SelectGroup>
 						</SelectContent>
 					</Select>

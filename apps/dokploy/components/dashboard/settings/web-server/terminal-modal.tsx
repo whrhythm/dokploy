@@ -10,6 +10,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import LocalServerConfig from "./local-server-config";
 
@@ -32,6 +33,7 @@ export const TerminalModal = ({
 	serverId,
 	asButton = false,
 }: Props) => {
+	const { t } = useTranslation();
 	const [terminalKey, setTerminalKey] = useState<string>(getTerminalKey());
 	const [isOpen, setIsOpen] = useState(false);
 	const isLocalServer = serverId === "local";
@@ -68,8 +70,10 @@ export const TerminalModal = ({
 				onEscapeKeyDown={(event) => event.preventDefault()}
 			>
 				<DialogHeader className="flex flex-col gap-1">
-					<DialogTitle>Terminal ({data?.name ?? serverId})</DialogTitle>
-					<DialogDescription>Easy way to access the server</DialogDescription>
+					<DialogTitle>
+						{t("terminal.title")} ({data?.name ?? serverId})
+					</DialogTitle>
+					<DialogDescription>{t("terminal.description")}</DialogDescription>
 				</DialogHeader>
 
 				{isLocalServer && (

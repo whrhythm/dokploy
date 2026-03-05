@@ -10,6 +10,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 import { getFallbackAvatarInitials } from "@/lib/utils";
 import { api } from "@/utils/api";
@@ -20,6 +21,7 @@ const _AUTO_CHECK_UPDATES_INTERVAL_MINUTES = 7;
 
 export const UserNav = () => {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const { data } = api.user.get.useQuery();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
 
@@ -45,7 +47,9 @@ export const UserNav = () => {
 						</AvatarFallback>
 					</Avatar>
 					<div className="grid flex-1 text-left text-sm leading-tight">
-						<span className="truncate font-semibold">Account</span>
+						<span className="truncate font-semibold">
+							{t("userNav.account")}
+						</span>
 						<span className="truncate text-xs">{data?.user?.email}</span>
 					</div>
 					<ChevronsUpDown className="ml-auto size-4" />
@@ -59,7 +63,7 @@ export const UserNav = () => {
 			>
 				<div className="flex items-center justify-between px-2 py-1.5">
 					<DropdownMenuLabel className="flex flex-col">
-						My Account
+						{t("userNav.myAccount")}
 						<span className="text-xs font-normal text-muted-foreground">
 							{data?.user?.email}
 						</span>
@@ -74,7 +78,7 @@ export const UserNav = () => {
 							router.push("/dashboard/settings/profile");
 						}}
 					>
-						Profile
+						{t("userNav.profile")}
 					</DropdownMenuItem>
 					<DropdownMenuItem
 						className="cursor-pointer"
@@ -82,7 +86,7 @@ export const UserNav = () => {
 							router.push("/dashboard/projects");
 						}}
 					>
-						Projects
+						{t("userNav.projects")}
 					</DropdownMenuItem>
 					{!isCloud ? (
 						<>
@@ -92,7 +96,7 @@ export const UserNav = () => {
 									router.push("/dashboard/monitoring");
 								}}
 							>
-								Monitoring
+								{t("userNav.monitoring")}
 							</DropdownMenuItem>
 							{(data?.role === "owner" ||
 								data?.role === "admin" ||
@@ -103,7 +107,7 @@ export const UserNav = () => {
 										router.push("/dashboard/traefik");
 									}}
 								>
-									Traefik
+									{t("userNav.traefik")}
 								</DropdownMenuItem>
 							)}
 							{(data?.role === "owner" ||
@@ -117,7 +121,7 @@ export const UserNav = () => {
 										});
 									}}
 								>
-									Docker
+									{t("userNav.docker")}
 								</DropdownMenuItem>
 							)}
 						</>
@@ -129,7 +133,7 @@ export const UserNav = () => {
 									router.push("/dashboard/settings/servers");
 								}}
 							>
-								Servers
+								{t("userNav.servers")}
 							</DropdownMenuItem>
 						)
 					)}
@@ -141,7 +145,7 @@ export const UserNav = () => {
 							router.push("/dashboard/settings/billing");
 						}}
 					>
-						Billing
+						{t("userNav.billing")}
 					</DropdownMenuItem>
 				)}
 				<DropdownMenuSeparator />
@@ -156,7 +160,7 @@ export const UserNav = () => {
 						// });
 					}}
 				>
-					Log out
+					{t("userNav.logout")}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

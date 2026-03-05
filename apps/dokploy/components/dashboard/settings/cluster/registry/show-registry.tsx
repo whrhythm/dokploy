@@ -9,10 +9,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { HandleRegistry } from "./handle-registry";
 
 export const ShowRegistry = () => {
+	const { t } = useTranslation();
 	const { mutateAsync, isPending: isRemoving } =
 		api.registry.remove.useMutation();
 	const { data, isPending, refetch } = api.registry.all.useQuery();
@@ -24,16 +26,14 @@ export const ShowRegistry = () => {
 					<CardHeader className="">
 						<CardTitle className="text-xl flex flex-row gap-2">
 							<Package className="size-6 text-muted-foreground self-center" />
-							Docker Registry
+							{t("registry.title")}
 						</CardTitle>
-						<CardDescription>
-							Manage your Docker Registry configurations
-						</CardDescription>
+						<CardDescription>{t("registry.description")}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2 py-8 border-t">
 						{isPending ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[25vh]">
-								<span>Loading...</span>
+								<span>{t("loading")}</span>
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
@@ -42,7 +42,7 @@ export const ShowRegistry = () => {
 									<div className="flex flex-col items-center gap-3  min-h-[25vh] justify-center">
 										<Package className="size-8 self-center text-muted-foreground" />
 										<span className="text-base text-muted-foreground text-center">
-											You don't have any registry configurations
+											{t("registry.empty")}
 										</span>
 										<HandleRegistry />
 									</div>
@@ -74,23 +74,19 @@ export const ShowRegistry = () => {
 															/>
 
 															<DialogAction
-																title="Delete Registry"
-																description="Are you sure you want to delete this registry configuration?"
+																title={t("registry.deleteTitle")}
+																description={t("registry.deleteConfirm")}
 																type="destructive"
 																onClick={async () => {
 																	await mutateAsync({
 																		registryId: registry.registryId,
 																	})
 																		.then(() => {
-																			toast.success(
-																				"Registry configuration deleted successfully",
-																			);
+																			toast.success(t("registry.deleted"));
 																			refetch();
 																		})
 																		.catch(() => {
-																			toast.error(
-																				"Error deleting registry configuration",
-																			);
+																			toast.error(t("registry.deleteError"));
 																		});
 																}}
 															>

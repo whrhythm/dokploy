@@ -13,9 +13,11 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 export const UpdateWebServer = () => {
+	const { t } = useTranslation();
 	const [updating, setUpdating] = useState(false);
 	const [open, setOpen] = useState(false);
 
@@ -25,12 +27,10 @@ export const UpdateWebServer = () => {
 		try {
 			const response = await fetch("/api/health");
 			if (!response.ok) {
-				throw new Error("Health check failed");
+				throw new Error(t("webServerUpdate.healthCheckFailed"));
 			}
 
-			toast.success(
-				"The server has been updated. The page will be reloaded to reflect the changes...",
-			);
+			toast.success(t("webServerUpdate.updatedReload"));
 
 			setTimeout(() => {
 				// Allow seeing the toast before reloading
@@ -56,9 +56,7 @@ export const UpdateWebServer = () => {
 		} catch (error) {
 			setUpdating(false);
 			console.error("Error updating server:", error);
-			toast.error(
-				"An error occurred while updating the server, please try again.",
-			);
+			toast.error(t("webServerUpdate.updateError"));
 		}
 	};
 
@@ -75,39 +73,34 @@ export const UpdateWebServer = () => {
 						<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
 						<span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
 					</span>
-					Update Server
+					{t("webServerUpdate.updateServer")}
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
 						{updating
-							? "Server update in progress"
-							: "Are you absolutely sure?"}
+							? t("webServerUpdate.updatingTitle")
+							: t("webServerUpdate.confirmTitle")}
 					</AlertDialogTitle>
 					<AlertDialogDescription>
 						{updating ? (
 							<span className="flex items-center gap-1">
 								<Loader2 className="animate-spin" />
-								The server is being updated, please wait...
+								{t("webServerUpdate.updatingDesc")}
 							</span>
 						) : (
-							<>
-								This action cannot be undone. This will update the web server to
-								the new version. You will not be able to use the panel during
-								the update process. The page will be reloaded once the update is
-								finished.
-							</>
+							<>{t("webServerUpdate.confirmDesc")}</>
 						)}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				{!updating && (
 					<AlertDialogFooter>
 						<AlertDialogCancel onClick={() => setOpen(false)}>
-							Cancel
+							{t("button.cancel")}
 						</AlertDialogCancel>
 						<AlertDialogAction onClick={handleConfirm}>
-							Confirm
+							{t("button.confirm")}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				)}

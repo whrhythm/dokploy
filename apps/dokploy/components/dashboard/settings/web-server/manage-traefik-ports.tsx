@@ -35,6 +35,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useHealthCheckAfterMutation } from "@/hooks/use-health-check-after-mutation";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -42,23 +43,29 @@ interface Props {
 	serverId?: string;
 }
 
-const PortSchema = z.object({
-	targetPort: z.number().min(1, "Target port is required"),
-	publishedPort: z.number().min(1, "Published port is required"),
-	protocol: z.enum(["tcp", "udp", "sctp"]),
-});
+const createTraefikPortsSchema = (t: (key: string) => string) => {
+	const portSchema = z.object({
+		targetPort: z.number().min(1, t("traefikPorts.validation.targetRequired")),
+		publishedPort: z
+			.number()
+			.min(1, t("traefikPorts.validation.publishedRequired")),
+		protocol: z.enum(["tcp", "udp", "sctp"]),
+	});
 
-const TraefikPortsSchema = z.object({
-	ports: z.array(PortSchema),
-});
+	return z.object({
+		ports: z.array(portSchema),
+	});
+};
 
-type TraefikPortsForm = z.infer<typeof TraefikPortsSchema>;
+type TraefikPortsForm = z.infer<ReturnType<typeof createTraefikPortsSchema>>;
 
 export const ManageTraefikPorts = ({ children, serverId }: Props) => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
+	const traefikPortsSchema = createTraefikPortsSchema(t);
 
 	const form = useForm<TraefikPortsForm>({
-		resolver: zodResolver(TraefikPortsSchema),
+		resolver: zodResolver(traefikPortsSchema),
 		defaultValues: {
 			ports: [],
 		},
@@ -82,7 +89,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 		isExecuting: isHealthCheckExecuting,
 	} = useHealthCheckAfterMutation({
 		initialDelay: 5000,
-		successMessage: "Ports updated successfully",
+		successMessage: t("traefikPorts.updated"),
 		onSuccess: () => {
 			refetchPorts();
 			setOpen(false);
@@ -114,7 +121,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 			);
 			setOpen(false);
 		} catch (error) {
-			toast.error((error as Error).message || "Error updating Traefik ports");
+			toast.error((error as Error).message || t("traefikPorts.updateError"));
 		}
 	};
 
@@ -127,15 +134,14 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 				<DialogContent className="sm:max-w-3xl">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2 text-xl">
-							Additional Port Mappings
+							{t("traefikPorts.title")}
 						</DialogTitle>
 						<DialogDescription className="text-base w-full">
 							<div className="flex items-center justify-between">
 								<div className="flex flex-col gap-1">
-									Add or remove additional ports for Traefik
+									{t("traefikPorts.description")}
 									<span className="text-sm text-muted-foreground">
-										{fields.length} port mapping{fields.length !== 1 ? "s" : ""}{" "}
-										configured
+										{fields.length} {t("traefikPorts.mappingsConfigured")}
 									</span>
 								</div>
 								<Button
@@ -144,7 +150,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 									className="gap-2"
 								>
 									<Plus className="h-4 w-4" />
-									Add Mapping
+									{t("traefikPorts.addMapping")}
 								</Button>
 							</div>
 						</DialogDescription>
@@ -157,10 +163,10 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 									<div className="flex w-full flex-col items-center justify-center gap-3 pt-10">
 										<ArrowRightLeft className="size-8 text-muted-foreground" />
 										<span className="text-base text-muted-foreground text-center">
-											No port mappings configured
+											{t("traefikPorts.empty")}
 										</span>
 										<p className="text-sm text-muted-foreground text-center">
-											Add one to get started
+											{t("traefikPorts.emptyHelp")}
 										</p>
 									</div>
 								) : (
@@ -175,7 +181,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 															render={({ field }) => (
 																<FormItem>
 																	<FormLabel className="text-sm font-medium text-muted-foreground">
-																		Target Port
+																		{t("traefikPorts.targetPort")}
 																	</FormLabel>
 																	<FormControl>
 																		<Input
@@ -190,7 +196,9 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 																				);
 																			}}
 																			value={field.value || ""}
-																			placeholder="e.g. 8080"
+																			placeholder={t(
+																				"traefikPorts.targetPortPlaceholder",
+																			)}
 																		/>
 																	</FormControl>
 																	<FormMessage />
@@ -204,7 +212,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 															render={({ field }) => (
 																<FormItem>
 																	<FormLabel className="text-sm font-medium text-muted-foreground">
-																		Published Port
+																		{t("traefikPorts.publishedPort")}
 																	</FormLabel>
 																	<FormControl>
 																		<Input
@@ -219,7 +227,9 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 																				);
 																			}}
 																			value={field.value || ""}
-																			placeholder="e.g. 80"
+																			placeholder={t(
+																				"traefikPorts.publishedPortPlaceholder",
+																			)}
 																		/>
 																	</FormControl>
 																	<FormMessage />
@@ -232,7 +242,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 															render={({ field }) => (
 																<FormItem>
 																	<FormLabel className="text-sm font-medium text-muted-foreground">
-																		Protocol
+																		{t("traefikPorts.protocol")}
 																	</FormLabel>
 																	<FormControl>
 																		<Select
@@ -240,7 +250,11 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 																			defaultValue={field.value}
 																		>
 																			<SelectTrigger>
-																				<SelectValue placeholder="Select a protocol" />
+																				<SelectValue
+																					placeholder={t(
+																						"traefikPorts.selectProtocol",
+																					)}
+																				/>
 																			</SelectTrigger>
 																			<SelectContent>
 																				<SelectGroup>
@@ -284,34 +298,25 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 									<AlertBlock type="info">
 										<div className="flex flex-col gap-2">
 											<span className="text-sm">
-												<strong>
-													Each port mapping defines how external traffic reaches
-													your containers through Traefik.
-												</strong>
+												<strong>{t("traefikPorts.infoTitle")}</strong>
 												<ul className="pt-2">
 													<li>
-														<strong>Target Port:</strong> The port inside your
-														container that the service is listening on.
+														<strong>{t("traefikPorts.targetPort")}:</strong>{" "}
+														{t("traefikPorts.targetPortDesc")}
 													</li>
 													<li>
-														<strong>Published Port:</strong> The port on your
-														host machine that will be mapped to the target port.
+														<strong>{t("traefikPorts.publishedPort")}:</strong>{" "}
+														{t("traefikPorts.publishedPortDesc")}
 													</li>
 												</ul>
-												<p className="mt-2">
-													All ports are bound directly to the host machine,
-													allowing Traefik to handle incoming traffic and route
-													it appropriately to your services.
-												</p>
+												<p className="mt-2">{t("traefikPorts.infoFooter")}</p>
 											</span>
 										</div>
 									</AlertBlock>
 								)}
 
 								<AlertBlock type="warning">
-									The Traefik container will be recreated from scratch. This
-									means the container will be deleted and created again, which
-									may cause downtime in your applications.
+									{t("traefikPorts.warning")}
 								</AlertBlock>
 							</div>
 							<DialogFooter>
@@ -321,7 +326,7 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 									className="text-sm"
 									isLoading={isPending || isHealthCheckExecuting}
 								>
-									Save
+									{t("button.save")}
 								</Button>
 							</DialogFooter>
 						</form>

@@ -30,6 +30,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const schema = z.object({
@@ -44,6 +45,7 @@ interface Props {
 }
 
 export const UpdateServerIp = ({ children }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 
 	const { data, refetch } = api.settings.getWebServerSettings.useQuery();
@@ -77,12 +79,12 @@ export const UpdateServerIp = ({ children }: Props) => {
 			serverIp: data.serverIp,
 		})
 			.then(async () => {
-				toast.success("Server IP Updated");
+				toast.success(t("webServer.serverIpUpdated"));
 				await refetch();
 				setIsOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error updating the IP of the server");
+				toast.error(t("webServer.serverIpUpdateError"));
 			});
 	};
 
@@ -91,8 +93,10 @@ export const UpdateServerIp = ({ children }: Props) => {
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Update Server IP</DialogTitle>
-					<DialogDescription>Update the IP of the server</DialogDescription>
+					<DialogTitle>{t("webServer.updateServerIp")}</DialogTitle>
+					<DialogDescription>
+						{t("webServer.updateServerIpDesc")}
+					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
@@ -106,7 +110,7 @@ export const UpdateServerIp = ({ children }: Props) => {
 							name="serverIp"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Server IP</FormLabel>
+									<FormLabel>{t("webServer.serverIpLabel")}</FormLabel>
 									<FormControl className="flex gap-2">
 										<div>
 											<Input {...field} />
@@ -127,7 +131,7 @@ export const UpdateServerIp = ({ children }: Props) => {
 														sideOffset={5}
 														className="max-w-[11rem]"
 													>
-														<p>Set current public IP</p>
+														<p>{t("webServer.setCurrentIp")}</p>
 													</TooltipContent>
 												</Tooltip>
 											</TooltipProvider>
@@ -148,7 +152,7 @@ export const UpdateServerIp = ({ children }: Props) => {
 							form="hook-form-update-server-ip"
 							type="submit"
 						>
-							Update
+							{t("button.update")}
 						</Button>
 					</DialogFooter>
 				</Form>
