@@ -2,7 +2,12 @@
 	"name": "Dokploy development container",
 	"build": {
 		"dockerfile": "Dockerfile",
-		"context": ".."
+		"context": "..",
+		"args": {
+			"HTTP_PROXY": "http://172.27.112.1:7890",
+		    "HTTPS_PROXY": "http://172.27.112.1:7890",
+		    "NO_PROXY": "localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.tuna.tsinghua.edu.cn,172.27.119.71,.nip.io"
+		}
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -20,33 +25,24 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-vscode.vscode-typescript-next",
-				"bradlc.vscode-tailwindcss",
-				"ms-vscode.vscode-json",
-				"biomejs.biome",
-				"golang.go",
-				"redhat.vscode-xml",
-				"github.vscode-github-actions",
-				"github.copilot",
-				"github.copilot-chat"
+				// "ms-vscode.vscode-typescript-next",
+				// "bradlc.vscode-tailwindcss",
+				// "ms-vscode.vscode-json",
+				// "biomejs.biome",
+				// "golang.go",
+				// "redhat.vscode-xml",
+				// "github.vscode-github-actions",
+				// "github.copilot",
+				// "github.copilot-chat"
 			]
 		}
 	},
-	"forwardPorts": [3000, 5432, 6379],
-	"portsAttributes": {
-		"3000": {
-			"label": "Dokploy App",
-			"onAutoForward": "notify"
-		},
-		"5432": {
-			"label": "PostgreSQL",
-			"onAutoForward": "silent"
-		},
-		"6379": {
-			"label": "Redis",
-			"onAutoForward": "silent"
-		}
-	},
+	// 端口映射规则（容器端口:宿主机端口）
+	"appPort": [
+        "0.0.0.0:3003:3000",
+		"0.0.0.0:5433:5432",
+		"0.0.0.0:6380:6379"
+    ],
 	"remoteUser": "node",
 	"workspaceFolder": "/workspaces/dokploy",
 	"runArgs": ["--name", "dokploy-devcontainer"]
