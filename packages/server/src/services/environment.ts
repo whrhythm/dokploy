@@ -292,7 +292,7 @@ export const createProductionEnvironment = async (projectId: string) => {
 		.insert(environments)
 		.values({
 			name: "production",
-			description: "Production environment",
+			description: "生产环境",
 			projectId,
 			isDefault: true,
 		})
@@ -302,7 +302,7 @@ export const createProductionEnvironment = async (projectId: string) => {
 	if (!newEnvironment) {
 		throw new TRPCError({
 			code: "BAD_REQUEST",
-			message: "Error creating the production environment",
+			message: "创建生产环境时出错",
 		});
 	}
 

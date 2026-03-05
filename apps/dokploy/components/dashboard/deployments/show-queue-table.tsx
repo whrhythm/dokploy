@@ -1,8 +1,8 @@
 "use client";
 
 import type { inferRouterOutputs } from "@trpc/server";
-import Link from "next/link";
 import { ArrowRight, ListTodo, Loader2, XCircle } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/hooks/use-translation";
 import type { AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 
@@ -66,6 +67,7 @@ function getJobLabel(row: QueueRow): string {
 }
 
 export function ShowQueueTable(props: { embedded?: boolean }) {
+	const { t } = useTranslation();
 	const { embedded: _embedded = false } = props;
 	const { data: queueList, isLoading } = api.deployment.queueList.useQuery(
 		undefined,
@@ -92,22 +94,22 @@ export function ShowQueueTable(props: { embedded?: boolean }) {
 			{isLoading ? (
 				<div className="flex gap-4 w-full items-center justify-center min-h-[30vh] text-muted-foreground">
 					<Loader2 className="size-4 animate-spin" />
-					<span>Loading queue...</span>
+					<span>{t("loading")}</span>
 				</div>
 			) : (
 				<div className="rounded-md border overflow-x-auto">
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Job ID</TableHead>
-								<TableHead>Label</TableHead>
-								<TableHead>Type</TableHead>
-								<TableHead>State</TableHead>
+								<TableHead>{t("form.id") || "Job ID"}</TableHead>
+								<TableHead>{t("form.label") || "Label"}</TableHead>
+								<TableHead>{t("form.type")}</TableHead>
+								<TableHead>{t("form.status")}</TableHead>
 								<TableHead>Added</TableHead>
 								<TableHead>Processed</TableHead>
 								<TableHead>Finished</TableHead>
 								<TableHead>Error</TableHead>
-								<TableHead className="w-[100px]">Actions</TableHead>
+								<TableHead className="w-[100px]">{t("form.actions")}</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -149,7 +151,7 @@ export function ShowQueueTable(props: { embedded?: boolean }) {
 														<Button variant="ghost" size="sm" asChild>
 															<Link href={pathInfo!.href!}>
 																<ArrowRight className="size-4 mr-1" />
-																Service
+																{t("form.service")}
 															</Link>
 														</Button>
 													) : (
@@ -187,7 +189,7 @@ export function ShowQueueTable(props: { embedded?: boolean }) {
 																}}
 															>
 																<XCircle className="size-4 mr-1" />
-																Cancel
+																{t("button.cancel")}
 															</Button>
 														)}
 												</div>
@@ -200,9 +202,9 @@ export function ShowQueueTable(props: { embedded?: boolean }) {
 									<TableCell colSpan={9} className="text-center py-12">
 										<div className="flex flex-col items-center justify-center gap-2 text-muted-foreground min-h-[30vh]">
 											<ListTodo className="size-8" />
-											<p className="font-medium">Queue is empty</p>
+											<p className="font-medium">{t("empty")}</p>
 											<p className="text-sm">
-												Deployment jobs will appear here when they are queued.
+												{t("deployment.queueDescription")}
 											</p>
 										</div>
 									</TableCell>

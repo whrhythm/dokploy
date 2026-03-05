@@ -13,6 +13,22 @@ import { ShowDockerModalLogs } from "../logs/show-docker-modal-logs";
 import { DockerTerminalModal } from "../terminal/docker-terminal-modal";
 import type { Container } from "./show-containers";
 
+const translateColumn = (key: string): string => {
+	const translations: Record<string, string> = {
+		name: "名称",
+		state: "状态",
+		status: "状态",
+		image: "镜像",
+		createdAt: "创建时间",
+		ports: "端口",
+		actions: "操作",
+		viewLogs: "查看日志",
+		terminal: "终端",
+		config: "配置",
+	};
+	return translations[key] || key;
+};
+
 export const columns: ColumnDef<Container>[] = [
 	{
 		accessorKey: "name",
@@ -22,7 +38,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Name
+					{translateColumn("name")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -39,7 +55,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					State
+					{translateColumn("state")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -71,7 +87,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Status
+					{translateColumn("status")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -88,7 +104,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Image
+					{translateColumn("image")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -110,12 +126,12 @@ export const columns: ColumnDef<Container>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
+						<DropdownMenuLabel>{translateColumn("actions")}</DropdownMenuLabel>
 						<ShowDockerModalLogs
 							containerId={container.containerId}
 							serverId={container.serverId}
 						>
-							View Logs
+							{translateColumn("viewLogs")}
 						</ShowDockerModalLogs>
 						<ShowContainerConfig
 							containerId={container.containerId}
@@ -125,7 +141,7 @@ export const columns: ColumnDef<Container>[] = [
 							containerId={container.containerId}
 							serverId={container.serverId || ""}
 						>
-							Terminal
+							{translateColumn("terminal")}
 						</DockerTerminalModal>
 					</DropdownMenuContent>
 				</DropdownMenu>

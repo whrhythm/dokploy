@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const AddProjectSchema = z.object({
@@ -60,6 +61,7 @@ interface Props {
 }
 
 export const HandleProject = ({ projectId }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -99,7 +101,9 @@ export const HandleProject = ({ projectId }: Props) => {
 		})
 			.then(async (data) => {
 				await utils.project.all.invalidate();
-				toast.success(projectId ? "Project Updated" : "Project Created");
+				toast.success(
+					projectId ? t("project.updated") : t("project.createdSuccessfully"),
+				);
 				setIsOpen(false);
 				if (!projectId) {
 					const projectIdToUse =
@@ -120,7 +124,9 @@ export const HandleProject = ({ projectId }: Props) => {
 			})
 			.catch(() => {
 				toast.error(
-					projectId ? "Error updating a project" : "Error creating a project",
+					projectId
+						? t("project.errorUpdatingProject")
+						: t("project.errorCreatingProject"),
 				);
 			});
 	};
@@ -134,19 +140,23 @@ export const HandleProject = ({ projectId }: Props) => {
 						onSelect={(e) => e.preventDefault()}
 					>
 						<SquarePen className="size-4" />
-						<span>Update</span>
+						<span>{t("project.update")}</span>
 					</DropdownMenuItem>
 				) : (
 					<Button>
 						<PlusIcon className="h-4 w-4" />
-						Create Project
+						{t("project.create")}
 					</Button>
 				)}
 			</DialogTrigger>
 			<DialogContent className="sm:m:max-w-lg ">
 				<DialogHeader>
-					<DialogTitle>{projectId ? "Update" : "Add a"} project</DialogTitle>
-					<DialogDescription>The home of something big!</DialogDescription>
+					<DialogTitle>
+						{projectId ? t("project.updateProject") : t("project.addAProject")}
+					</DialogTitle>
+					<DialogDescription>
+						{t("project.theHomeOfSomethingBig")}
+					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 				<Form {...form}>
@@ -161,7 +171,7 @@ export const HandleProject = ({ projectId }: Props) => {
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>{t("project.name")}</FormLabel>
 										<FormControl>
 											<Input placeholder="Vandelay Industries" {...field} />
 										</FormControl>
@@ -177,7 +187,7 @@ export const HandleProject = ({ projectId }: Props) => {
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description</FormLabel>
+									<FormLabel>{t("project.description")}</FormLabel>
 									<FormControl>
 										<Textarea
 											placeholder="Description about your project..."
@@ -198,7 +208,7 @@ export const HandleProject = ({ projectId }: Props) => {
 							form="hook-form-add-project"
 							type="submit"
 						>
-							{projectId ? "Update" : "Create"}
+							{projectId ? t("project.update") : t("project.create")}
 						</Button>
 					</DialogFooter>
 				</Form>

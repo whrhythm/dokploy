@@ -510,7 +510,7 @@ export const AddUserPermissions = ({ userId }: Props) => {
 							render={() => (
 								<FormItem className="md:col-span-2">
 									<div className="mb-4">
-										<FormLabel className="text-base">Projects</FormLabel>
+										<FormLabel className="text-base">xiangmu</FormLabel>
 										<FormDescription>
 											Select the Projects that the user can access
 										</FormDescription>

@@ -8,6 +8,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { type ApplicationList, columns } from "./columns";
 import { DataTable } from "./data-table";
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const ShowNodeApplications = ({ serverId }: Props) => {
+	const { t } = useTranslation();
 	const { data: NodeApps, isPending: NodeAppsLoading } =
 		api.swarm.getNodeApps.useQuery({ serverId });
 
@@ -44,7 +46,7 @@ export const ShowNodeApplications = ({ serverId }: Props) => {
 	if (!NodeApps || !NodeAppDetails) {
 		return (
 			<span className="text-sm w-full flex text-center justify-center items-center">
-				No data found
+				{t("swarm.noDataFound")}
 			</span>
 		);
 	}
@@ -84,14 +86,14 @@ export const ShowNodeApplications = ({ serverId }: Props) => {
 			<DialogTrigger asChild>
 				<Button variant="outline" size="sm" className="w-full">
 					<Layers className="h-4 w-4 mr-2" />
-					Services
+					{t("swarm.services")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className={"sm:max-w-10xl"}>
 				<DialogHeader>
-					<DialogTitle>Node Applications</DialogTitle>
+					<DialogTitle>{t("swarm.nodeApplications")}</DialogTitle>
 					<DialogDescription>
-						See in detail the applications running on this node
+						{t("swarm.nodeApplicationsDesc")}
 					</DialogDescription>
 				</DialogHeader>
 				<div className="max-h-[80vh]">

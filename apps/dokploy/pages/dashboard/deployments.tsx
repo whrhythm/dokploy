@@ -13,6 +13,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from "@/hooks/use-translation";
 
 const TAB_VALUES = ["deployments", "queue"] as const;
 type TabValue = (typeof TAB_VALUES)[number];
@@ -22,6 +23,7 @@ function isValidTab(t: string): t is TabValue {
 }
 
 function DeploymentsPage() {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const tab =
 		router.query.tab && isValidTab(router.query.tab as string)
@@ -46,17 +48,19 @@ function DeploymentsPage() {
 							<div>
 								<CardTitle className="text-xl font-bold flex items-center gap-2">
 									<Rocket className="size-5" />
-									Deployments
+									{t("menu.deployments")}
 								</CardTitle>
 								<CardDescription>
-									All application and compose deployments in one place.
+									{t("deployment.allInOnePlace")}
 								</CardDescription>
 							</div>
 						</div>
 						<Tabs value={tab} onValueChange={setTab} className="w-full">
 							<TabsList className="mt-2">
-								<TabsTrigger value="deployments">Deployments</TabsTrigger>
-								<TabsTrigger value="queue">Queue</TabsTrigger>
+								<TabsTrigger value="deployments">
+									{t("menu.deployments")}
+								</TabsTrigger>
+								<TabsTrigger value="queue">{t("deployment.queue")}</TabsTrigger>
 							</TabsList>
 							<TabsContent value="deployments" className="mt-0 pt-4">
 								<ShowDeploymentsTable />

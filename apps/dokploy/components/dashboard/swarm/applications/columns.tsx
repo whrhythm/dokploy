@@ -24,6 +24,23 @@ export interface ApplicationList {
 	serverId: string;
 }
 
+const translateColumn = (key: string): string => {
+	const translations: Record<string, string> = {
+		id: "ID",
+		name: "名称",
+		image: "镜像",
+		mode: "模式",
+		currentState: "当前状态",
+		desiredState: "期望状态",
+		replicas: "副本数",
+		ports: "端口",
+		errors: "错误",
+		logs: "日志",
+		actions: "操作",
+	};
+	return translations[key] || key;
+};
+
 export const columns: ColumnDef<ApplicationList>[] = [
 	{
 		accessorKey: "ID",
@@ -34,7 +51,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					ID
+					{translateColumn("id")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -52,7 +69,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Name
+					{translateColumn("name")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -70,7 +87,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Image
+					{translateColumn("image")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -88,7 +105,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Mode
+					{translateColumn("mode")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -106,7 +123,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Current State
+					{translateColumn("currentState")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -144,7 +161,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Desired State
+					{translateColumn("desiredState")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -163,7 +180,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Replicas
+					{translateColumn("replicas")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -182,7 +199,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Ports
+					{translateColumn("ports")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -200,7 +217,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					Errors
+					{translateColumn("errors")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -213,7 +230,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 		accessorKey: "Logs",
 		accessorFn: (row) => row.Error,
 		header: () => {
-			return <span>Logs</span>;
+			return <span>{translateColumn("logs")}</span>;
 		},
 		cell: ({ row }) => {
 			return (
@@ -226,12 +243,14 @@ export const columns: ColumnDef<ApplicationList>[] = [
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
-							<DropdownMenuLabel>Actions</DropdownMenuLabel>
+							<DropdownMenuLabel>
+								{translateColumn("actions")}
+							</DropdownMenuLabel>
 							<ShowDockerModalStackLogs
 								containerId={row.original.ID}
 								serverId={row.original.serverId}
 							>
-								View Logs
+								{translateColumn("logs")}
 							</ShowDockerModalStackLogs>
 						</DropdownMenuContent>
 					</DropdownMenu>

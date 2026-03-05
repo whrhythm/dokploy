@@ -95,6 +95,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { appRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
@@ -267,6 +268,7 @@ export const extractServicesFromEnvironment = (
 const EnvironmentPage = (
 	props: InferGetServerSidePropsType<typeof getServerSideProps>,
 ) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [isBulkActionLoading, setIsBulkActionLoading] = useState(false);
 	const { projectId, environmentId } = props;
@@ -385,13 +387,13 @@ const EnvironmentPage = (
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const serviceTypes = [
-		{ value: "application", label: "Application", icon: GlobeIcon },
-		{ value: "postgres", label: "PostgreSQL", icon: PostgresqlIcon },
-		{ value: "mariadb", label: "MariaDB", icon: MariadbIcon },
-		{ value: "mongo", label: "MongoDB", icon: MongodbIcon },
-		{ value: "mysql", label: "MySQL", icon: MysqlIcon },
-		{ value: "redis", label: "Redis", icon: RedisIcon },
-		{ value: "compose", label: "Compose", icon: CircuitBoard },
+		{ value: "application", label: t("application.title"), icon: GlobeIcon },
+		{ value: "postgres", label: t("database.postgres"), icon: PostgresqlIcon },
+		{ value: "mariadb", label: t("database.mariadb"), icon: MariadbIcon },
+		{ value: "mongo", label: t("database.mongodb"), icon: MongodbIcon },
+		{ value: "mysql", label: t("database.mysql"), icon: MysqlIcon },
+		{ value: "redis", label: t("database.redis"), icon: RedisIcon },
+		{ value: "compose", label: t("dashboard.compose"), icon: CircuitBoard },
 	];
 
 	const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -839,7 +841,7 @@ const EnvironmentPage = (
 	if (isLoading) {
 		return (
 			<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[60vh]">
-				<span>Loading...</span>
+				<span>{t("loading")}</span>
 				<Loader2 className="animate-spin size-4" />
 			</div>
 		);
@@ -849,7 +851,7 @@ const EnvironmentPage = (
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[60vh]">
 				<span className="text-lg font-medium text-muted-foreground">
-					Environment not found
+					{t("environment.environmentNotFound")}
 				</span>
 			</div>
 		);
@@ -859,7 +861,7 @@ const EnvironmentPage = (
 		<div>
 			<BreadcrumbSidebar
 				list={[
-					{ name: "Projects", href: "/dashboard/projects" },
+					{ name: t("menu.projects"), href: "/dashboard/projects" },
 					{
 						name: projectData?.name || "",
 					},
@@ -893,13 +895,16 @@ const EnvironmentPage = (
 									</EnvironmentVariables>
 								</CardTitle>
 								<CardDescription>
-									{currentEnvironment.description || "No description provided"}
+									{currentEnvironment.description ||
+										t("environment.noDescriptionProvided")}
 								</CardDescription>
 							</CardHeader>
 							<div className="flex flex-row gap-4 flex-wrap justify-between items-center">
 								<div className="flex flex-row gap-4 flex-wrap">
 									<ProjectEnvironment projectId={projectId}>
-										<Button variant="outline">Project Environment</Button>
+										<Button variant="outline">
+											{t("environment.projectEnvironment")}
+										</Button>
 									</ProjectEnvironment>
 									{(auth?.role === "owner" ||
 										auth?.role === "admin" ||
@@ -908,7 +913,7 @@ const EnvironmentPage = (
 											<DropdownMenuTrigger asChild>
 												<Button>
 													<PlusIcon className="h-4 w-4" />
-													Create Service
+													{t("environment.createService")}
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent
@@ -916,7 +921,7 @@ const EnvironmentPage = (
 												align="end"
 											>
 												<DropdownMenuLabel className="text-sm font-normal">
-													Actions
+													{t("project.actions")}
 												</DropdownMenuLabel>
 												<DropdownMenuSeparator />
 												<AddApplication
@@ -958,7 +963,7 @@ const EnvironmentPage = (
 												onCheckedChange={handleSelectAll}
 											/>
 											<span className="text-sm">
-												Select All{" "}
+												{t("environment.selectAll")}{" "}
 												{selectedServices.length > 0 &&
 													`(${selectedServices.length}/${filteredServices.length})`}
 											</span>
@@ -974,15 +979,17 @@ const EnvironmentPage = (
 													disabled={selectedServices.length === 0}
 													isLoading={isBulkActionLoading}
 												>
-													Bulk Actions
+													{t("environment.bulkActions")}
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
-												<DropdownMenuLabel>Actions</DropdownMenuLabel>
+												<DropdownMenuLabel>
+													{t("project.actions")}
+												</DropdownMenuLabel>
 												<DropdownMenuSeparator />
 												<DialogAction
-													title="Start Services"
-													description={`Are you sure you want to start ${selectedServices.length} services?`}
+													title={t("environment.startServices")}
+													description={`${t("environment.startServices")} ${selectedServices.length} ${t("project.services")}?`}
 													type="default"
 													onClick={handleBulkStart}
 												>
@@ -991,12 +998,12 @@ const EnvironmentPage = (
 														className="w-full justify-start"
 													>
 														<CheckCircle2 className="mr-2 h-4 w-4" />
-														Start
+														{t("button.start")}
 													</Button>
 												</DialogAction>
 												<DialogAction
-													title="Deploy Services"
-													description={`Are you sure you want to deploy ${selectedServices.length} service${selectedServices.length !== 1 ? "s" : ""}? This will redeploy/restart the selected services.`}
+													title={t("environment.deployServices")}
+													description={`${t("environment.deployServices")} ${selectedServices.length} ${t("project.services")}? ${t("project.thisWillRedeploy")}`}
 													onClick={handleBulkDeploy}
 													type="default"
 													disabled={
@@ -1008,12 +1015,12 @@ const EnvironmentPage = (
 														className="w-full justify-start"
 													>
 														<Play className="mr-2 h-4 w-4" />
-														Deploy
+														{t("button.deploy")}
 													</Button>
 												</DialogAction>
 												<DialogAction
-													title="Stop Services"
-													description={`Are you sure you want to stop ${selectedServices.length} services?`}
+													title={t("environment.stopServices")}
+													description={`${t("environment.stopServices")} ${selectedServices.length} ${t("project.services")}?`}
 													type="destructive"
 													onClick={handleBulkStop}
 												>
@@ -1022,7 +1029,7 @@ const EnvironmentPage = (
 														className="w-full justify-start text-destructive"
 													>
 														<Ban className="mr-2 h-4 w-4" />
-														Stop
+														{t("button.stop")}
 													</Button>
 												</DialogAction>
 												{(auth?.role === "owner" ||
@@ -1030,22 +1037,21 @@ const EnvironmentPage = (
 													auth?.canDeleteServices) && (
 													<>
 														<DialogAction
-															title="Delete Services"
+															title={t("environment.deleteServices")}
 															description={
 																<div className="space-y-3">
 																	<p>
-																		Are you sure you want to delete{" "}
-																		{selectedServices.length} services? This
-																		action cannot be undone.
+																		{t("environment.confirmDeleteServices")}{" "}
+																		{selectedServices.length}{" "}
+																		{t("project.services")}?{" "}
+																		{t("project.actionCannotBeUndone")}
 																	</p>
 																	{selectedServicesWithRunningStatus.length >
 																		0 && (
 																		<AlertBlock type="warning">
-																			Warning:{" "}
-																			{selectedServicesWithRunningStatus.length}{" "}
-																			of the selected services are currently
-																			running. Please stop these services first
-																			before deleting:{" "}
+																			{t("environment.warningRunningServices")}
+																			{selectedServicesWithRunningStatus.length}
+																			{t("environment.pleaseStopFirst")}
 																			{selectedServicesWithRunningStatus
 																				.map((s) => s.name)
 																				.join(", ")}
@@ -1064,7 +1070,7 @@ const EnvironmentPage = (
 																className="w-full justify-start text-destructive"
 															>
 																<Trash2 className="mr-2 h-4 w-4" />
-																Delete
+																{t("button.delete")}
 															</Button>
 														</DialogAction>
 														<DuplicateProject
@@ -1085,15 +1091,18 @@ const EnvironmentPage = (
 															className="w-full justify-start"
 														>
 															<FolderInput className="mr-2 h-4 w-4" />
-															Move
+															{t("environment.moveServices")}
 														</Button>
 													</DialogTrigger>
 													<DialogContent>
 														<DialogHeader>
-															<DialogTitle>Move Services</DialogTitle>
+															<DialogTitle>
+																{t("environment.moveServices")}
+															</DialogTitle>
 															<DialogDescription>
-																Select the target project and environment to
-																move {selectedServices.length} services
+																{t("environment.selectTargetProject")}{" "}
+																{selectedServices.length}{" "}
+																{t("project.services")}
 															</DialogDescription>
 														</DialogHeader>
 														<div className="flex flex-col gap-4">
@@ -1316,7 +1325,7 @@ const EnvironmentPage = (
 									<div className="flex flex-col gap-2 lg:flex-row lg:gap-4 lg:items-center">
 										<div className="w-full relative">
 											<FocusShortcutInput
-												placeholder="Filter services..."
+												placeholder={t("environment.filterServices")}
 												value={searchQuery}
 												onChange={(e) => setSearchQuery(e.target.value)}
 												className="pr-10"
@@ -1325,22 +1334,30 @@ const EnvironmentPage = (
 										</div>
 										<Select value={sortBy} onValueChange={setSortBy}>
 											<SelectTrigger className="lg:w-[280px]">
-												<SelectValue placeholder="Sort by..." />
+												<SelectValue placeholder={t("environment.sortBy")} />
 											</SelectTrigger>
 											<SelectContent>
 												<SelectItem value="lastDeploy-desc">
-													Recently deployed
+													{t("environment.recentlyDeployed")}
 												</SelectItem>
 												<SelectItem value="createdAt-desc">
-													Newest first
+													{t("environment.newestFirst")}
 												</SelectItem>
 												<SelectItem value="createdAt-asc">
-													Oldest first
+													{t("environment.oldestFirst")}
 												</SelectItem>
-												<SelectItem value="name-asc">Name (A-Z)</SelectItem>
-												<SelectItem value="name-desc">Name (Z-A)</SelectItem>
-												<SelectItem value="type-asc">Type (A-Z)</SelectItem>
-												<SelectItem value="type-desc">Type (Z-A)</SelectItem>
+												<SelectItem value="name-asc">
+													{t("environment.nameAZ")}
+												</SelectItem>
+												<SelectItem value="name-desc">
+													{t("environment.nameZA")}
+												</SelectItem>
+												<SelectItem value="type-asc">
+													{t("environment.typeAZ")}
+												</SelectItem>
+												<SelectItem value="type-desc">
+													{t("environment.typeZA")}
+												</SelectItem>
 											</SelectContent>
 										</Select>
 										<Popover open={openCombobox} onOpenChange={setOpenCombobox}>
@@ -1351,15 +1368,19 @@ const EnvironmentPage = (
 													className="min-w-[200px] justify-between"
 												>
 													{selectedTypes.length === 0
-														? "Select types..."
-														: `${selectedTypes.length} selected`}
+														? t("environment.selectTypes")
+														: `${selectedTypes.length} ${t("environment.typesSelected")}`}
 													<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 												</Button>
 											</PopoverTrigger>
 											<PopoverContent className="w-[200px] p-0">
 												<Command>
-													<CommandInput placeholder="Search type..." />
-													<CommandEmpty>No type found.</CommandEmpty>
+													<CommandInput
+														placeholder={t("environment.searchType")}
+													/>
+													<CommandEmpty>
+														{t("environment.noTypeFound")}
+													</CommandEmpty>
 													<CommandGroup>
 														{serviceTypes.map((type) => (
 															<CommandItem
@@ -1412,15 +1433,19 @@ const EnvironmentPage = (
 												onValueChange={setSelectedServerId}
 											>
 												<SelectTrigger className="lg:w-[200px]">
-													<SelectValue placeholder="Filter by server..." />
+													<SelectValue
+														placeholder={t("environment.filterByServer")}
+													/>
 												</SelectTrigger>
 												<SelectContent>
-													<SelectItem value="all">All servers</SelectItem>
+													<SelectItem value="all">
+														{t("environment.allServers")}
+													</SelectItem>
 													{hasServicesWithoutServer && (
 														<SelectItem value="dokploy-server">
 															<div className="flex items-center gap-2">
 																<ServerIcon className="size-4" />
-																<span>Dokploy server</span>
+																<span>{t("environment.dokployServer")}</span>
 															</div>
 														</SelectItem>
 													)}
@@ -1446,17 +1471,17 @@ const EnvironmentPage = (
 										<div className="flex h-[70vh] w-full flex-col items-center justify-center">
 											<FolderInput className="size-8 self-center text-muted-foreground" />
 											<span className="text-center font-medium text-muted-foreground">
-												No services added yet. Click on Create Service.
+												{t("environment.noServicesAdded")}
 											</span>
 										</div>
 									) : filteredServices.length === 0 ? (
 										<div className="flex h-[70vh] w-full flex-col items-center justify-center">
 											<Search className="size-8 self-center text-muted-foreground" />
 											<span className="text-center font-medium text-muted-foreground">
-												No services found with the current filters
+												{t("environment.noServicesFound")}
 											</span>
 											<span className="text-sm text-muted-foreground">
-												Try adjusting your search or filters
+												{t("environment.tryAdjustingSearch")}
 											</span>
 										</div>
 									) : (
@@ -1550,7 +1575,7 @@ const EnvironmentPage = (
 																		</div>
 																	)}
 																	<DateTooltip date={service.createdAt}>
-																		Created
+																		{t("environment.created")}
 																	</DateTooltip>
 																</div>
 															</CardFooter>

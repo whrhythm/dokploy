@@ -77,6 +77,7 @@ import {
 	SidebarTrigger,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import type { AppRouter } from "@/server/api/root";
@@ -868,6 +869,11 @@ function SidebarLogo() {
 }
 
 export default function Page({ children }: Props) {
+	const { t } = useTranslation();
+	// Debug: log translation result
+	const homeLabel = t("menu.home");
+	console.log("Translated menu.home:", homeLabel);
+
 	const [defaultOpen, setDefaultOpen] = useState<boolean | undefined>(
 		undefined,
 	);
@@ -895,6 +901,18 @@ export default function Page({ children }: Props) {
 		settings: filteredSettings,
 		help,
 	} = createMenuForAuthUser({ auth, isCloud: !!isCloud });
+
+	const translateMenuTitle = (title: string) => {
+		const key = `menu.${title.toLowerCase().replace(/\s+/g, "-")}`;
+		const translated = t(key);
+		return translated === key ? title : translated;
+	};
+
+	const translateSettingsTitle = (title: string) => {
+		const key = `settings.${title.toLowerCase().replace(/\s+/g, "-")}`;
+		const translated = t(key);
+		return translated === key ? title : translated;
+	};
 
 	const activeItem = findActiveNavItem(
 		[...filteredHome, ...filteredSettings],
@@ -932,7 +950,7 @@ export default function Page({ children }: Props) {
 				</SidebarHeader>
 				<SidebarContent>
 					<SidebarGroup>
-						<SidebarGroupLabel>Home</SidebarGroupLabel>
+						<SidebarGroupLabel>{t("menu.home")}</SidebarGroupLabel>
 						<SidebarMenu>
 							{filteredHome.map((item) => {
 								const isSingle = item.isSingle !== false;
@@ -941,6 +959,7 @@ export default function Page({ children }: Props) {
 									: item.items.some((item) =>
 											isActiveRoute({ itemUrl: item.url, pathname }),
 										);
+								const translatedTitle = translateMenuTitle(item.title);
 
 								return (
 									<Collapsible
@@ -953,7 +972,7 @@ export default function Page({ children }: Props) {
 											{isSingle ? (
 												<SidebarMenuButton
 													asChild
-													tooltip={item.title}
+													tooltip={translatedTitle}
 													className={cn(isActive && "bg-border")}
 												>
 													<Link
@@ -965,19 +984,19 @@ export default function Page({ children }: Props) {
 																className={cn(isActive && "text-primary")}
 															/>
 														)}
-														<span>{item.title}</span>
+														<span>{translatedTitle}</span>
 													</Link>
 												</SidebarMenuButton>
 											) : (
 												<>
 													<CollapsibleTrigger asChild>
 														<SidebarMenuButton
-															tooltip={item.title}
+															tooltip={translatedTitle}
 															isActive={isActive}
 														>
 															{item.icon && <item.icon />}
 
-															<span>{item.title}</span>
+															<span>{translatedTitle}</span>
 															{item.items?.length && (
 																<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
 															)}
@@ -985,31 +1004,36 @@ export default function Page({ children }: Props) {
 													</CollapsibleTrigger>
 													<CollapsibleContent>
 														<SidebarMenuSub>
-															{item.items?.map((subItem) => (
-																<SidebarMenuSubItem key={subItem.title}>
-																	<SidebarMenuSubButton
-																		asChild
-																		className={cn(isActive && "bg-border")}
-																	>
-																		<Link
-																			href={subItem.url}
-																			className="flex w-full items-center"
+															{item.items?.map((subItem) => {
+																const translatedSubTitle = translateMenuTitle(
+																	subItem.title,
+																);
+																return (
+																	<SidebarMenuSubItem key={subItem.title}>
+																		<SidebarMenuSubButton
+																			asChild
+																			className={cn(isActive && "bg-border")}
 																		>
-																			{subItem.icon && (
-																				<span className="mr-2">
-																					<subItem.icon
-																						className={cn(
-																							"h-4 w-4 text-muted-foreground",
-																							isActive && "text-primary",
-																						)}
-																					/>
-																				</span>
-																			)}
-																			<span>{subItem.title}</span>
-																		</Link>
-																	</SidebarMenuSubButton>
-																</SidebarMenuSubItem>
-															))}
+																			<Link
+																				href={subItem.url}
+																				className="flex w-full items-center"
+																			>
+																				{subItem.icon && (
+																					<span className="mr-2">
+																						<subItem.icon
+																							className={cn(
+																								"h-4 w-4 text-muted-foreground",
+																								isActive && "text-primary",
+																							)}
+																						/>
+																					</span>
+																				)}
+																				<span>{translatedSubTitle}</span>
+																			</Link>
+																		</SidebarMenuSubButton>
+																	</SidebarMenuSubItem>
+																);
+															})}
 														</SidebarMenuSub>
 													</CollapsibleContent>
 												</>
@@ -1021,7 +1045,7 @@ export default function Page({ children }: Props) {
 						</SidebarMenu>
 					</SidebarGroup>
 					<SidebarGroup>
-						<SidebarGroupLabel>Settings</SidebarGroupLabel>
+						<SidebarGroupLabel>{t("menu.settings")}</SidebarGroupLabel>
 						<SidebarMenu className="gap-1">
 							{filteredSettings.map((item) => {
 								const isSingle = item.isSingle !== false;
@@ -1030,6 +1054,7 @@ export default function Page({ children }: Props) {
 									: item.items.some((item) =>
 											isActiveRoute({ itemUrl: item.url, pathname }),
 										);
+								const translatedTitle = translateSettingsTitle(item.title);
 
 								return (
 									<Collapsible
@@ -1042,7 +1067,7 @@ export default function Page({ children }: Props) {
 											{isSingle ? (
 												<SidebarMenuButton
 													asChild
-													tooltip={item.title}
+													tooltip={translatedTitle}
 													className={cn(isActive && "bg-border")}
 												>
 													<Link
@@ -1054,19 +1079,19 @@ export default function Page({ children }: Props) {
 																className={cn(isActive && "text-primary")}
 															/>
 														)}
-														<span>{item.title}</span>
+														<span>{translatedTitle}</span>
 													</Link>
 												</SidebarMenuButton>
 											) : (
 												<>
 													<CollapsibleTrigger asChild>
 														<SidebarMenuButton
-															tooltip={item.title}
+															tooltip={translatedTitle}
 															isActive={isActive}
 														>
 															{item.icon && <item.icon />}
 
-															<span>{item.title}</span>
+															<span>{translatedTitle}</span>
 															{item.items?.length && (
 																<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
 															)}
@@ -1074,31 +1099,35 @@ export default function Page({ children }: Props) {
 													</CollapsibleTrigger>
 													<CollapsibleContent>
 														<SidebarMenuSub>
-															{item.items?.map((subItem) => (
-																<SidebarMenuSubItem key={subItem.title}>
-																	<SidebarMenuSubButton
-																		asChild
-																		className={cn(isActive && "bg-border")}
-																	>
-																		<Link
-																			href={subItem.url}
-																			className="flex w-full items-center"
+															{item.items?.map((subItem) => {
+																const translatedSubTitle =
+																	translateSettingsTitle(subItem.title);
+																return (
+																	<SidebarMenuSubItem key={subItem.title}>
+																		<SidebarMenuSubButton
+																			asChild
+																			className={cn(isActive && "bg-border")}
 																		>
-																			{subItem.icon && (
-																				<span className="mr-2">
-																					<subItem.icon
-																						className={cn(
-																							"h-4 w-4 text-muted-foreground",
-																							isActive && "text-primary",
-																						)}
-																					/>
-																				</span>
-																			)}
-																			<span>{subItem.title}</span>
-																		</Link>
-																	</SidebarMenuSubButton>
-																</SidebarMenuSubItem>
-															))}
+																			<Link
+																				href={subItem.url}
+																				className="flex w-full items-center"
+																			>
+																				{subItem.icon && (
+																					<span className="mr-2">
+																						<subItem.icon
+																							className={cn(
+																								"h-4 w-4 text-muted-foreground",
+																								isActive && "text-primary",
+																							)}
+																						/>
+																					</span>
+																				)}
+																				<span>{translatedSubTitle}</span>
+																			</Link>
+																		</SidebarMenuSubButton>
+																	</SidebarMenuSubItem>
+																);
+															})}
 														</SidebarMenuSub>
 													</CollapsibleContent>
 												</>
@@ -1110,7 +1139,7 @@ export default function Page({ children }: Props) {
 						</SidebarMenu>
 					</SidebarGroup>
 					<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-						<SidebarGroupLabel>Extra</SidebarGroupLabel>
+						<SidebarGroupLabel>{t("common.extra")}</SidebarGroupLabel>
 						<SidebarMenu>
 							{help.map((item: ExternalLink) => (
 								<SidebarMenuItem key={item.name}>

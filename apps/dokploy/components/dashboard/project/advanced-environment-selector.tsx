@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 type Environment = Awaited<
@@ -38,6 +39,7 @@ export const AdvancedEnvironmentSelector = ({
 	projectId,
 	currentEnvironmentId,
 }: AdvancedEnvironmentSelectorProps) => {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -285,7 +287,7 @@ export const AdvancedEnvironmentSelector = ({
 							onClick={() => setIsCreateDialogOpen(true)}
 						>
 							<PlusIcon className="h-4 w-4 mr-2" />
-							Create Environment
+							{t("environment.createEnvironment")}
 						</DropdownMenuItem>
 					)}
 				</DropdownMenuContent>
@@ -294,29 +296,31 @@ export const AdvancedEnvironmentSelector = ({
 			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Create Environment</DialogTitle>
+						<DialogTitle>{t("environment.createEnvironment")}</DialogTitle>
 						<DialogDescription>
-							Create a new environment for your project.
+							{t("environment.createEnvironmentDesc")}
 						</DialogDescription>
 					</DialogHeader>
 
 					<div className="space-y-4">
 						<div className="space-y-1">
-							<Label htmlFor="name">Name</Label>
+							<Label htmlFor="name">{t("environment.envName")}</Label>
 							<Input
 								id="name"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
-								placeholder="Environment name"
+								placeholder={t("environment.envNamePlaceholder")}
 							/>
 						</div>
 						<div className="space-y-1">
-							<Label htmlFor="description">Description (optional)</Label>
+							<Label htmlFor="description">
+								{t("environment.descriptionOptional")}
+							</Label>
 							<Textarea
 								id="description"
 								value={description}
 								onChange={(e) => setDescription(e.target.value)}
-								placeholder="Environment description"
+								placeholder={t("environment.descriptionPlaceholder")}
 							/>
 						</div>
 					</div>
@@ -330,45 +334,47 @@ export const AdvancedEnvironmentSelector = ({
 								setDescription("");
 							}}
 						>
-							Cancel
+							{t("button.cancel")}
 						</Button>
 						<Button
 							onClick={handleCreateEnvironment}
 							disabled={!name.trim() || createEnvironment.isPending}
 						>
-							{createEnvironment.isPending ? "Creating..." : "Create"}
+							{createEnvironment.isPending
+								? t("environment.creating")
+								: t("button.create")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-
-			{/* Edit Environment Dialog */}
 			<Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Edit Environment</DialogTitle>
+						<DialogTitle>{t("environment.editEnvironment")}</DialogTitle>
 						<DialogDescription>
-							Update the environment details.
+							{t("environment.updateEnvironmentDetails")}
 						</DialogDescription>
 					</DialogHeader>
 
 					<div className="space-y-4">
 						<div className="space-y-1">
-							<Label htmlFor="edit-name">Name</Label>
+							<Label htmlFor="edit-name">{t("environment.envName")}</Label>
 							<Input
 								id="edit-name"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
-								placeholder="Environment name"
+								placeholder={t("environment.envNamePlaceholder")}
 							/>
 						</div>
 						<div className="space-y-1">
-							<Label htmlFor="edit-description">Description (optional)</Label>
+							<Label htmlFor="edit-description">
+								{t("environment.descriptionOptional")}
+							</Label>
 							<Textarea
 								id="edit-description"
 								value={description}
 								onChange={(e) => setDescription(e.target.value)}
-								placeholder="Environment description"
+								placeholder={t("environment.descriptionPlaceholder")}
 							/>
 						</div>
 					</div>
@@ -383,33 +389,32 @@ export const AdvancedEnvironmentSelector = ({
 								setDescription("");
 							}}
 						>
-							Cancel
+							{t("button.cancel")}
 						</Button>
 						<Button
 							onClick={handleUpdateEnvironment}
 							disabled={!name.trim() || updateEnvironment.isPending}
 						>
-							{updateEnvironment.isPending ? "Updating..." : "Update"}
+							{updateEnvironment.isPending
+								? t("environment.updating")
+								: t("button.save")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-
-			{/* Delete Environment Dialog */}
 			<Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Delete Environment</DialogTitle>
+						<DialogTitle>{t("environment.deleteEnvironment")}</DialogTitle>
 						<DialogDescription>
-							Are you sure you want to delete the environment "
-							{selectedEnvironment?.name}"? This action cannot be undone and
-							will also delete all services in this environment.
+							{t("environment.confirmDeleteEnvironment")} "
+							{selectedEnvironment?.name}"? {t("project.actionCannotBeUndone")}
 						</DialogDescription>
 					</DialogHeader>
 
 					{haveServices && (
 						<AlertBlock type="warning">
-							This environment have active services, please delete them first.
+							{t("environment.hasActiveServices")}
 						</AlertBlock>
 					)}
 

@@ -9,6 +9,7 @@ import NextTopLoader from "nextjs-toploader";
 import type { ReactElement, ReactNode } from "react";
 import { SearchCommand } from "@/components/dashboard/search-command";
 import { Toaster } from "@/components/ui/sonner";
+import { TranslationProvider } from "@/hooks/translation-provider";
 import { api } from "@/utils/api";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -40,18 +41,20 @@ const MyApp = ({
 			<Head>
 				<title>Dokploy</title>
 			</Head>
-			<ThemeProvider
-				attribute="class"
-				defaultTheme="system"
-				enableSystem
-				disableTransitionOnChange
-				forcedTheme={Component.theme}
-			>
-				<NextTopLoader color="hsl(var(--sidebar-ring))" />
-				<Toaster richColors />
-				<SearchCommand />
-				{getLayout(<Component {...pageProps} />)}
-			</ThemeProvider>
+			<TranslationProvider>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+					forcedTheme={Component.theme}
+				>
+					<NextTopLoader color="hsl(var(--sidebar-ring))" />
+					<Toaster richColors />
+					<SearchCommand />
+					{getLayout(<Component {...pageProps} />)}
+				</ThemeProvider>
+			</TranslationProvider>
 		</>
 	);
 };

@@ -34,17 +34,30 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/hooks/use-translation";
 import { api, type RouterOutputs } from "@/utils/api";
 import { columns } from "./colums";
 export type Container = NonNullable<
 	RouterOutputs["docker"]["getContainers"]
 >[0];
 
+const translateColumnId = (id: string): string => {
+	const translations: Record<string, string> = {
+		name: "名称",
+		state: "状态",
+		status: "状态",
+		image: "镜像",
+		actions: "操作",
+	};
+	return translations[id] || id;
+};
+
 interface Props {
 	serverId?: string;
 }
 
 export const ShowContainers = ({ serverId }: Props) => {
+	const { t } = useTranslation();
 	const { data, isPending } = api.docker.getContainers.useQuery({
 		serverId,
 	});
@@ -83,18 +96,16 @@ export const ShowContainers = ({ serverId }: Props) => {
 					<CardHeader className="">
 						<CardTitle className="text-xl flex flex-row gap-2">
 							<Container className="size-6 text-muted-foreground self-center" />
-							Docker Containers
+							{t("dashboard.containers")}
 						</CardTitle>
-						<CardDescription>
-							See all the containers of your dokploy server
-						</CardDescription>
+						<CardDescription>{t("docker.seeAllContainers")}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2 py-8 border-t">
 						<div className="gap-4 pb-20 w-full">
 							<div className="flex flex-col gap-4  w-full overflow-auto">
 								<div className="flex items-center gap-2 max-sm:flex-wrap">
 									<Input
-										placeholder="Filter by name..."
+										placeholder={t("search.filterByName")}
 										value={
 											(table.getColumn("name")?.getFilterValue() as string) ??
 											""
@@ -112,7 +123,8 @@ export const ShowContainers = ({ serverId }: Props) => {
 												variant="outline"
 												className="sm:ml-auto max-sm:w-full"
 											>
-												Columns <ChevronDown className="ml-2 h-4 w-4" />
+												{t("docker.columns")}{" "}
+												<ChevronDown className="ml-2 h-4 w-4" />
 											</Button>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent align="end">
@@ -129,7 +141,7 @@ export const ShowContainers = ({ serverId }: Props) => {
 																column.toggleVisibility(!!value)
 															}
 														>
-															{column.id}
+															{translateColumnId(column.id)}
 														</DropdownMenuCheckboxItem>
 													);
 												})}
@@ -140,13 +152,13 @@ export const ShowContainers = ({ serverId }: Props) => {
 									{isPending ? (
 										<div className="w-full flex-col gap-2 flex items-center justify-center h-[55vh]">
 											<span className="text-muted-foreground text-lg font-medium">
-												Loading...
+												{t("loading")}
 											</span>
 										</div>
 									) : data?.length === 0 ? (
 										<div className="flex-col gap-2 flex items-center justify-center h-[55vh]">
 											<span className="text-muted-foreground text-lg font-medium">
-												No results.
+												{t("search.noResults")}
 											</span>
 										</div>
 									) : (
@@ -195,11 +207,11 @@ export const ShowContainers = ({ serverId }: Props) => {
 															{isPending ? (
 																<div className="w-full flex-col gap-2 flex items-center justify-center h-[55vh]">
 																	<span className="text-muted-foreground text-lg font-medium">
-																		Loading...
+																		{t("loading")}
 																	</span>
 																</div>
 															) : (
-																<>No results.</>
+																<>{t("search.noResults")}</>
 															)}
 														</TableCell>
 													</TableRow>
@@ -217,7 +229,7 @@ export const ShowContainers = ({ serverId }: Props) => {
 												onClick={() => table.previousPage()}
 												disabled={!table.getCanPreviousPage()}
 											>
-												Previous
+												{t("pagination.prev")}
 											</Button>
 											<Button
 												variant="outline"
@@ -225,7 +237,7 @@ export const ShowContainers = ({ serverId }: Props) => {
 												onClick={() => table.nextPage()}
 												disabled={!table.getCanNextPage()}
 											>
-												Next
+												{t("pagination.next")}
 											</Button>
 										</div>
 									</div>

@@ -25,6 +25,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const updateProjectSchema = z.object({
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export const ProjectEnvironment = ({ projectId, children }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const utils = api.useUtils();
 	const { mutateAsync, error, isError, isPending } =
@@ -72,11 +74,11 @@ export const ProjectEnvironment = ({ projectId, children }: Props) => {
 			projectId: projectId,
 		})
 			.then(() => {
-				toast.success("Project env updated successfully");
+				toast.success(t("project.envUpdated"));
 				utils.project.all.invalidate();
 			})
 			.catch(() => {
-				toast.error("Error updating the env");
+				toast.error(t("project.errorUpdatingEnv"));
 			})
 			.finally(() => {});
 	};
@@ -105,22 +107,21 @@ export const ProjectEnvironment = ({ projectId, children }: Props) => {
 						onSelect={(e) => e.preventDefault()}
 					>
 						<FileIcon className="size-4" />
-						<span>Project Environment</span>
+						<span>{t("project.projectEnvironment")}</span>
 					</DropdownMenuItem>
 				)}
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-6xl">
 				<DialogHeader>
-					<DialogTitle>Project Environment</DialogTitle>
+					<DialogTitle>{t("project.projectEnvironment")}</DialogTitle>
 					<DialogDescription>
-						Update the env Environment variables that are accessible to all
-						services of this project.
+						{t("project.updateEnvVariablesDesc")}
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 				<AlertBlock type="info">
-					Use this syntax to reference project-level variables in your service
-					environments: <code>DATABASE_URL=${"{{project.DATABASE_URL}}"}</code>
+					{t("project.useSyntaxToReference")}{" "}
+					<code>DATABASE_URL=${"{{project.DATABASE_URL}}"}</code>
 				</AlertBlock>
 				<div className="grid gap-4">
 					<div className="grid items-center gap-4">
@@ -134,7 +135,7 @@ export const ProjectEnvironment = ({ projectId, children }: Props) => {
 									name="env"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Environment variables</FormLabel>
+											<FormLabel>{t("environment.variables")}</FormLabel>
 											<FormControl>
 												<CodeEditor
 													lineWrapping
@@ -142,7 +143,7 @@ export const ProjectEnvironment = ({ projectId, children }: Props) => {
 													wrapperClassName="h-[35rem] font-mono"
 													placeholder={`NODE_ENV=production
 PORT=3000
-
+                                                            
                                                     `}
 													{...field}
 												/>
@@ -156,7 +157,7 @@ PORT=3000
 								/>
 								<DialogFooter>
 									<Button isLoading={isPending} type="submit">
-										Update
+										{t("button.update")}
 									</Button>
 								</DialogFooter>
 							</form>

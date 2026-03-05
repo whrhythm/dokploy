@@ -50,12 +50,14 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { TimeBadge } from "@/components/ui/time-badge";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { useDebounce } from "@/utils/hooks/use-debounce";
 import { HandleProject } from "./handle-project";
 import { ProjectEnvironment } from "./project-environment";
 
 export const ShowProjects = () => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const router = useRouter();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
@@ -166,7 +168,7 @@ export const ShowProjects = () => {
 	return (
 		<>
 			<BreadcrumbSidebar
-				list={[{ name: "Projects", href: "/dashboard/projects" }]}
+				list={[{ name: t("dashboard.projects"), href: "/dashboard/projects" }]}
 			/>
 			{!isCloud && (
 				<div className="absolute top-4 right-4">
@@ -180,11 +182,9 @@ export const ShowProjects = () => {
 							<CardHeader className="p-0">
 								<CardTitle className="text-xl flex flex-row gap-2">
 									<FolderInput className="size-6 text-muted-foreground self-center" />
-									Projects
+									{t("dashboard.projects")}
 								</CardTitle>
-								<CardDescription>
-									Create and manage your projects
-								</CardDescription>
+								<CardDescription>{t("project.description")}</CardDescription>
 							</CardHeader>
 							{(auth?.role === "owner" ||
 								auth?.role === "admin" ||
@@ -198,7 +198,7 @@ export const ShowProjects = () => {
 						<CardContent className="space-y-2 py-8 border-t gap-4 flex flex-col min-h-[60vh]">
 							{isPending ? (
 								<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[60vh]">
-									<span>Loading...</span>
+									<span>{t("loading")}</span>
 									<Loader2 className="animate-spin size-4" />
 								</div>
 							) : (
@@ -206,7 +206,7 @@ export const ShowProjects = () => {
 									<div className="flex max-sm:flex-col gap-4 items-center w-full">
 										<div className="flex-1 relative max-sm:w-full">
 											<FocusShortcutInput
-												placeholder="Filter projects..."
+												placeholder={t("search.placeholder")}
 												value={searchQuery}
 												onChange={(e) => setSearchQuery(e.target.value)}
 												className="pr-10"
@@ -218,22 +218,26 @@ export const ShowProjects = () => {
 											<ArrowUpDown className="size-4 text-muted-foreground" />
 											<Select value={sortBy} onValueChange={setSortBy}>
 												<SelectTrigger className="w-full">
-													<SelectValue placeholder="Sort by..." />
+													<SelectValue placeholder={t("sort.asc")} />
 												</SelectTrigger>
 												<SelectContent>
-													<SelectItem value="name-asc">Name (A-Z)</SelectItem>
-													<SelectItem value="name-desc">Name (Z-A)</SelectItem>
+													<SelectItem value="name-asc">
+														{t("sort.name")} (A-Z)
+													</SelectItem>
+													<SelectItem value="name-desc">
+														{t("sort.name")} (Z-A)
+													</SelectItem>
 													<SelectItem value="createdAt-desc">
-														Newest first
+														{t("filter.active")}
 													</SelectItem>
 													<SelectItem value="createdAt-asc">
-														Oldest first
+														{t("filter.inactive")}
 													</SelectItem>
 													<SelectItem value="services-desc">
-														Most services
+														{t("project.services")} ({t("filter.most")})
 													</SelectItem>
 													<SelectItem value="services-asc">
-														Least services
+														{t("project.services")} ({t("filter.least")})
 													</SelectItem>
 												</SelectContent>
 											</Select>
@@ -243,7 +247,7 @@ export const ShowProjects = () => {
 										<div className="mt-6 flex h-[50vh] w-full flex-col items-center justify-center space-y-4">
 											<FolderInput className="size-8 self-center text-muted-foreground" />
 											<span className="text-center font-medium text-muted-foreground">
-												No projects found
+												{t("search.noResults")}
 											</span>
 										</div>
 									)}
@@ -319,8 +323,7 @@ export const ShowProjects = () => {
 																			<div className="flex flex-row gap-2 items-center rounded-lg bg-yellow-50 p-2 mt-2 dark:bg-yellow-950">
 																				<AlertTriangle className="size-4 text-yellow-600 dark:text-yellow-400 shrink-0" />
 																				<span className="text-xs text-yellow-600 dark:text-yellow-400">
-																					You have access to this project but no
-																					environments are available
+																					{t("project.noEnvironments")}
 																				</span>
 																			</div>
 																		)}
@@ -341,7 +344,7 @@ export const ShowProjects = () => {
 																				onClick={(e) => e.stopPropagation()}
 																			>
 																				<DropdownMenuLabel className="font-normal">
-																					Actions
+																					{t("project.actions")}
 																				</DropdownMenuLabel>
 																				<div
 																					onClick={(e) => e.stopPropagation()}
@@ -372,34 +375,38 @@ export const ShowProjects = () => {
 																									}
 																								>
 																									<TrashIcon className="size-4" />
-																									<span>Delete</span>
+																									<span>
+																										{t("project.delete")}
+																									</span>
 																								</DropdownMenuItem>
 																							</AlertDialogTrigger>
 																							<AlertDialogContent>
 																								<AlertDialogHeader>
 																									<AlertDialogTitle>
-																										Are you sure to delete this
-																										project?
+																										{t(
+																											"project.sureToDeleteProject",
+																										)}
 																									</AlertDialogTitle>
 																									{!emptyServices ? (
 																										<div className="flex flex-row gap-4 rounded-lg bg-yellow-50 p-2 dark:bg-yellow-950">
 																											<AlertTriangle className="text-yellow-600 dark:text-yellow-400" />
 																											<span className="text-sm text-yellow-600 dark:text-yellow-400">
-																												You have active
-																												services, please delete
-																												them first
+																												{t(
+																													"project.hasActiveServices",
+																												)}
 																											</span>
 																										</div>
 																									) : (
 																										<AlertDialogDescription>
-																											This action cannot be
-																											undone
+																											{t(
+																												"project.actionCannotBeUndone",
+																											)}
 																										</AlertDialogDescription>
 																									)}
 																								</AlertDialogHeader>
 																								<AlertDialogFooter>
 																									<AlertDialogCancel>
-																										Cancel
+																										{t("button.cancel")}
 																									</AlertDialogCancel>
 																									<AlertDialogAction
 																										disabled={!emptyServices}
@@ -410,12 +417,16 @@ export const ShowProjects = () => {
 																											})
 																												.then(() => {
 																													toast.success(
-																														"Project deleted successfully",
+																														t(
+																															"project.deletedSuccessfully",
+																														),
 																													);
 																												})
 																												.catch(() => {
 																													toast.error(
-																														"Error deleting this project",
+																														t(
+																															"project.errorDeletingProject",
+																														),
 																													);
 																												})
 																												.finally(() => {
@@ -423,7 +434,7 @@ export const ShowProjects = () => {
 																												});
 																										}}
 																									>
-																										Delete
+																										{t("project.delete")}
 																									</AlertDialogAction>
 																								</AlertDialogFooter>
 																							</AlertDialogContent>
@@ -438,13 +449,13 @@ export const ShowProjects = () => {
 															<CardFooter className="pt-4">
 																<div className="space-y-1 text-sm flex flex-row justify-between max-sm:flex-wrap w-full gap-2 sm:gap-4">
 																	<DateTooltip date={project.createdAt}>
-																		Created
+																		{t("environment.created")}
 																	</DateTooltip>
 																	<span>
 																		{totalServices}{" "}
 																		{totalServices === 1
-																			? "service"
-																			: "services"}
+																			? t("project.service")
+																			: t("project.services")}
 																	</span>
 																</div>
 															</CardFooter>

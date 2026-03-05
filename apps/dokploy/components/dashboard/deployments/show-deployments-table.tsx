@@ -42,6 +42,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/hooks/use-translation";
 import type { AppRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 
@@ -95,6 +96,7 @@ function getServiceInfo(d: DeploymentRow) {
 }
 
 export function ShowDeploymentsTable() {
+	const { t } = useTranslation();
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "createdAt", desc: true },
 	]);
@@ -183,7 +185,9 @@ export function ShowDeploymentsTable() {
 							<div className="flex flex-col min-w-0">
 								<span className="font-medium truncate">{info.name}</span>
 								<Badge variant="outline" className="w-fit text-[10px]">
-									{info.type}
+									{info.type === "Application"
+										? t("dashboard.applications")
+										: t("dashboard.compose")}
 								</Badge>
 							</div>
 						</div>
@@ -237,7 +241,7 @@ export function ShowDeploymentsTable() {
 						className="-ml-3 h-8"
 						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 					>
-						Environment
+						{t("form.environment")}
 						<ArrowUpDown className="ml-2 size-4" />
 					</Button>
 				),
@@ -270,7 +274,7 @@ export function ShowDeploymentsTable() {
 						className="-ml-3 h-8"
 						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 					>
-						Server
+						{t("form.server")}
 						<ArrowUpDown className="ml-2 size-4" />
 					</Button>
 				),
@@ -315,7 +319,7 @@ export function ShowDeploymentsTable() {
 							)}
 							{showBuild && buildServerName && (
 								<div className="flex items-center gap-1.5 text-muted-foreground flex-wrap">
-									<span className="text-[10px]">Build:</span>
+									<span className="text-[10px]">{t("button.build")}:</span>
 									<span className="truncate text-xs">{buildServerName}</span>
 									{buildServerType && (
 										<Badge
@@ -346,7 +350,7 @@ export function ShowDeploymentsTable() {
 						className="-ml-3 h-8"
 						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 					>
-						Title
+						{t("form.name")}
 						<ArrowUpDown className="ml-2 size-4" />
 					</Button>
 				),
@@ -371,7 +375,7 @@ export function ShowDeploymentsTable() {
 						className="-ml-3 h-8"
 						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 					>
-						Status
+						{t("form.status")}
 						<ArrowUpDown className="ml-2 size-4" />
 					</Button>
 				),
@@ -379,7 +383,7 @@ export function ShowDeploymentsTable() {
 					const status = row.original.status ?? "running";
 					return (
 						<Badge variant={statusVariants[status] ?? "secondary"}>
-							{status}
+							{t(`status.${status}`)}
 						</Badge>
 					);
 				},
@@ -399,7 +403,7 @@ export function ShowDeploymentsTable() {
 						className="-ml-3 h-8"
 						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 					>
-						Created
+						{t("status.created")}
 						<ArrowUpDown className="ml-2 size-4" />
 					</Button>
 				),
@@ -422,7 +426,7 @@ export function ShowDeploymentsTable() {
 						<Button variant="ghost" size="sm" asChild>
 							<Link href={info.href} className="gap-1">
 								<ExternalLink className="size-4" />
-								Open
+								{t("button.view")}
 							</Link>
 						</Button>
 					);
@@ -455,31 +459,33 @@ export function ShowDeploymentsTable() {
 		<div className="space-y-2">
 			<div className="flex flex-wrap items-center gap-2">
 				<Input
-					placeholder="Search by name, project, environment, server..."
+					placeholder={t("search.placeholder")}
 					value={globalFilter}
 					onChange={(e) => setGlobalFilter(e.target.value)}
 					className="max-w-xs"
 				/>
 				<Select value={statusFilter} onValueChange={setStatusFilter}>
 					<SelectTrigger className="w-[140px]">
-						<SelectValue placeholder="Status" />
+						<SelectValue placeholder={t("form.status")} />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="all">All statuses</SelectItem>
-						<SelectItem value="running">Running</SelectItem>
-						<SelectItem value="done">Done</SelectItem>
-						<SelectItem value="error">Error</SelectItem>
-						<SelectItem value="cancelled">Cancelled</SelectItem>
+						<SelectItem value="all">{t("filter.all")}</SelectItem>
+						<SelectItem value="running">{t("status.running")}</SelectItem>
+						<SelectItem value="done">{t("status.completed")}</SelectItem>
+						<SelectItem value="error">{t("status.error")}</SelectItem>
+						<SelectItem value="cancelled">{t("status.cancelled")}</SelectItem>
 					</SelectContent>
 				</Select>
 				<Select value={typeFilter} onValueChange={setTypeFilter}>
 					<SelectTrigger className="w-[140px]">
-						<SelectValue placeholder="Type" />
+						<SelectValue placeholder={t("form.type")} />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="all">All types</SelectItem>
-						<SelectItem value="application">Application</SelectItem>
-						<SelectItem value="compose">Compose</SelectItem>
+						<SelectItem value="all">{t("filter.all")}</SelectItem>
+						<SelectItem value="application">
+							{t("dashboard.applications")}
+						</SelectItem>
+						<SelectItem value="compose">{t("dashboard.compose")}</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
