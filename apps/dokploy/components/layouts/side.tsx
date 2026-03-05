@@ -5,12 +5,11 @@ import {
 	BarChartHorizontalBigIcon,
 	Bell,
 	BlocksIcon,
-	BookIcon,
-	BotIcon,
+	// BookIcon,
+	// BotIcon,
 	Boxes,
 	ChevronRight,
 	ChevronsUpDown,
-	CircleHelp,
 	Clock,
 	CreditCard,
 	Database,
@@ -30,7 +29,7 @@ import {
 	ShieldCheck,
 	Star,
 	Trash2,
-	User,
+	// User,
 	Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -296,18 +295,19 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Profile",
-			url: "/dashboard/settings/profile",
-			icon: User,
-		},
-		{
-			isSingle: true,
 			title: "Remote Servers",
 			url: "/dashboard/settings/servers",
 			icon: Server,
 			// Only enabled for admins
-			isEnabled: ({ auth }) =>
-				!!(auth?.role === "owner" || auth?.role === "admin"),
+			isEnabled: ({ auth: _auth }) => false,
+		},
+		{
+			isSingle: true,
+			title: "SSH Keys",
+			icon: KeyRound,
+			url: "/dashboard/settings/ssh-keys",
+			// Only enabled for admins and users with access to SSH keys
+			isEnabled: ({ auth: _auth }) => false,
 		},
 		{
 			isSingle: true,
@@ -324,33 +324,23 @@ const MENU: Menu = {
 			icon: KeyRound,
 			url: "/dashboard/settings/ssh-keys",
 			// Only enabled for admins and users with access to SSH keys
-			isEnabled: ({ auth }) =>
-				!!(
-					auth?.role === "owner" ||
-					auth?.canAccessToSSHKeys ||
-					auth?.role === "admin"
-				),
+			isEnabled: ({ auth: _auth }) => false,
 		},
-		{
-			title: "AI",
-			icon: BotIcon,
-			url: "/dashboard/settings/ai",
-			isSingle: true,
-			isEnabled: ({ auth }) =>
-				!!(auth?.role === "owner" || auth?.role === "admin"),
-		},
+		// AI menu item is hidden
+		// {
+		// 	title: "AI",
+		// 	icon: BotIcon,
+		// 	url: "/dashboard/settings/ai",
+		// 	isSingle: true,
+		// 	isEnabled: ({ auth }) => false,
+		// },
 		{
 			isSingle: true,
 			title: "Git",
 			url: "/dashboard/settings/git-providers",
 			icon: GitBranch,
 			// Only enabled for admins and users with access to Git providers
-			isEnabled: ({ auth }) =>
-				!!(
-					auth?.role === "owner" ||
-					auth?.canAccessToGitProviders ||
-					auth?.role === "admin"
-				),
+			isEnabled: ({ auth: _auth }) => false,
 		},
 		{
 			isSingle: true,
@@ -412,7 +402,7 @@ const MENU: Menu = {
 			url: "/dashboard/settings/license",
 			icon: Key,
 			// Only enabled for admins in non-cloud environments
-			isEnabled: ({ auth }) => !!(auth?.role === "owner"),
+			isEnabled: ({ auth: _auth, isCloud: _isCloud }) => false,
 		},
 		{
 			isSingle: true,
@@ -426,16 +416,17 @@ const MENU: Menu = {
 	],
 
 	help: [
-		{
-			name: "Documentation",
-			url: "https://docs.dokploy.com/docs/core",
-			icon: BookIcon,
-		},
-		{
-			name: "Support",
-			url: "https://discord.gg/2tBnJ3jDJc",
-			icon: CircleHelp,
-		},
+		// {
+		// 	name: "Documentation",
+		// 	url: "https://docs.dokploy.com/docs/core",
+		// 	icon: BookIcon,
+		// },
+		// Support is hidden
+		// {
+		// 	name: "Support",
+		// 	url: "https://discord.gg/2tBnJ3jDJc",
+		// 	icon: CircleHelp,
+		// },
 	],
 } as const;
 
@@ -1138,6 +1129,7 @@ export default function Page({ children }: Props) {
 							})}
 						</SidebarMenu>
 					</SidebarGroup>
+					{/* Extra section is hidden
 					<SidebarGroup className="group-data-[collapsible=icon]:hidden">
 						<SidebarGroupLabel>{t("common.extra")}</SidebarGroupLabel>
 						<SidebarMenu>
@@ -1160,6 +1152,7 @@ export default function Page({ children }: Props) {
 							))}
 						</SidebarMenu>
 					</SidebarGroup>
+					*/}
 				</SidebarContent>
 				<SidebarFooter>
 					<SidebarMenu className="flex flex-col gap-2">
