@@ -2,20 +2,20 @@ import path from "node:path";
 import { IS_CLOUD, paths } from "@dokploy/server/constants";
 import { getDokployUrl } from "@dokploy/server/services/admin";
 import {
-	createServerDeployment,
-	updateDeploymentStatus,
+  createServerDeployment,
+  updateDeploymentStatus,
 } from "@dokploy/server/services/deployment";
 import {
-	findServerById,
-	updateServerById,
+  findServerById,
+  updateServerById,
 } from "@dokploy/server/services/server";
 import {
-	getDefaultMiddlewares,
-	getDefaultServerTraefikConfig,
-	TRAEFIK_HTTP3_PORT,
-	TRAEFIK_PORT,
-	TRAEFIK_SSL_PORT,
-	TRAEFIK_VERSION,
+  getDefaultMiddlewares,
+  getDefaultServerTraefikConfig,
+  TRAEFIK_HTTP3_PORT,
+  TRAEFIK_PORT,
+  TRAEFIK_SSL_PORT,
+  TRAEFIK_VERSION,
 } from "@dokploy/server/setup/traefik-setup";
 import slug from "slugify";
 import { Client } from "ssh2";
@@ -23,91 +23,91 @@ import { recreateDirectory } from "../utils/filesystem/directory";
 import { setupMonitoring } from "./monitoring-setup";
 
 const generateToken = () => {
-	const array = new Uint8Array(64);
-	crypto.getRandomValues(array);
-	return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
-		"",
-	);
+  const array = new Uint8Array(64);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+    "",
+  );
 };
 
 export const slugify = (text: string | undefined) => {
-	if (!text) {
-		return "";
-	}
+  if (!text) {
+    return "";
+  }
 
-	const cleanedText = text.trim().replace(/[^a-zA-Z0-9\s]/g, "");
+  const cleanedText = text.trim().replace(/[^a-zA-Z0-9\s]/g, "");
 
-	return slug(cleanedText, {
-		lower: true,
-		trim: true,
-		strict: true,
-	});
+  return slug(cleanedText, {
+    lower: true,
+    trim: true,
+    strict: true,
+  });
 };
 
 export const serverSetup = async (
-	serverId: string,
-	onData?: (data: any) => void,
+  serverId: string,
+  onData?: (data: any) => void,
 ) => {
-	const server = await findServerById(serverId);
-	const { LOGS_PATH } = paths();
+  const server = await findServerById(serverId);
+  const { LOGS_PATH } = paths();
 
-	const slugifyName = slugify(`server ${server.name}`);
+  const slugifyName = slugify(`server ${server.name}`);
 
-	const fullPath = path.join(LOGS_PATH, slugifyName);
+  const fullPath = path.join(LOGS_PATH, slugifyName);
 
-	await recreateDirectory(fullPath);
+  await recreateDirectory(fullPath);
 
-	const deployment = await createServerDeployment({
-		serverId: server.serverId,
-		title: "Setup Server",
-		description: "Setup Server",
-	});
+  const deployment = await createServerDeployment({
+    serverId: server.serverId,
+    title: "Setup Server",
+    description: "Setup Server",
+  });
 
-	try {
-		const isBuildServer = server.serverType === "build";
-		onData?.(
-			isBuildServer
-				? "\nInstalling Build Server Dependencies: ✅\n"
-				: "\nInstalling Server Dependencies: ✅\n",
-		);
-		await installRequirements(serverId, onData);
+  try {
+    const isBuildServer = server.serverType === "build";
+    onData?.(
+      isBuildServer
+        ? "\nInstalling Build Server Dependencies: ✅\n"
+        : "\nInstalling Server Dependencies: ✅\n",
+    );
+    await installRequirements(serverId, onData);
 
-		if (IS_CLOUD) {
-			onData?.("\nConfiguring Monitoring: 🔄\n");
+    if (IS_CLOUD) {
+      onData?.("\nConfiguring Monitoring: 🔄\n");
 
-			const baseUrl = await getDokployUrl();
-			const token = generateToken();
-			const urlCallback = `${baseUrl}/api/trpc/notification.receiveNotification`;
+      const baseUrl = await getDokployUrl();
+      const token = generateToken();
+      const urlCallback = `${baseUrl}/api/trpc/notification.receiveNotification`;
 
-			// Update server with monitoring configuration
-			await updateServerById(serverId, {
-				metricsConfig: {
-					server: {
-						...server.metricsConfig.server,
-						token: token,
-						urlCallback: urlCallback,
-					},
-					containers: server.metricsConfig.containers,
-				},
-			});
+      // Update server with monitoring configuration
+      await updateServerById(serverId, {
+        metricsConfig: {
+          server: {
+            ...server.metricsConfig.server,
+            token: token,
+            urlCallback: urlCallback,
+          },
+          containers: server.metricsConfig.containers,
+        },
+      });
 
-			await setupMonitoring(serverId);
-			onData?.("\nMonitoring Configured: ✅\n");
-		}
+      await setupMonitoring(serverId);
+      onData?.("\nMonitoring Configured: ✅\n");
+    }
 
-		await updateDeploymentStatus(deployment.deploymentId, "done");
+    await updateDeploymentStatus(deployment.deploymentId, "done");
 
-		onData?.("\nSetup Server: ✅\n");
-	} catch (err) {
-		console.log(err);
+    onData?.("\nSetup Server: ✅\n");
+  } catch (err) {
+    console.log(err);
 
-		await updateDeploymentStatus(deployment.deploymentId, "error");
-		onData?.(`${err} ❌\n`);
-	}
+    await updateDeploymentStatus(deployment.deploymentId, "error");
+    onData?.(`${err} ❌\n`);
+  }
 };
 
 export const defaultCommand = (isBuildServer = false) => {
-	const bashCommand = `
+  const bashCommand = `
 set -e;
 DOCKER_VERSION=28.5.0
 OS_TYPE=$(grep -w "ID" /etc/os-release | cut -d "=" -f 2 | tr -d '"')
@@ -178,8 +178,8 @@ command_exists() {
 ${installUtilities()}
 
 ${
-	!isBuildServer
-		? `
+  !isBuildServer
+    ? `
 echo -e "2. Validating ports. "
 ${validatePorts()}
 
@@ -219,7 +219,7 @@ ${installBuildpacks()}
 echo -e "13. Installing Railpack"
 ${installRailpack()}
 `
-		: `
+    : `
 echo -e "2. Installing Docker. "
 ${installDocker()}
 
@@ -239,111 +239,111 @@ ${installRailpack()}
 }
 				`;
 
-	return bashCommand;
+  return bashCommand;
 };
 
 const installRequirements = async (
-	serverId: string,
-	onData?: (data: any) => void,
+  serverId: string,
+  onData?: (data: any) => void,
 ) => {
-	const client = new Client();
-	const server = await findServerById(serverId);
-	if (!server.sshKeyId) {
-		onData?.("❌ No SSH Key found, please assign one to this server");
-		throw new Error("No SSH Key found");
-	}
+  const client = new Client();
+  const server = await findServerById(serverId);
+  if (!server.sshKeyId) {
+    onData?.("❌ No SSH Key found, please assign one to this server");
+    throw new Error("No SSH Key found");
+  }
 
-	const isBuildServer = server.serverType === "build";
+  const isBuildServer = server.serverType === "build";
 
-	return new Promise<void>((resolve, reject) => {
-		client
-			.once("ready", () => {
-				const command = server.command || defaultCommand(isBuildServer);
-				client.exec(command, (err, stream) => {
-					if (err) {
-						onData?.(err.message);
-						reject(err);
-						return;
-					}
-					stream
-						.on("close", () => {
-							client.end();
-							resolve();
-						})
-						.on("data", (data: string) => {
-							onData?.(data.toString());
-						})
-						.stderr.on("data", (data) => {
-							onData?.(data.toString());
-						});
-				});
-			})
-			.on("error", (err) => {
-				client.end();
-				if (err.level === "client-authentication") {
-					const technicalDetail = `Error: ${err.message} ${err.level}`;
-					const friendlyMessage = [
-						"",
-						"❌ Couldn't connect to your server — the SSH key was not accepted.",
-						"",
-						"This usually means the key doesn't match what's on the server, or the key format is invalid.",
-						"",
-						`Technical details: ${technicalDetail}`,
-						"",
-						"💡 Hints:",
-						"  • Check that the SSH key you added in Dokploy is the same one installed on the server (e.g. in ~/.ssh/authorized_keys).",
-						"  • Try generating a new SSH key in Dokploy and add only the public key to the server, then try again.",
-						"  • Make sure to follow the instructions on the Setup Server Button on the SSH Keys tab",
-					].join("\n");
-					onData?.(friendlyMessage);
-					reject(
-						new Error(
-							`Authentication failed: Invalid SSH private key. ${technicalDetail}`,
-						),
-					);
-				} else {
-					const technicalDetail = `${err.message} ${err.level ?? ""}`.trim();
-					const friendlyMessage = [
-						"",
-						"❌ Couldn't connect to your server.",
-						"",
-						"The connection failed before setup could run. Common causes: wrong IP or port, firewall blocking access, or the server is offline.",
-						"",
-						`Technical details: ${technicalDetail}`,
-						"",
-						"💡 Hints:",
-						"  • Check that the server IP address and SSH port are correct and the server is powered on.",
-						"  • If the server is in a private network, ensure Dokploy can reach it (VPN, firewall rules, or correct security groups).",
-						"  • Make sure the SSH port (usually 22) is open and the SSH service is running on the server.",
-					].join("\n");
-					onData?.(friendlyMessage);
-					reject(new Error(`SSH connection error: ${technicalDetail}`));
-				}
-			})
-			.connect({
-				host: server.ipAddress,
-				port: server.port,
-				username: server.username,
-				privateKey: server.sshKey?.privateKey,
-			});
-	});
+  return new Promise<void>((resolve, reject) => {
+    client
+      .once("ready", () => {
+        const command = server.command || defaultCommand(isBuildServer);
+        client.exec(command, (err, stream) => {
+          if (err) {
+            onData?.(err.message);
+            reject(err);
+            return;
+          }
+          stream
+            .on("close", () => {
+              client.end();
+              resolve();
+            })
+            .on("data", (data: string) => {
+              onData?.(data.toString());
+            })
+            .stderr.on("data", (data) => {
+              onData?.(data.toString());
+            });
+        });
+      })
+      .on("error", (err) => {
+        client.end();
+        if (err.level === "client-authentication") {
+          const technicalDetail = `Error: ${err.message} ${err.level}`;
+          const friendlyMessage = [
+            "",
+            "❌ Couldn't connect to your server — the SSH key was not accepted.",
+            "",
+            "This usually means the key doesn't match what's on the server, or the key format is invalid.",
+            "",
+            `Technical details: ${technicalDetail}`,
+            "",
+            "💡 Hints:",
+            "  • Check that the SSH key you added in Dokploy is the same one installed on the server (e.g. in ~/.ssh/authorized_keys).",
+            "  • Try generating a new SSH key in Dokploy and add only the public key to the server, then try again.",
+            "  • Make sure to follow the instructions on the Setup Server Button on the SSH Keys tab",
+          ].join("\n");
+          onData?.(friendlyMessage);
+          reject(
+            new Error(
+              `Authentication failed: Invalid SSH private key. ${technicalDetail}`,
+            ),
+          );
+        } else {
+          const technicalDetail = `${err.message} ${err.level ?? ""}`.trim();
+          const friendlyMessage = [
+            "",
+            "❌ Couldn't connect to your server.",
+            "",
+            "The connection failed before setup could run. Common causes: wrong IP or port, firewall blocking access, or the server is offline.",
+            "",
+            `Technical details: ${technicalDetail}`,
+            "",
+            "💡 Hints:",
+            "  • Check that the server IP address and SSH port are correct and the server is powered on.",
+            "  • If the server is in a private network, ensure Dokploy can reach it (VPN, firewall rules, or correct security groups).",
+            "  • Make sure the SSH port (usually 22) is open and the SSH service is running on the server.",
+          ].join("\n");
+          onData?.(friendlyMessage);
+          reject(new Error(`SSH connection error: ${technicalDetail}`));
+        }
+      })
+      .connect({
+        host: server.ipAddress,
+        port: server.port,
+        username: server.username,
+        privateKey: server.sshKey?.privateKey,
+      });
+  });
 };
 
 const setupDirectories = () => {
-	const { SSH_PATH } = paths(true);
-	const directories = Object.values(paths(true));
+  const { SSH_PATH } = paths(true);
+  const directories = Object.values(paths(true));
 
-	const createDirsCommand = directories
-		.map((dir) => `mkdir -p "${dir}"`)
-		.join(" && ");
-	const chmodCommand = `chmod 700 "${SSH_PATH}"`;
+  const createDirsCommand = directories
+    .map((dir) => `mkdir -p "${dir}"`)
+    .join(" && ");
+  const chmodCommand = `chmod 700 "${SSH_PATH}"`;
 
-	const command = `
+  const command = `
 	${createDirsCommand}
 	${chmodCommand}
 	`;
 
-	return command;
+  return command;
 };
 
 const setupMainDirectory = () => `
@@ -615,9 +615,9 @@ fi
 `;
 
 const createTraefikConfig = () => {
-	const config = getDefaultServerTraefikConfig();
+  const config = getDefaultServerTraefikConfig();
 
-	const command = `
+  const command = `
 	if [ -f "/etc/dokploy/traefik/dynamic/acme.json" ]; then
 		chmod 600 "/etc/dokploy/traefik/dynamic/acme.json"
 	fi
@@ -628,19 +628,19 @@ const createTraefikConfig = () => {
 	fi
 	`;
 
-	return command;
+  return command;
 };
 
 const createDefaultMiddlewares = () => {
-	const config = getDefaultMiddlewares();
-	const command = `
+  const config = getDefaultMiddlewares();
+  const command = `
 	if [ -f "/etc/dokploy/traefik/dynamic/middlewares.yml" ]; then
 		echo "Middlewares config already exists ✅"
 	else
 		echo "${config}" > /etc/dokploy/traefik/dynamic/middlewares.yml
 	fi
 	`;
-	return command;
+  return command;
 };
 
 export const installRClone = () => `
@@ -654,7 +654,7 @@ export const installRClone = () => `
 `;
 
 export const createTraefikInstance = () => {
-	const command = `
+  const command = `
 	    # Check if dokpyloy-traefik exists
 		if docker service inspect dokploy-traefik > /dev/null 2>&1; then
 			echo "Migrating Traefik to Standalone..."
@@ -677,14 +677,14 @@ export const createTraefikInstance = () => {
 				-p ${TRAEFIK_SSL_PORT}:${TRAEFIK_SSL_PORT} \
 				-p ${TRAEFIK_PORT}:${TRAEFIK_PORT} \
 				-p ${TRAEFIK_HTTP3_PORT}:${TRAEFIK_HTTP3_PORT}/udp \
-				traefik:v$TRAEFIK_VERSION
+				docker.1ms.run/library/traefik:v$TRAEFIK_VERSION
 
 			docker network connect dokploy-network dokploy-traefik;
 			echo "Traefik version $TRAEFIK_VERSION installed ✅"
 		fi
 	`;
 
-	return command;
+  return command;
 };
 
 const installNixpacks = () => `
