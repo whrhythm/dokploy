@@ -3,9 +3,9 @@ import { getWebServerSettings } from "@dokploy/server/services/web-server-settin
 import type { ContainerCreateOptions } from "dockerode";
 import { IS_CLOUD } from "../constants";
 import { getDokployImageTag } from "../services/settings";
-import { pullImage, pullRemoteImage } from "../utils/docker/utils";
 import { execAsync, execAsyncRemote } from "../utils/process/execAsync";
 import { getRemoteDocker } from "../utils/servers/remote-docker";
+import { ensureImage } from "./image-setup";
 
 export const setupMonitoring = async (serverId: string) => {
 	const server = await findServerById(serverId);
@@ -59,9 +59,7 @@ export const setupMonitoring = async (serverId: string) => {
 			serverId,
 			"mkdir -p /etc/dokploy/monitoring && touch /etc/dokploy/monitoring/monitoring.db",
 		);
-		if (serverId) {
-			await pullRemoteImage(imageName, serverId);
-		}
+		await ensureImage(imageName, serverId);
 
 		// Check if container exists
 		const container = docker.getContainer(containerName);
@@ -134,7 +132,7 @@ export const setupWebMonitoring = async () => {
 		await execAsync(
 			"mkdir -p /etc/dokploy/monitoring && touch /etc/dokploy/monitoring/monitoring.db",
 		);
-		await pullImage(imageName);
+		await ensureImage(imageName);
 
 		const container = docker.getContainer(containerName);
 		try {
