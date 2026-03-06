@@ -437,6 +437,11 @@ function getNestedValue(
 	obj: TranslationObject,
 	path: string,
 ): string | undefined {
+	const directValue = obj[path];
+	if (typeof directValue === "string") {
+		return directValue;
+	}
+
 	const keys = path.split(".");
 	let current: string | TranslationObject | undefined = obj;
 
