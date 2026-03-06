@@ -3,7 +3,7 @@ import { docker } from "../constants";
 import { pullImage } from "../utils/docker/utils";
 
 export const initializeRedis = async () => {
-  const imageName = "redis:7";
+  const imageName = "docker.1ms.run/library/redis:7";
   const containerName = "dokploy-redis";
 
   const settings: CreateServiceOptions = {
