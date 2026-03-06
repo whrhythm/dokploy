@@ -6,6 +6,10 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
+	i18n: {
+		locales: ["en", "zh-Hans", "zh-Hant"],
+		defaultLocale: "zh-Hans",
+	},
 	typescript: {
 		ignoreBuildErrors: true,
 	},
