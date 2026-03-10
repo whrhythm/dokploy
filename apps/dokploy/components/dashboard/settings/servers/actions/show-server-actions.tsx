@@ -9,6 +9,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 import { ShowStorageActions } from "./show-storage-actions";
 import { ShowTraefikActions } from "./show-traefik-actions";
 import { ToggleDockerCleanup } from "./toggle-docker-cleanup";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export const ShowServerActions = ({ serverId, asButton = false }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -36,13 +38,17 @@ export const ShowServerActions = ({ serverId, asButton = false }: Props) => {
 						setIsOpen(true);
 					}}
 				>
-					View Actions
+					{t("serverActions.viewActions")}
 				</DropdownMenuItem>
 			)}
 			<DialogContent className="sm:max-w-xl">
 				<div className="flex flex-col gap-1">
-					<DialogTitle className="text-xl">Web server settings</DialogTitle>
-					<DialogDescription>Reload or clean the web server.</DialogDescription>
+					<DialogTitle className="text-xl">
+						{t("serverActions.webServerSettings")}
+					</DialogTitle>
+					<DialogDescription>
+						{t("serverActions.webServerDescription")}
+					</DialogDescription>
 				</div>
 
 				<div className="grid grid-cols-2 w-full gap-4">

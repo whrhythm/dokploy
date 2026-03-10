@@ -23,10 +23,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { EditScript } from "../edit-script";
 
 export const Setup = () => {
+	const { t } = useTranslation();
 	const { data: servers } = api.server.all.useQuery();
 	const [serverId, setServerId] = useState<string>(
 		servers?.[0]?.serverId || "",
@@ -72,10 +74,10 @@ export const Setup = () => {
 			<Card className="bg-background">
 				<CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
 					<div className="flex flex-col gap-2 w-full">
-						<Label>Select the server and click on setup server</Label>
+						<Label>{t("welcomeStripe.setup.selectServer")}</Label>
 						<Select onValueChange={setServerId} defaultValue={serverId}>
 							<SelectTrigger>
-								<SelectValue placeholder="Select a server" />
+								<SelectValue placeholder={t("verifyServer.selectServer")} />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectGroup>
@@ -84,38 +86,42 @@ export const Setup = () => {
 											{server.name}
 										</SelectItem>
 									))}
-									<SelectLabel>Servers ({servers?.length})</SelectLabel>
+									<SelectLabel>
+										{t("verifyServer.serversLabel", {
+											count: servers?.length ?? 0,
+										})}
+									</SelectLabel>
 								</SelectGroup>
 							</SelectContent>
 						</Select>
 					</div>
 					<div className="flex flex-row gap-2 justify-between w-full max-sm:flex-col">
 						<div className="flex flex-col gap-1">
-							<CardTitle className="text-xl">Setup Server</CardTitle>
-							<CardDescription>
-								To setup a server, please click on the button below.
-							</CardDescription>
+							<CardTitle className="text-xl">
+								{t("setupServer.title")}
+							</CardTitle>
+							<CardDescription>{t("setupServer.description")}</CardDescription>
 						</div>
 					</div>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-4 min-h-[25vh] items-center">
 					<div className="flex flex-col gap-4 items-center h-full max-w-xl mx-auto min-h-[25vh] justify-center">
 						<span className="text-sm text-muted-foreground text-center">
-							When your server is ready, you can click on the button below, to
-							directly run the script we use for setup the server or directly
-							modify the script
+							{t("setupServer.deployments.readyDescription")}
 						</span>
 						<div className="flex flex-row gap-2">
 							<EditScript serverId={server?.serverId || ""} />
 							<DialogAction
-								title={"Setup Server?"}
+								title={t("setupServer.deployments.setupDialogTitle")}
 								type="default"
-								description="This will setup the server and all associated data"
+								description={t(
+									"setupServer.deployments.setupDialogDescription",
+								)}
 								onClick={async () => {
 									setIsDeploying(true);
 								}}
 							>
-								<Button>Setup Server</Button>
+								<Button>{t("setupServer.deployments.setupButton")}</Button>
 							</DialogAction>
 						</div>
 					</div>

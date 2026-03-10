@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 import SwarmMonitorCard from "../../swarm/monitoring-card";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export const ShowSwarmOverviewModal = ({ serverId }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
@@ -17,7 +19,7 @@ export const ShowSwarmOverviewModal = ({ serverId }: Props) => {
 					className="w-full cursor-pointer "
 					onSelect={(e) => e.preventDefault()}
 				>
-					Show Swarm Overview
+					{t("swarm.showOverview")}
 				</DropdownMenuItem>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-7xl  ">

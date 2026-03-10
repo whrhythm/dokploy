@@ -66,16 +66,16 @@ export const UpdateServer = ({
 
 			if (updateData.updateAvailable) {
 				toast.success(versionToUpdate, {
-					description: t("webServerUpdate.newVersionAvailable"),
+					description: t("webServer.Modal.update.toast.newVersionAvailable"),
 				});
 			} else {
-				toast.info(t("webServerUpdate.noUpdates"));
+				toast.info(t("webServer.Modal.update.toast.noUpdates"));
 			}
 		} catch (error) {
 			console.error("Error checking for updates:", error);
 			setHasCheckedUpdate(true);
 			setIsUpdateAvailable(false);
-			toast.error(t("webServerUpdate.checkError"));
+			toast.error(t("webServer.Modal.update.toast.checkError"));
 		}
 	};
 
@@ -102,11 +102,11 @@ export const UpdateServer = ({
 									<Download className="h-4 w-4 flex-shrink-0" />
 									{updateData ? (
 										<span className="font-medium truncate group-data-[collapsible=icon]:hidden">
-											{t("webServerUpdate.updateAvailable")}
+											{t("webServer.Modal.update.trigger.available")}
 										</span>
 									) : (
 										<span className="font-medium truncate group-data-[collapsible=icon]:hidden">
-											{t("webServerUpdate.checkUpdates")}
+											{t("webServer.Modal.update.trigger.check")}
 										</span>
 									)}
 									{updateData && (
@@ -119,7 +119,7 @@ export const UpdateServer = ({
 							</TooltipTrigger>
 							{updateData && (
 								<TooltipContent side="right" sideOffset={10}>
-									<p>{t("webServerUpdate.updateAvailable")}</p>
+									<p>{t("webServer.Modal.update.trigger.available")}</p>
 								</TooltipContent>
 							)}
 						</Tooltip>
@@ -129,7 +129,7 @@ export const UpdateServer = ({
 			<DialogContent className="max-w-lg">
 				<div className="flex items-center justify-between mb-8">
 					<DialogTitle className="text-2xl font-semibold">
-						{t("webServerUpdate.title")}
+						{t("webServer.Modal.update.title")}
 					</DialogTitle>
 					{dokployVersion && (
 						<div className="flex items-center gap-1.5 rounded-full px-3 py-1 mr-2 bg-muted">
@@ -147,10 +147,10 @@ export const UpdateServer = ({
 				{!hasCheckedUpdate && (
 					<div className="mb-8">
 						<p className="text text-muted-foreground">
-							{t("webServerUpdate.introLine1")}
+							{t("webServer.Modal.update.intro.line1")}
 							<br />
 							<br />
-							{t("webServerUpdate.introLine2")}
+							{t("webServer.Modal.update.intro.line2")}
 						</p>
 					</div>
 				)}
@@ -162,7 +162,7 @@ export const UpdateServer = ({
 							<div className="flex items-center gap-1.5">
 								<Download className="h-4 w-4 text-emerald-400" />
 								<span className="text font-medium text-emerald-400 ">
-									{t("webServerUpdate.newVersionLabel")}
+									{t("webServer.Modal.update.newVersionLabel")}
 								</span>
 							</div>
 							<span className="text font-semibold text-emerald-300">
@@ -171,18 +171,18 @@ export const UpdateServer = ({
 						</div>
 
 						<div className="space-y-4 text-muted-foreground">
-							<p className="text">{t("webServerUpdate.updateReasonIntro")}</p>
+							<p className="text">{t("webServer.Modal.update.reason.intro")}</p>
 							<ul className="space-y-3">
 								<li className="flex items-start gap-2">
 									<Stars className="h-5 w-5 mt-0.5 text-[#5B9DFF]" />
 									<span className="text">
-										{t("webServerUpdate.reasonFeatures")}
+										{t("webServer.Modal.update.reason.features")}
 									</span>
 								</li>
 								<li className="flex items-start gap-2">
 									<Bug className="h-5 w-5 mt-0.5 text-[#5B9DFF]" />
 									<span className="text">
-										{t("webServerUpdate.reasonFixes")}
+										{t("webServer.Modal.update.reason.fixes")}
 									</span>
 								</li>
 							</ul>
@@ -199,10 +199,10 @@ export const UpdateServer = ({
 							</div>
 							<div className="text-center space-y-2">
 								<h3 className="text-lg font-medium">
-									{t("webServerUpdate.latestTitle")}
+									{t("webServer.Modal.update.latest.title")}
 								</h3>
 								<p className="text text-muted-foreground">
-									{t("webServerUpdate.latestDesc")}
+									{t("webServer.Modal.update.latest.description")}
 								</p>
 							</div>
 						</div>
@@ -217,10 +217,10 @@ export const UpdateServer = ({
 							</div>
 							<div className="text-center space-y-2">
 								<h3 className="text-lg font-medium">
-									{t("webServerUpdate.checkingTitle")}
+									{t("webServer.Modal.update.checking.title")}
 								</h3>
 								<p className="text text-muted-foreground">
-									{t("webServerUpdate.checkingDesc")}
+									{t("webServer.Modal.update.checking.description")}
 								</p>
 							</div>
 						</div>
@@ -232,15 +232,15 @@ export const UpdateServer = ({
 						<div className="flex gap-2">
 							<Info className="h-5 w-5 flex-shrink-0 text-[#5B9DFF]" />
 							<div className="text-[#5B9DFF]">
-								{t("webServerUpdate.reviewNotes")}{" "}
+								{t("webServer.Modal.update.reviewNotes.prefix")}{" "}
 								<Link
 									href="https://github.com/Dokploy/dokploy/releases"
 									target="_blank"
 									className="text-white underline hover:text-zinc-200"
 								>
-									{t("webServerUpdate.releaseNotes")}
+									{t("webServer.Modal.update.reviewNotes.link")}
 								</Link>{" "}
-								{t("webServerUpdate.reviewNotesSuffix")}
+								{t("webServer.Modal.update.reviewNotes.suffix")}
 							</div>
 						</div>
 					</div>
@@ -266,12 +266,12 @@ export const UpdateServer = ({
 								{isPending ? (
 									<>
 										<RefreshCcw className="h-4 w-4 animate-spin" />
-										{t("webServerUpdate.checkingButton")}
+										{t("webServer.Modal.update.buttons.checking")}
 									</>
 								) : (
 									<>
 										<RefreshCcw className="h-4 w-4" />
-										{t("webServerUpdate.checkUpdates")}
+										{t("webServer.Modal.update.buttons.checkUpdates")}
 									</>
 								)}
 							</Button>
