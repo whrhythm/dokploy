@@ -36,18 +36,21 @@ import {
 } from "@/components/ui/table";
 import { useTranslation } from "@/hooks/use-translation";
 import { api, type RouterOutputs } from "@/utils/api";
-import { columns } from "./colums";
+import { getColumns } from "./colums";
 export type Container = NonNullable<
 	RouterOutputs["docker"]["getContainers"]
 >[0];
 
-const translateColumnId = (id: string): string => {
+const translateColumnId = (
+	t: (key: string, params?: Record<string, string | number>) => string,
+	id: string,
+): string => {
 	const translations: Record<string, string> = {
-		name: "名称",
-		state: "状态",
-		status: "状态",
-		image: "镜像",
-		actions: "操作",
+		name: t("docker.column.name"),
+		state: t("docker.column.state"),
+		status: t("docker.column.statusDetail"),
+		image: t("docker.column.image"),
+		actions: t("docker.column.actions"),
 	};
 	return translations[id] || id;
 };
@@ -61,6 +64,7 @@ export const ShowContainers = ({ serverId }: Props) => {
 	const { data, isPending } = api.docker.getContainers.useQuery({
 		serverId,
 	});
+	const columns = React.useMemo(() => getColumns(t), [t]);
 
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -141,7 +145,7 @@ export const ShowContainers = ({ serverId }: Props) => {
 																column.toggleVisibility(!!value)
 															}
 														>
-															{translateColumnId(column.id)}
+															{translateColumnId(t, column.id)}
 														</DropdownMenuCheckboxItem>
 													);
 												})}

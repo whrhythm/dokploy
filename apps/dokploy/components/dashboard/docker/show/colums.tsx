@@ -13,23 +13,28 @@ import { ShowDockerModalLogs } from "../logs/show-docker-modal-logs";
 import { DockerTerminalModal } from "../terminal/docker-terminal-modal";
 import type { Container } from "./show-containers";
 
-const translateColumn = (key: string): string => {
+type Translator = (
+	key: string,
+	params?: Record<string, string | number>,
+) => string;
+
+const translateColumn = (t: Translator, key: string): string => {
 	const translations: Record<string, string> = {
-		name: "名称",
-		state: "状态",
-		status: "状态",
-		image: "镜像",
-		createdAt: "创建时间",
-		ports: "端口",
-		actions: "操作",
-		viewLogs: "查看日志",
-		terminal: "终端",
-		config: "配置",
+		name: t("docker.column.name"),
+		state: t("docker.column.state"),
+		status: t("docker.column.statusDetail"),
+		image: t("docker.column.image"),
+		createdAt: t("docker.column.createdAt"),
+		ports: t("docker.column.ports"),
+		actions: t("docker.column.actions"),
+		viewLogs: t("docker.action.viewLogs"),
+		terminal: t("docker.action.terminal"),
+		config: t("docker.action.config"),
 	};
 	return translations[key] || key;
 };
 
-export const columns: ColumnDef<Container>[] = [
+export const getColumns = (t: Translator): ColumnDef<Container>[] => [
 	{
 		accessorKey: "name",
 		header: ({ column }) => {
@@ -38,7 +43,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					{translateColumn("name")}
+					{translateColumn(t, "name")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -55,7 +60,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					{translateColumn("state")}
+					{translateColumn(t, "state")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -87,7 +92,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					{translateColumn("status")}
+					{translateColumn(t, "status")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -104,7 +109,7 @@ export const columns: ColumnDef<Container>[] = [
 					variant="ghost"
 					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
-					{translateColumn("image")}
+					{translateColumn(t, "image")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			);
@@ -126,12 +131,14 @@ export const columns: ColumnDef<Container>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>{translateColumn("actions")}</DropdownMenuLabel>
+						<DropdownMenuLabel>
+							{translateColumn(t, "actions")}
+						</DropdownMenuLabel>
 						<ShowDockerModalLogs
 							containerId={container.containerId}
 							serverId={container.serverId}
 						>
-							{translateColumn("viewLogs")}
+							{translateColumn(t, "viewLogs")}
 						</ShowDockerModalLogs>
 						<ShowContainerConfig
 							containerId={container.containerId}
@@ -141,7 +148,7 @@ export const columns: ColumnDef<Container>[] = [
 							containerId={container.containerId}
 							serverId={container.serverId || ""}
 						>
-							{translateColumn("terminal")}
+							{translateColumn(t, "terminal")}
 						</DockerTerminalModal>
 					</DropdownMenuContent>
 				</DropdownMenu>
