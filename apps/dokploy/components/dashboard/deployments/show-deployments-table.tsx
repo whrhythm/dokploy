@@ -168,7 +168,7 @@ export function ShowDeploymentsTable() {
 						className="-ml-3 h-8"
 						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 					>
-						Service
+						{t("deployment.serviceColumn")}
 						<ArrowUpDown className="ml-2 size-4" />
 					</Button>
 				),
@@ -211,7 +211,7 @@ export function ShowDeploymentsTable() {
 						className="-ml-3 h-8"
 						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 					>
-						Project
+						{t("deployment.projectColumn")}
 						<ArrowUpDown className="ml-2 size-4" />
 					</Button>
 				),
@@ -433,7 +433,7 @@ export function ShowDeploymentsTable() {
 				},
 			},
 		],
-		[],
+		[t],
 	);
 
 	const table = useReactTable({
@@ -493,7 +493,7 @@ export function ShowDeploymentsTable() {
 				{isLoading ? (
 					<div className="flex gap-4 w-full items-center justify-center min-h-[45vh] text-muted-foreground">
 						<Loader2 className="size-4 animate-spin" />
-						<span>Loading deployments...</span>
+						<span>{t("deployment.loading")}</span>
 					</div>
 				) : (
 					<>
@@ -537,10 +537,11 @@ export function ShowDeploymentsTable() {
 											>
 												<div className="flex flex-col min-h-[45vh] items-center justify-center gap-2 text-muted-foreground">
 													<Rocket className="size-8" />
-													<p className="font-medium">No deployments found</p>
+													<p className="font-medium">
+														{t("deployment.emptyTitle")}
+													</p>
 													<p className="text-sm">
-														Deployments from applications and compose will
-														appear here.
+														{t("deployment.emptyDescription")}
 													</p>
 												</div>
 											</TableCell>
@@ -552,7 +553,7 @@ export function ShowDeploymentsTable() {
 						<div className="flex flex-col gap-4 px-4 py-4 border-t sm:flex-row sm:items-center sm:justify-between">
 							<div className="flex items-center gap-2 flex-wrap">
 								<span className="text-sm text-muted-foreground whitespace-nowrap">
-									Rows per page
+									{t("deployment.rowsPerPage")}
 								</span>
 								<Select
 									value={String(pagination.pageSize)}
@@ -576,16 +577,17 @@ export function ShowDeploymentsTable() {
 									</SelectContent>
 								</Select>
 								<span className="text-sm text-muted-foreground whitespace-nowrap">
-									Showing{" "}
-									{filteredData.length === 0
-										? 0
-										: pagination.pageIndex * pagination.pageSize + 1}{" "}
-									to{" "}
-									{Math.min(
-										(pagination.pageIndex + 1) * pagination.pageSize,
-										filteredData.length,
-									)}{" "}
-									of {filteredData.length} entries
+									{t("deployment.showingEntries", {
+										from:
+											filteredData.length === 0
+												? 0
+												: pagination.pageIndex * pagination.pageSize + 1,
+										to: Math.min(
+											(pagination.pageIndex + 1) * pagination.pageSize,
+											filteredData.length,
+										),
+										total: filteredData.length,
+									})}
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
@@ -597,7 +599,7 @@ export function ShowDeploymentsTable() {
 									disabled={!table.getCanPreviousPage()}
 								>
 									<ChevronLeft className="size-4" />
-									Previous
+									{t("pagination.prev")}
 								</Button>
 								<Button
 									variant="outline"
@@ -606,7 +608,7 @@ export function ShowDeploymentsTable() {
 									onClick={() => table.nextPage()}
 									disabled={!table.getCanNextPage()}
 								>
-									Next
+									{t("pagination.next")}
 									<ChevronRight className="size-4" />
 								</Button>
 							</div>
