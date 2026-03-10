@@ -75,7 +75,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 					}
 					variant="outline"
 				>
-					Traefik
+					{t("dashboard.traefik")}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56" align="start">

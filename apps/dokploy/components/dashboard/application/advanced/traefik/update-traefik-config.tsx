@@ -26,6 +26,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const UpdateTraefikConfigSchema = z.object({
@@ -38,7 +39,10 @@ interface Props {
 	applicationId: string;
 }
 
-export const validateAndFormatYAML = (yamlText: string) => {
+export const validateAndFormatYAML = (
+	yamlText: string,
+	unexpectedErrorMessage?: string,
+) => {
 	try {
 		const obj = parse(yamlText);
 		const formattedYaml = stringify(obj, { indent: 4 });
@@ -54,12 +58,15 @@ export const validateAndFormatYAML = (yamlText: string) => {
 		return {
 			valid: false,
 			formattedYaml: yamlText,
-			error: "An unexpected error occurred while processing the YAML.",
+			error:
+				unexpectedErrorMessage ??
+				"An unexpected error occurred while processing the YAML.",
 		};
 	}
 };
 
 export const UpdateTraefikConfig = ({ applicationId }: Props) => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [skipYamlValidation, setSkipYamlValidation] = useState(false);
 	const { data, refetch } = api.application.readTraefikConfig.useQuery(
@@ -89,11 +96,14 @@ export const UpdateTraefikConfig = ({ applicationId }: Props) => {
 
 	const onSubmit = async (data: UpdateTraefikConfig) => {
 		if (!skipYamlValidation) {
-			const { valid, error } = validateAndFormatYAML(data.traefikConfig);
+			const { valid, error } = validateAndFormatYAML(
+				data.traefikConfig,
+				t("traefikConfig.yamlUnexpectedError"),
+			);
 			if (!valid) {
 				form.setError("traefikConfig", {
 					type: "manual",
-					message: (error as string) || "Invalid YAML",
+					message: (error as string) || t("traefikConfig.invalidYaml"),
 				});
 				return;
 			}
@@ -104,13 +114,13 @@ export const UpdateTraefikConfig = ({ applicationId }: Props) => {
 			traefikConfig: data.traefikConfig,
 		})
 			.then(async () => {
-				toast.success("Traefik config Updated");
+				toast.success(t("traefikConfig.updated"));
 				refetch();
 				setOpen(false);
 				form.reset();
 			})
 			.catch(() => {
-				toast.error("Error updating the Traefik config");
+				toast.error(t("traefikConfig.updateError"));
 			});
 	};
 
@@ -126,12 +136,16 @@ export const UpdateTraefikConfig = ({ applicationId }: Props) => {
 			}}
 		>
 			<DialogTrigger asChild>
-				<Button isLoading={isPending}>Modify</Button>
+				<Button isLoading={isPending}>
+					{t("traefikConfig.actions.modify")}
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-4xl">
 				<DialogHeader>
-					<DialogTitle>Update traefik config</DialogTitle>
-					<DialogDescription>Update the traefik config</DialogDescription>
+					<DialogTitle>{t("traefik.Modal.updateConfig.title")}</DialogTitle>
+					<DialogDescription>
+						{t("traefik.Modal.updateConfig.description")}
+					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
@@ -147,21 +161,12 @@ export const UpdateTraefikConfig = ({ applicationId }: Props) => {
 								name="traefikConfig"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Traefik config</FormLabel>
+										<FormLabel>{t("traefikConfig.label")}</FormLabel>
 										<FormControl>
 											<CodeEditor
 												lineWrapping
 												wrapperClassName="h-[35rem] font-mono"
-												placeholder={`http:
-routers:
-    router-name:
-        rule: Host('domain.com')
-        service: container-name
-        entryPoints:
-            - web
-        tls: false
-        middlewares: []
-                                                    `}
+												placeholder={t("traefikConfig.placeholder")}
 												{...field}
 											/>
 										</FormControl>
@@ -189,12 +194,13 @@ routers:
 									htmlFor="skip-yaml-validation-app"
 									className="text-sm font-normal cursor-pointer"
 								>
-									Skip YAML validation (for Go templating)
+									{t("traefikConfig.skipValidation")}
 								</Label>
 							</div>
 							<p className="text-sm text-muted-foreground">
-								Check to save configs with Go templating (e.g.{" "}
-								<code className="text-xs">{"{{range}}"}</code>).
+								{t("traefikConfig.skipValidationHelp", {
+									template: "{{range}}",
+								})}
 							</p>
 						</div>
 						<Button
@@ -202,7 +208,7 @@ routers:
 							form="hook-form-update-traefik-config"
 							type="submit"
 						>
-							Update
+							{t("button.update")}
 						</Button>
 					</DialogFooter>
 				</Form>
