@@ -7,6 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { UpdateTraefikConfig } from "./update-traefik-config";
 
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const ShowTraefikConfig = ({ applicationId }: Props) => {
+	const { t } = useTranslation();
 	const { data, isPending } = api.application.readTraefikConfig.useQuery(
 		{
 			applicationId,
@@ -26,25 +28,21 @@ export const ShowTraefikConfig = ({ applicationId }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row justify-between">
 				<div>
-					<CardTitle className="text-xl">Traefik</CardTitle>
-					<CardDescription>
-						Modify the traefik config, in rare cases you may need to add
-						specific config, be careful because modifying incorrectly can break
-						traefik and your application
-					</CardDescription>
+					<CardTitle className="text-xl">{t("dashboard.traefik")}</CardTitle>
+					<CardDescription>{t("traefikConfig.description")}</CardDescription>
 				</div>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
 				{isPending ? (
 					<span className="text-base text-muted-foreground flex flex-row gap-3 items-center justify-center min-h-[10vh]">
-						Loading...
+						{t("loading")}
 						<Loader2 className="animate-spin" />
 					</span>
 				) : !data ? (
 					<div className="flex w-full flex-col items-center justify-center gap-3 pt-10">
 						<File className="size-8 text-muted-foreground" />
 						<span className="text-base text-muted-foreground">
-							No traefik config detected
+							{t("traefikConfig.empty")}
 						</span>
 					</div>
 				) : (
@@ -52,7 +50,7 @@ export const ShowTraefikConfig = ({ applicationId }: Props) => {
 						<div className="flex flex-col gap-6 max-h-[35rem] min-h-[10rem] overflow-y-auto">
 							<CodeEditor
 								lineWrapping
-								value={data || "Empty"}
+								value={data || ""}
 								disabled
 								className="font-mono"
 							/>

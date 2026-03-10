@@ -1,13 +1,21 @@
+import { useRouter } from "next/router";
 import type React from "react";
 import {
 	createContext,
 	useCallback,
 	useContext,
+	useEffect,
 	useMemo,
 	useState,
 } from "react";
+import enCommonTranslations from "@/public/locales/en/common.json";
+import enSettingsTranslations from "@/public/locales/en/settings.json";
+import zhHansCommonTranslations from "@/public/locales/zh-Hans/common.json";
+import zhHansSettingsTranslations from "@/public/locales/zh-Hans/settings.json";
+import zhHantCommonTranslations from "@/public/locales/zh-Hant/common.json";
+import zhHantSettingsTranslations from "@/public/locales/zh-Hant/settings.json";
 
-export type Locale = "en" | "zh-Hans" | "zh-Hant" | string;
+export type Locale = "en" | "zh-Hans" | "zh-Hant";
 
 type TranslationObject = {
 	[key: string]: string | TranslationObject;
@@ -20,7 +28,7 @@ const STORAGE_KEY = "dokploy-locale";
 export const SUPPORTED_LOCALES: { code: Locale; name: string }[] = [
 	{ code: "en", name: "English" },
 	{ code: "zh-Hans", name: "简体中文" },
-	{ code: "zh-Hant", name: "繁體中文" },
+	{ code: "zh-Hant", name: "繁体中文" },
 ];
 
 const zhHansTranslations: TranslationObject = {
@@ -370,16 +378,70 @@ const enTranslations: TranslationObject = {
 	"settings.title": "Settings",
 };
 
-const translations: Record<string, TranslationObject> = {
-	"zh-Hans": zhHansTranslations,
-	"zh-Hant": zhHansTranslations,
-	en: enTranslations,
+const zhFileTranslations: TranslationObject = {
+	...zhHansCommonTranslations,
+	...zhHansSettingsTranslations,
 };
+
+const enFileTranslations: TranslationObject = {
+	...enCommonTranslations,
+	...enSettingsTranslations,
+};
+
+const zhHantFileTranslations: TranslationObject = {
+	...zhHantCommonTranslations,
+	...zhHantSettingsTranslations,
+};
+
+const translations: Record<string, TranslationObject> = {
+	"zh-Hans": {
+		...zhHansTranslations,
+		...zhFileTranslations,
+	},
+	"zh-Hant": {
+		...zhHansTranslations,
+		...zhHantFileTranslations,
+	},
+	en: {
+		...enTranslations,
+		...enFileTranslations,
+	},
+};
+
+function normalizeLocale(input?: string | null): Locale {
+	if (!input) {
+		return DEFAULT_LOCALE;
+	}
+
+	const lowerCaseLocale = input.toLowerCase();
+	if (lowerCaseLocale === "zh" || lowerCaseLocale.startsWith("zh-cn")) {
+		return "zh-Hans";
+	}
+
+	if (
+		lowerCaseLocale.startsWith("zh-hant") ||
+		lowerCaseLocale.startsWith("zh-tw") ||
+		lowerCaseLocale.startsWith("zh-hk")
+	) {
+		return "zh-Hant";
+	}
+
+	if (lowerCaseLocale.startsWith("zh")) {
+		return "zh-Hans";
+	}
+
+	return "en";
+}
 
 function getNestedValue(
 	obj: TranslationObject,
 	path: string,
 ): string | undefined {
+	const directValue = obj[path];
+	if (typeof directValue === "string") {
+		return directValue;
+	}
+
 	const keys = path.split(".");
 	let current: string | TranslationObject | undefined = obj;
 
@@ -417,17 +479,88 @@ interface TranslationProviderProps {
 }
 
 export function TranslationProvider({ children }: TranslationProviderProps) {
+	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
+	const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
 
-	const setLocale = useCallback((newLocale: Locale) => {
-		console.log("Setting locale to:", newLocale);
-		if (typeof window !== "undefined") {
-			localStorage.setItem(STORAGE_KEY, newLocale);
+	useEffect(() => {
+		if (!router.isReady) {
+			return;
 		}
-	}, []);
+
+		const storedLocale =
+			typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+
+		const detectedLocale = normalizeLocale(
+			storedLocale ??
+				router.locale ??
+				(typeof navigator !== "undefined" ? navigator.language : null),
+		);
+
+		setLocaleState(detectedLocale);
+
+		if (typeof window !== "undefined") {
+			localStorage.setItem(STORAGE_KEY, detectedLocale);
+		}
+
+		if (router.locale !== detectedLocale) {
+			void router.replace(router.asPath, router.asPath, {
+				locale: detectedLocale,
+				scroll: false,
+			});
+		}
+	}, [router.isReady, router.locale, router.asPath, router.replace]);
+
+	const setLocale = useCallback(
+		(newLocale: Locale) => {
+			const normalizedLocale = normalizeLocale(newLocale);
+			setLocaleState(normalizedLocale);
+
+			if (typeof window !== "undefined") {
+				localStorage.setItem(STORAGE_KEY, normalizedLocale);
+			}
+
+			if (router.locale !== normalizedLocale) {
+				void router.replace(router.asPath, router.asPath, {
+					locale: normalizedLocale,
+					scroll: false,
+				});
+			}
+		},
+		[router.asPath, router.locale, router.replace],
+	);
 
 	const t = useCallback(
-		(key: string, _params?: Record<string, string | number>): string => {
+		(key: string, params?: Record<string, string | number>): string => {
+			const localeTranslations = translations[locale] ?? {};
+			const englishTranslations = translations.en ?? {};
+			const chineseFallbackTranslations: TranslationObject =
+				locale === "zh-Hant" ? (translations["zh-Hans"] ?? {}) : {};
+			const fallbackTranslation =
+				getNestedValue(localeTranslations, key) ??
+				getNestedValue(chineseFallbackTranslations, key) ??
+				getNestedValue(englishTranslations, key);
+
+			if (fallbackTranslation) {
+				if (!params) {
+					return fallbackTranslation;
+				}
+
+				return Object.entries(params).reduce(
+					(translatedValue, [paramKey, paramValue]) => {
+						return translatedValue.replaceAll(
+							`{${paramKey}}`,
+							String(paramValue),
+						);
+					},
+					fallbackTranslation,
+				);
+			}
+
+			if (locale === "en") {
+				return key;
+			}
+
 			// Comprehensive Chinese translations
 			const hardcodedTranslations: Record<string, string> = {
 				// Menu - Home
@@ -1890,24 +2023,37 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 				"notifications.validation.endpointUrlRequired": "接口 URL 为必填项",
 			};
 
-			if (hardcodedTranslations[key]) {
-				return hardcodedTranslations[key];
+			const hardcodedTranslation = hardcodedTranslations[key];
+			if (hardcodedTranslation) {
+				if (!params) {
+					return hardcodedTranslation;
+				}
+
+				return Object.entries(params).reduce(
+					(translatedValue, [paramKey, paramValue]) => {
+						return translatedValue.replaceAll(
+							`{${paramKey}}`,
+							String(paramValue),
+						);
+					},
+					hardcodedTranslation,
+				);
 			}
 
 			return key;
 		},
-		[],
+		[locale],
 	);
 
 	const value = useMemo(
 		() => ({
 			t,
-			locale: "zh-Hans" as Locale,
+			locale,
 			setLocale,
 			isLoading,
 			supportedLocales: SUPPORTED_LOCALES,
 		}),
-		[t, setLocale, isLoading],
+		[t, locale, setLocale, isLoading],
 	);
 
 	return (
