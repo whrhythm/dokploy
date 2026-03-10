@@ -24,7 +24,27 @@ export interface ApplicationList {
 	serverId: string;
 }
 
+let _globalT: ((key: string) => string) | null = null;
+
 const translateColumn = (key: string): string => {
+	const t = _globalT;
+	if (t) {
+		const translations: Record<string, string> = {
+			id: t("swarm.table.id"),
+			name: t("swarm.table.name"),
+			image: t("swarm.table.image"),
+			mode: t("swarm.table.mode"),
+			currentState: t("swarm.table.currentState"),
+			desiredState: t("swarm.table.desiredState"),
+			replicas: t("swarm.table.replicas"),
+			ports: t("swarm.table.ports"),
+			errors: t("swarm.table.errors"),
+			logs: t("swarm.table.logs"),
+			actions: t("swarm.table.actions"),
+			openMenu: t("swarm.table.openMenu"),
+		};
+		return translations[key] || key;
+	}
 	const translations: Record<string, string> = {
 		id: "ID",
 		name: "名称",
@@ -37,8 +57,13 @@ const translateColumn = (key: string): string => {
 		errors: "错误",
 		logs: "日志",
 		actions: "操作",
+		openMenu: "Open menu",
 	};
 	return translations[key] || key;
+};
+
+export const setColumnsTranslator = (t: (key: string) => string) => {
+	_globalT = t;
 };
 
 export const columns: ColumnDef<ApplicationList>[] = [
@@ -238,7 +263,7 @@ export const columns: ColumnDef<ApplicationList>[] = [
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="ghost" className="h-8 w-8 p-0">
-								<span className="sr-only">Open menu</span>
+								<span className="sr-only">{translateColumn("openMenu")}</span>
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
