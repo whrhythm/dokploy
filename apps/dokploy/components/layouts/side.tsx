@@ -148,13 +148,13 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "部署",
+			title: "Deployments",
 			url: "/dashboard/deployments",
 			icon: Rocket,
 		},
 		{
 			isSingle: true,
-			title: "监控",
+			title: "Monitoring",
 			url: "/dashboard/monitoring",
 			icon: BarChartHorizontalBigIcon,
 			// Only enabled in non-cloud environments
@@ -162,7 +162,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "定时任务",
+			title: "Schedules",
 			url: "/dashboard/schedules",
 			icon: Clock,
 			// Only enabled in non-cloud environments
@@ -171,7 +171,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Traefik文件系统",
+			title: "Traefik File System",
 			url: "/dashboard/traefik",
 			icon: GalleryVerticalEnd,
 			// Only enabled for admins and users with access to Traefik files in non-cloud environments
@@ -286,7 +286,7 @@ const MENU: Menu = {
 	settings: [
 		{
 			isSingle: true,
-			title: "Web 服务器",
+			title: "Web Server",
 			url: "/dashboard/settings/server",
 			icon: Activity,
 			// Only enabled for admins in non-cloud environments
@@ -311,7 +311,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "用户管理",
+			title: "Users",
 			icon: Users,
 			url: "/dashboard/settings/users",
 			// Only enabled for admins
@@ -344,7 +344,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "镜像仓库",
+			title: "Registry",
 			url: "/dashboard/settings/registry",
 			icon: Package,
 			// Only enabled for admins
@@ -353,7 +353,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "S3 存储",
+			title: "S3 Destinations",
 			url: "/dashboard/settings/destinations",
 			icon: Database,
 			// Only enabled for admins
@@ -363,7 +363,7 @@ const MENU: Menu = {
 
 		{
 			isSingle: true,
-			title: "证书管理",
+			title: "Certificates",
 			url: "/dashboard/settings/certificates",
 			icon: ShieldCheck,
 			// Only enabled for admins
@@ -372,7 +372,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "集群",
+			title: "Cluster",
 			url: "/dashboard/settings/cluster",
 			icon: Boxes,
 			// Only enabled for admins in non-cloud environments
@@ -381,7 +381,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "通知",
+			title: "Notifications",
 			url: "/dashboard/settings/notifications",
 			icon: Bell,
 			// Only enabled for admins
