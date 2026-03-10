@@ -946,5 +946,12 @@
 	"swarm.table.columns": "列",
 	"swarm.table.noResults": "无结果",
 	"swarm.table.previous": "上一页",
-	"swarm.table.next": "下一页"
+	"swarm.table.next": "下一页",
+
+	"docker.columns": "列",
+	"docker.containerConfig": "容器配置",
+	"docker.containerConfigDesc": "查看此容器的详细配置",
+	"docker.seeAllContainers": "查看服务器的所有容器",
+	"docker.viewConfig": "查看配置",
+	"search.filterByName": "按名称筛选..."
 }

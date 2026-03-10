@@ -945,5 +945,12 @@
 	"swarm.table.columns": "Columns",
 	"swarm.table.noResults": "No results",
 	"swarm.table.previous": "Previous",
-	"swarm.table.next": "Next"
+	"swarm.table.next": "Next",
+
+	"docker.columns": "Columns",
+	"docker.containerConfig": "Container Configuration",
+	"docker.containerConfigDesc": "View detailed configuration for this container",
+	"docker.seeAllContainers": "View all containers on this server",
+	"docker.viewConfig": "View Configuration",
+	"search.filterByName": "Filter by name..."
 }
