@@ -88,6 +88,18 @@ export interface RequestsTableProps {
 	};
 }
 
+const getColumnLabel = (
+	columnId: string,
+	t: (key: string) => string,
+): string => {
+	const columnLabelMap: Record<string, string> = {
+		level: t("requests.level"),
+		RequestPath: t("requests.message"),
+		time: t("requests.time"),
+	};
+	return columnLabelMap[columnId] ?? columnId;
+};
+
 export const RequestsTable = ({ dateRange }: RequestsTableProps) => {
 	const { t } = useTranslation();
 	const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -224,7 +236,7 @@ export const RequestsTable = ({ dateRange }: RequestsTableProps) => {
 														column.toggleVisibility(!!value)
 													}
 												>
-													{column.id}
+													{getColumnLabel(column.id, t)}
 												</DropdownMenuCheckboxItem>
 											);
 										})}
