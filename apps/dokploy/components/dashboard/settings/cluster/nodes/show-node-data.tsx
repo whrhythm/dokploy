@@ -8,12 +8,14 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface Props {
 	data: unknown;
 }
 
 export const ShowNodeData = ({ data }: Props) => {
+	const { t } = useTranslation();
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -21,14 +23,14 @@ export const ShowNodeData = ({ data }: Props) => {
 					className="w-full cursor-pointer"
 					onSelect={(e) => e.preventDefault()}
 				>
-					View Config
+					{t("cluster.Modal.nodeConfig.trigger")}
 				</DropdownMenuItem>
 			</DialogTrigger>
 			<DialogContent className={"sm:max-w-5xl"}>
 				<DialogHeader>
-					<DialogTitle>Node Config</DialogTitle>
+					<DialogTitle>{t("cluster.Modal.nodeConfig.title")}</DialogTitle>
 					<DialogDescription>
-						See in detail the metadata of this node
+						{t("cluster.Modal.nodeConfig.description")}
 					</DialogDescription>
 				</DialogHeader>
 				<div className="text-wrap rounded-lg border p-4 text-sm sm:max-w-[59rem] bg-card">

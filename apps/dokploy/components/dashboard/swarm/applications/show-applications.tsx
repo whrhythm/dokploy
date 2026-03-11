@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
-import { type ApplicationList, columns } from "./columns";
+import { type ApplicationList, columns, setColumnsTranslator } from "./columns";
 import { DataTable } from "./data-table";
 
 interface Props {
@@ -19,6 +19,7 @@ interface Props {
 
 export const ShowNodeApplications = ({ serverId }: Props) => {
 	const { t } = useTranslation();
+	setColumnsTranslator(t);
 	const { data: NodeApps, isPending: NodeAppsLoading } =
 		api.swarm.getNodeApps.useQuery({ serverId });
 

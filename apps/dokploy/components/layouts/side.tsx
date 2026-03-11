@@ -148,13 +148,13 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "部署",
+			title: "Deployments",
 			url: "/dashboard/deployments",
 			icon: Rocket,
 		},
 		{
 			isSingle: true,
-			title: "监控",
+			title: "Monitoring",
 			url: "/dashboard/monitoring",
 			icon: BarChartHorizontalBigIcon,
 			// Only enabled in non-cloud environments
@@ -162,7 +162,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "定时任务",
+			title: "Schedules",
 			url: "/dashboard/schedules",
 			icon: Clock,
 			// Only enabled in non-cloud environments
@@ -171,7 +171,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "Traefik文件系统",
+			title: "Traefik File System",
 			url: "/dashboard/traefik",
 			icon: GalleryVerticalEnd,
 			// Only enabled for admins and users with access to Traefik files in non-cloud environments
@@ -286,7 +286,7 @@ const MENU: Menu = {
 	settings: [
 		{
 			isSingle: true,
-			title: "Web 服务器",
+			title: "Web Server",
 			url: "/dashboard/settings/server",
 			icon: Activity,
 			// Only enabled for admins in non-cloud environments
@@ -311,7 +311,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "用户管理",
+			title: "Users",
 			icon: Users,
 			url: "/dashboard/settings/users",
 			// Only enabled for admins
@@ -344,7 +344,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "镜像仓库",
+			title: "Registry",
 			url: "/dashboard/settings/registry",
 			icon: Package,
 			// Only enabled for admins
@@ -353,7 +353,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "S3 存储",
+			title: "S3 Destinations",
 			url: "/dashboard/settings/destinations",
 			icon: Database,
 			// Only enabled for admins
@@ -363,7 +363,7 @@ const MENU: Menu = {
 
 		{
 			isSingle: true,
-			title: "证书管理",
+			title: "Certificates",
 			url: "/dashboard/settings/certificates",
 			icon: ShieldCheck,
 			// Only enabled for admins
@@ -372,7 +372,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "集群",
+			title: "Cluster",
 			url: "/dashboard/settings/cluster",
 			icon: Boxes,
 			// Only enabled for admins in non-cloud environments
@@ -381,7 +381,7 @@ const MENU: Menu = {
 		},
 		{
 			isSingle: true,
-			title: "通知",
+			title: "Notifications",
 			url: "/dashboard/settings/notifications",
 			icon: Bell,
 			// Only enabled for admins
@@ -536,6 +536,7 @@ function LogoWrapper() {
 
 function SidebarLogo() {
 	const { state } = useSidebar();
+	const { t } = useTranslation();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
 	const { data: user } = api.user.get.useQuery();
 	const { data: session } = authClient.useSession();
@@ -619,7 +620,8 @@ function SidebarLogo() {
 											)}
 										>
 											<p className="text-sm font-medium leading-none">
-												{activeOrganization?.name ?? "Select Organization"}
+												{activeOrganization?.name ??
+													t("dashboard.organization.select")}
 											</p>
 										</div>
 									</div>
@@ -690,12 +692,16 @@ function SidebarLogo() {
 															})
 																.then(() => {
 																	refetch();
-																	toast.success("Default organization updated");
+																	toast.success(
+																		t("dashboard.organization.defaultUpdated"),
+																	);
 																})
 																.catch((error) => {
 																	toast.error(
 																		error?.message ||
-																			"Error setting default organization",
+																			t(
+																				"dashboard.organization.defaultUpdateError",
+																			),
 																	);
 																});
 														}}
@@ -733,13 +739,17 @@ function SidebarLogo() {
 																		.then(() => {
 																			refetch();
 																			toast.success(
-																				"Organization deleted successfully",
+																				t(
+																					"dashboard.organization.deleteSuccess",
+																				),
 																			);
 																		})
 																		.catch((error) => {
 																			toast.error(
 																				error?.message ||
-																					"Error deleting organization",
+																					t(
+																						"dashboard.organization.deleteError",
+																					),
 																			);
 																		});
 																}}
@@ -818,8 +828,10 @@ function SidebarLogo() {
 													</div>
 												</DropdownMenuItem>
 												<DialogAction
-													title="Accept Invitation"
-													description="Are you sure you want to accept this invitation?"
+													title={t("dashboard.organization.acceptTitle")}
+													description={t(
+														"dashboard.organization.acceptDescription",
+													)}
 													type="default"
 													onClick={async () => {
 														const { error } =
@@ -829,24 +841,27 @@ function SidebarLogo() {
 
 														if (error) {
 															toast.error(
-																error.message || "Error accepting invitation",
+																error.message ||
+																	t("dashboard.organization.acceptError"),
 															);
 														} else {
-															toast.success("Invitation accepted successfully");
+															toast.success(
+																t("dashboard.organization.acceptSuccess"),
+															);
 															await refetchInvitations();
 															await refetch();
 														}
 													}}
 												>
 													<Button size="sm" variant="secondary">
-														Accept Invitation
+														{t("dashboard.organization.acceptAction")}
 													</Button>
 												</DialogAction>
 											</div>
 										))
 									) : (
 										<DropdownMenuItem disabled>
-											No pending invitations
+											{t("dashboard.organization.noPendingInvitations")}
 										</DropdownMenuItem>
 									)}
 								</div>
@@ -909,6 +924,12 @@ export default function Page({ children }: Props) {
 		[...filteredHome, ...filteredSettings],
 		pathname,
 	);
+	const settingsTitles = new Set(filteredSettings.map((item) => item.title));
+	const breadcrumbLabel = activeItem
+		? settingsTitles.has(activeItem.title)
+			? translateSettingsTitle(activeItem.title)
+			: translateMenuTitle(activeItem.title)
+		: t("dashboard.breadcrumb.home");
 
 	if (!isLoaded) {
 		return <div className="w-full h-screen bg-background" />; // Placeholder mientras se carga
@@ -1193,7 +1214,7 @@ export default function Page({ children }: Props) {
 													href={activeItem?.url || "/"}
 													className="flex items-center gap-1.5"
 												>
-													{activeItem?.title}
+													{breadcrumbLabel}
 												</Link>
 											</BreadcrumbLink>
 										</BreadcrumbItem>

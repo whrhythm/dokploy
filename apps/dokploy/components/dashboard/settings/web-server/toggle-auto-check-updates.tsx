@@ -23,7 +23,7 @@ export const ToggleAutoCheckUpdates = ({ disabled }: { disabled: boolean }) => {
 				disabled={disabled}
 			/>
 			<Label className="text-primary" htmlFor="autoCheckUpdatesToggle">
-				{t("webServerUpdate.autoCheckUpdates")}
+				{t("webServer.Modal.update.autoCheckUpdates")}
 			</Label>
 		</div>
 	);

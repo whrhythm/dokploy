@@ -9,6 +9,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 export const DockerLogsId = dynamic(
 	() =>
 		import("@/components/dashboard/docker/logs/docker-logs-id").then(
@@ -30,6 +31,8 @@ export const ShowDockerModalLogs = ({
 	children,
 	serverId,
 }: Props) => {
+	const { t } = useTranslation();
+
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -42,8 +45,10 @@ export const ShowDockerModalLogs = ({
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-7xl">
 				<DialogHeader>
-					<DialogTitle>View Logs</DialogTitle>
-					<DialogDescription>View the logs for {containerId}</DialogDescription>
+					<DialogTitle>{t("docker.Modal.logs.title")}</DialogTitle>
+					<DialogDescription>
+						{t("docker.Modal.logs.description", { id: containerId })}
+					</DialogDescription>
 				</DialogHeader>
 				<div className="flex flex-col gap-4 pt-2.5">
 					<DockerLogsId

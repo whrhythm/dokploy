@@ -27,8 +27,9 @@ export const ShowCertificates = () => {
 		if (expiration.status === "unknown") {
 			return t("certificates.expirationUnknown");
 		}
+		const locale = t("certificates.dateLocale");
 		const dateLabel = expiration.expirationDate
-			? expiration.expirationDate.toLocaleDateString("zh-CN", {
+			? expiration.expirationDate.toLocaleDateString(locale, {
 					year: "numeric",
 					month: "long",
 					day: "numeric",
