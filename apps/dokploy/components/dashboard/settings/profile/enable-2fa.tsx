@@ -36,21 +36,24 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 import { api } from "@/utils/api";
 
-const PasswordSchema = z.object({
-	password: z.string().min(8, {
-		message: "Password is required",
-	}),
-	issuer: z.string().optional(),
-});
+const createPasswordSchema = (t: (key: string) => string) =>
+	z.object({
+		password: z.string().min(8, {
+			message: t("profile.2fa.validation.passwordRequired"),
+		}),
+		issuer: z.string().optional(),
+	});
 
-const PinSchema = z.object({
-	pin: z.string().min(6, {
-		message: "Pin is required",
-	}),
-});
+const createPinSchema = (t: (key: string) => string) =>
+	z.object({
+		pin: z.string().min(6, {
+			message: t("profile.2fa.validation.pinRequired"),
+		}),
+	});
 
 type TwoFactorSetupData = {
 	qrCodeUrl: string;
@@ -58,30 +61,11 @@ type TwoFactorSetupData = {
 	totpURI: string;
 };
 
-type PasswordForm = z.infer<typeof PasswordSchema>;
-type PinForm = z.infer<typeof PinSchema>;
-
-export const USERNAME_PLACEHOLDER = "%username%";
-export const DATE_PLACEHOLDER = "%date%";
-export const BACKUP_CODES_PLACEHOLDER = "%backupCodes%";
-
-export const backupCodeTemplate = `Dokploy - BACKUP VERIFICATION CODES
-
-Points to note
---------------
-# Each code can be used only once.
-# Do not share these codes with anyone.
-
-Generated codes
----------------
-Username: ${USERNAME_PLACEHOLDER}
-Generated on: ${DATE_PLACEHOLDER}
-
-
-${BACKUP_CODES_PLACEHOLDER}
-`;
+type PasswordForm = z.infer<ReturnType<typeof createPasswordSchema>>;
+type PinForm = z.infer<ReturnType<typeof createPinSchema>>;
 
 export const Enable2FA = () => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [data, setData] = useState<TwoFactorSetupData | null>(null);
 	const [backupCodes, setBackupCodes] = useState<string[]>([]);
@@ -100,7 +84,7 @@ export const Enable2FA = () => {
 
 			if (result.error) {
 				if (result.error.code === "INVALID_TWO_FACTOR_AUTHENTICATION") {
-					toast.error("Invalid verification code");
+					toast.error(t("profile.2fa.error.invalidCode"));
 					return;
 				}
 
@@ -108,37 +92,40 @@ export const Enable2FA = () => {
 			}
 
 			if (!result.data) {
-				throw new Error("No response received from server");
+				throw new Error(t("profile.2fa.error.noServerResponse"));
 			}
 
-			toast.success("2FA configured successfully");
+			toast.success(t("profile.2fa.toast.configured"));
 			utils.user.get.invalidate();
 			setIsDialogOpen(false);
 		} catch (error) {
 			if (error instanceof Error) {
 				const errorMessage =
 					error.message === "Failed to fetch"
-						? "Connection error. Please check your internet connection."
+						? t("profile.2fa.error.connection")
 						: error.message;
 
 				toast.error(errorMessage);
 			} else {
-				toast.error("Error verifying 2FA code", {
-					description: error instanceof Error ? error.message : "Unknown error",
+				toast.error(t("profile.2fa.error.verify"), {
+					description:
+						error instanceof Error
+							? error.message
+							: t("profile.2fa.error.unknown"),
 				});
 			}
 		}
 	};
 
 	const passwordForm = useForm<PasswordForm>({
-		resolver: zodResolver(PasswordSchema),
+		resolver: zodResolver(createPasswordSchema(t)),
 		defaultValues: {
 			password: "",
 		},
 	});
 
 	const pinForm = useForm<PinForm>({
-		resolver: zodResolver(PinSchema),
+		resolver: zodResolver(createPinSchema(t)),
 		defaultValues: {
 			pin: "",
 		},
@@ -172,7 +159,7 @@ export const Enable2FA = () => {
 			});
 
 			if (!enableData) {
-				throw new Error(error?.message || "Error enabling 2FA");
+				throw new Error(error?.message || t("profile.2fa.error.enable"));
 			}
 
 			if (enableData.backupCodes) {
@@ -189,17 +176,17 @@ export const Enable2FA = () => {
 				});
 
 				setStep("verify");
-				toast.success("Scan the QR code with your authenticator app");
+				toast.success(t("profile.2fa.toast.scanQr"));
 			} else {
-				throw new Error("No TOTP URI received from server");
+				throw new Error(t("profile.2fa.error.noTotp"));
 			}
 		} catch (error) {
 			toast.error(
-				error instanceof Error ? error.message : "Error setting up 2FA",
+				error instanceof Error ? error.message : t("profile.2fa.error.setup"),
 			);
 			passwordForm.setError("password", {
 				message:
-					error instanceof Error ? error.message : "Error setting up 2FA",
+					error instanceof Error ? error.message : t("profile.2fa.error.setup"),
 			});
 		} finally {
 			setIsPasswordLoading(false);
@@ -208,7 +195,7 @@ export const Enable2FA = () => {
 
 	const handleDownloadBackupCodes = () => {
 		if (!backupCodes || backupCodes.length === 0) {
-			toast.error("No backup codes to download.");
+			toast.error(t("profile.2fa.error.noBackupCodes"));
 			return;
 		}
 
@@ -222,10 +209,11 @@ export const Enable2FA = () => {
 		const day = String(date.getDate()).padStart(2, "0");
 		const filename = `dokploy-2fa-backup-codes-${year}${month}${day}.txt`;
 
-		const backupCodesText = backupCodeTemplate
-			.replace(USERNAME_PLACEHOLDER, currentUser?.user?.email || "unknown")
-			.replace(DATE_PLACEHOLDER, date.toLocaleString())
-			.replace(BACKUP_CODES_PLACEHOLDER, backupCodesFormatted);
+		const backupCodesText = t("profile.2fa.backupTemplate", {
+			user: currentUser?.user?.email || t("profile.2fa.unknownUser"),
+			date: date.toLocaleString(),
+			codes: backupCodesFormatted,
+		});
 
 		const blob = new Blob([backupCodesText], { type: "text/plain" });
 		const url = URL.createObjectURL(blob);
@@ -245,13 +233,14 @@ export const Enable2FA = () => {
 			.map((code, index) => ` ${index + 1}. ${code}`)
 			.join("\n");
 
-		const backupCodesText = backupCodeTemplate
-			.replace(USERNAME_PLACEHOLDER, currentUser?.user?.email || "unknown")
-			.replace(DATE_PLACEHOLDER, date.toLocaleString())
-			.replace(BACKUP_CODES_PLACEHOLDER, backupCodesFormatted);
+		const backupCodesText = t("profile.2fa.backupTemplate", {
+			user: currentUser?.user?.email || t("profile.2fa.unknownUser"),
+			date: date.toLocaleString(),
+			codes: backupCodesFormatted,
+		});
 
 		copy(backupCodesText);
-		toast.success("Backup codes copied to clipboard");
+		toast.success(t("profile.2fa.toast.backupCopied"));
 	};
 
 	return (
@@ -259,16 +248,16 @@ export const Enable2FA = () => {
 			<DialogTrigger asChild>
 				<Button variant="ghost">
 					<Fingerprint className="size-4 text-muted-foreground" />
-					Enable 2FA
+					{t("profile.2fa.trigger")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-xl">
 				<DialogHeader>
-					<DialogTitle>2FA Setup</DialogTitle>
+					<DialogTitle>{t("profile.2fa.title")}</DialogTitle>
 					<DialogDescription>
 						{step === "password"
-							? "Enter your password to begin 2FA setup"
-							: "Scan the QR code and verify with your authenticator app"}
+							? t("profile.2fa.description.password")
+							: t("profile.2fa.description.verify")}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -284,16 +273,16 @@ export const Enable2FA = () => {
 								name="password"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Password</FormLabel>
+										<FormLabel>{t("profile.2fa.password")}</FormLabel>
 										<FormControl>
 											<Input
 												type="password"
-												placeholder="Enter your password"
+												placeholder={t("profile.2fa.passwordPlaceholder")}
 												{...field}
 											/>
 										</FormControl>
 										<FormDescription>
-											Enter your password to enable 2FA
+											{t("profile.2fa.passwordHelp")}
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -304,17 +293,16 @@ export const Enable2FA = () => {
 								name="issuer"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Issuer</FormLabel>
+										<FormLabel>{t("profile.2fa.issuer")}</FormLabel>
 										<FormControl>
 											<Input
 												type="text"
-												placeholder="Enter your issuer"
+												placeholder={t("profile.2fa.issuerPlaceholder")}
 												{...field}
 											/>
 										</FormControl>
 										<FormDescription>
-											Use a custom issuer to identify the service you're
-											authenticating with.
+											{t("profile.2fa.issuerHelp")}
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -325,7 +313,7 @@ export const Enable2FA = () => {
 								className="w-full"
 								isLoading={isPasswordLoading}
 							>
-								Continue
+								{t("profile.2fa.continue")}
 							</Button>
 						</form>
 					</Form>
@@ -338,17 +326,17 @@ export const Enable2FA = () => {
 										<div className="flex flex-col items-center gap-4 p-6 border rounded-lg">
 											<QrCode className="size-5 text-muted-foreground" />
 											<span className="text-sm font-medium">
-												Scan this QR code with your authenticator app
+												{t("profile.2fa.scanQr")}
 											</span>
 											{/** biome-ignore lint/performance/noImgElement: This is a valid use case for an img element */}
 											<img
 												src={data.qrCodeUrl}
-												alt="2FA QR Code"
+												alt={t("profile.2fa.qrAlt")}
 												className="rounded-lg w-48 h-48"
 											/>
 											<div className="flex flex-col gap-2 text-center">
 												<span className="text-sm text-muted-foreground">
-													Can't scan the QR code?
+													{t("profile.2fa.cantScan")}
 												</span>
 												<span className="text-xs font-mono bg-muted p-2 rounded">
 													{data.secret}
@@ -359,7 +347,9 @@ export const Enable2FA = () => {
 										{backupCodes && backupCodes.length > 0 && (
 											<div className="w-full space-y-3 border rounded-lg p-4">
 												<div className="flex items-center justify-between">
-													<h4 className="font-medium">Backup Codes</h4>
+													<h4 className="font-medium">
+														{t("profile.2fa.backupCodes")}
+													</h4>
 													<div className="flex items-center gap-2">
 														<TooltipProvider>
 															<Tooltip delayDuration={0}>
@@ -374,7 +364,7 @@ export const Enable2FA = () => {
 																	</Button>
 																</TooltipTrigger>
 																<TooltipContent>
-																	<p>Copy</p>
+																	<p>{t("profile.2fa.copy")}</p>
 																</TooltipContent>
 															</Tooltip>
 														</TooltipProvider>
@@ -392,7 +382,7 @@ export const Enable2FA = () => {
 																	</Button>
 																</TooltipTrigger>
 																<TooltipContent>
-																	<p>Download</p>
+																	<p>{t("profile.2fa.download")}</p>
 																</TooltipContent>
 															</Tooltip>
 														</TooltipProvider>
@@ -409,9 +399,7 @@ export const Enable2FA = () => {
 													))}
 												</div>
 												<p className="text-sm text-muted-foreground">
-													Save these backup codes in a secure place. You can use
-													them to access your account if you lose access to your
-													authenticator device.
+													{t("profile.2fa.backupHelp")}
 												</p>
 											</div>
 										)}
@@ -424,7 +412,7 @@ export const Enable2FA = () => {
 							</div>
 
 							<div className="flex flex-col justify-center items-center">
-								<FormLabel>Verification Code</FormLabel>
+								<FormLabel>{t("profile.2fa.verificationCode")}</FormLabel>
 								<InputOTP
 									maxLength={6}
 									value={otpValue}
@@ -441,7 +429,7 @@ export const Enable2FA = () => {
 									</InputOTPGroup>
 								</InputOTP>
 								<FormDescription>
-									Enter the 6-digit code from your authenticator app
+									{t("profile.2fa.verificationHelp")}
 								</FormDescription>
 							</div>
 
@@ -451,7 +439,7 @@ export const Enable2FA = () => {
 								isLoading={isPasswordLoading}
 								disabled={otpValue.length !== 6}
 							>
-								Enable 2FA
+								{t("profile.2fa.enable")}
 							</Button>
 						</form>
 					</Form>

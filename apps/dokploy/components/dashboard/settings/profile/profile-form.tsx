@@ -33,17 +33,21 @@ import { api } from "@/utils/api";
 import { Configure2FA } from "./configure-2fa";
 import { Enable2FA } from "./enable-2fa";
 
-const profileSchema = z.object({
-	email: z.string().email("请输入有效的邮箱地址").min(1, "邮箱不能为空"),
-	password: z.string().nullable(),
-	currentPassword: z.string().nullable(),
-	image: z.string().optional(),
-	firstName: z.string().optional(),
-	lastName: z.string().optional(),
-	allowImpersonation: z.boolean().optional().default(false),
-});
+const createProfileSchema = (t: (key: string) => string) =>
+	z.object({
+		email: z
+			.string()
+			.email(t("profile.validation.emailInvalid"))
+			.min(1, t("profile.validation.emailRequired")),
+		password: z.string().nullable(),
+		currentPassword: z.string().nullable(),
+		image: z.string().optional(),
+		firstName: z.string().optional(),
+		lastName: z.string().optional(),
+		allowImpersonation: z.boolean().optional().default(false),
+	});
 
-type Profile = z.infer<typeof profileSchema>;
+type Profile = z.infer<ReturnType<typeof createProfileSchema>>;
 
 const randomImages = [
 	"/avatars/avatar-1.png",
@@ -91,7 +95,7 @@ export const ProfileForm = () => {
 			firstName: data?.user?.firstName || "",
 			lastName: data?.user?.lastName || "",
 		},
-		resolver: zodResolver(profileSchema),
+		resolver: zodResolver(createProfileSchema(t)),
 	});
 
 	useEffect(() => {
