@@ -14,6 +14,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 export const labelsFormSchema = z.object({
@@ -33,6 +34,7 @@ interface LabelsFormProps {
 }
 
 export const LabelsForm = ({ id, type }: LabelsFormProps) => {
+	const { t } = useTranslation();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const queryMap = {
@@ -115,10 +117,10 @@ export const LabelsForm = ({ id, type }: LabelsFormProps) => {
 				labelsSwarm: labelsToSend,
 			});
 
-			toast.success("Labels updated successfully");
+			toast.success(t("services.swarmSettings.forms.labels.toast.updated"));
 			refetch();
 		} catch {
-			toast.error("Error updating labels");
+			toast.error(t("services.swarmSettings.forms.labels.toast.updateError"));
 		} finally {
 			setIsLoading(false);
 		}
@@ -128,9 +130,11 @@ export const LabelsForm = ({ id, type }: LabelsFormProps) => {
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 				<div>
-					<FormLabel>Labels</FormLabel>
+					<FormLabel>
+						{t("services.swarmSettings.forms.labels.title")}
+					</FormLabel>
 					<FormDescription>
-						Add key-value labels to your service
+						{t("services.swarmSettings.forms.labels.description")}
 					</FormDescription>
 					<div className="space-y-2 mt-2">
 						{fields.map((field, index) => (
@@ -141,7 +145,12 @@ export const LabelsForm = ({ id, type }: LabelsFormProps) => {
 									render={({ field }) => (
 										<FormItem className="flex-1">
 											<FormControl>
-												<Input {...field} placeholder="com.example.app.name" />
+												<Input
+													{...field}
+													placeholder={t(
+														"services.swarmSettings.forms.labels.keyPlaceholder",
+													)}
+												/>
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -153,7 +162,12 @@ export const LabelsForm = ({ id, type }: LabelsFormProps) => {
 									render={({ field }) => (
 										<FormItem className="flex-1">
 											<FormControl>
-												<Input {...field} placeholder="my-app" />
+												<Input
+													{...field}
+													placeholder={t(
+														"services.swarmSettings.forms.labels.valuePlaceholder",
+													)}
+												/>
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -165,7 +179,7 @@ export const LabelsForm = ({ id, type }: LabelsFormProps) => {
 									size="sm"
 									onClick={() => remove(index)}
 								>
-									Remove
+									{t("button.remove")}
 								</Button>
 							</div>
 						))}
@@ -175,7 +189,7 @@ export const LabelsForm = ({ id, type }: LabelsFormProps) => {
 							size="sm"
 							onClick={() => append({ key: "", value: "" })}
 						>
-							Add Label
+							{t("services.swarmSettings.forms.labels.add")}
 						</Button>
 					</div>
 				</div>
@@ -188,10 +202,10 @@ export const LabelsForm = ({ id, type }: LabelsFormProps) => {
 							form.reset({ labels: [] });
 						}}
 					>
-						Clear
+						{t("button.reset")}
 					</Button>
 					<Button type="submit" isLoading={isLoading}>
-						Save Labels
+						{t("services.swarmSettings.forms.labels.save")}
 					</Button>
 				</div>
 			</form>

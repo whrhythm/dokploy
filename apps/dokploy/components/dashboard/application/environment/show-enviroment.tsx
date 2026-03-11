@@ -21,6 +21,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Toggle } from "@/components/ui/toggle";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import type { ServiceType } from "../advanced/show-resources";
 
@@ -36,6 +37,7 @@ interface Props {
 }
 
 export const ShowEnvironment = ({ id, type }: Props) => {
+	const { t } = useTranslation();
 	const queryMap = {
 		postgres: () =>
 			api.postgres.one.useQuery({ postgresId: id }, { enabled: !!id }),
@@ -94,11 +96,11 @@ export const ShowEnvironment = ({ id, type }: Props) => {
 			env: formData.environment,
 		})
 			.then(async () => {
-				toast.success("Environments Added");
+				toast.success(t("services.environment.toast.updated"));
 				await refetch();
 			})
 			.catch(() => {
-				toast.error("Error adding environment");
+				toast.error(t("services.environment.toast.updateError"));
 			});
 	};
 
@@ -128,19 +130,21 @@ export const ShowEnvironment = ({ id, type }: Props) => {
 			<Card className="bg-background">
 				<CardHeader className="flex flex-row w-full items-center justify-between">
 					<div>
-						<CardTitle className="text-xl">Environment Settings</CardTitle>
+						<CardTitle className="text-xl">
+							{t("services.environment.title")}
+						</CardTitle>
 						<CardDescription>
-							You can add environment variables to your resource.
+							{t("services.environment.description")}
 							{hasChanges && (
 								<span className="text-yellow-500 ml-2">
-									(You have unsaved changes)
+									{t("services.environment.unsaved")}
 								</span>
 							)}
 						</CardDescription>
 					</div>
 
 					<Toggle
-						aria-label="Toggle bold"
+						aria-label={t("services.environment.toggleVisibility")}
 						pressed={isEnvVisible}
 						onPressedChange={setIsEnvVisible}
 					>
@@ -174,9 +178,7 @@ export const ShowEnvironment = ({ id, type }: Props) => {
 												disabled={isEnvVisible}
 												className="font-mono"
 												wrapperClassName="compose-file-editor"
-												placeholder={`NODE_ENV=production
-PORT=3000
-														`}
+												placeholder={t("services.environment.placeholder")}
 												{...field}
 											/>
 										</FormControl>
@@ -192,7 +194,7 @@ PORT=3000
 										variant="outline"
 										onClick={handleCancel}
 									>
-										Cancel
+										{t("button.cancel")}
 									</Button>
 								)}
 								<Button
@@ -201,7 +203,7 @@ PORT=3000
 									type="submit"
 									disabled={!hasChanges}
 								>
-									Save
+									{t("button.save")}
 								</Button>
 							</div>
 						</form>

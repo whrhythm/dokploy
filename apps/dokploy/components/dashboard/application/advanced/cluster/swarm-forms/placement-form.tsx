@@ -14,6 +14,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const PreferenceSchema = z.object({
@@ -38,6 +39,7 @@ interface PlacementFormProps {
 }
 
 export const PlacementForm = ({ id, type }: PlacementFormProps) => {
+	const { t } = useTranslation();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const queryMap = {
@@ -124,10 +126,12 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 					: null,
 			});
 
-			toast.success("Placement updated successfully");
+			toast.success(t("services.swarmSettings.forms.placement.toast.updated"));
 			refetch();
 		} catch {
-			toast.error("Error updating placement");
+			toast.error(
+				t("services.swarmSettings.forms.placement.toast.updateError"),
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -196,9 +200,11 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 				<div>
-					<FormLabel>Constraints</FormLabel>
+					<FormLabel>
+						{t("services.swarmSettings.forms.placement.constraintsLabel")}
+					</FormLabel>
 					<FormDescription>
-						Placement constraints (e.g., "node.role==manager")
+						{t("services.swarmSettings.forms.placement.constraintsDescription")}
 					</FormDescription>
 					<div className="space-y-2 mt-2">
 						{constraints.map((constraint: string, index: number) => (
@@ -206,7 +212,9 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 								<Input
 									value={constraint}
 									onChange={(e) => updateConstraint(index, e.target.value)}
-									placeholder="node.role==manager"
+									placeholder={t(
+										"services.swarmSettings.forms.placement.constraintPlaceholder",
+									)}
 								/>
 								<Button
 									type="button"
@@ -214,7 +222,7 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 									size="sm"
 									onClick={() => removeConstraint(index)}
 								>
-									Remove
+									{t("button.remove")}
 								</Button>
 							</div>
 						))}
@@ -224,16 +232,17 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 							size="sm"
 							onClick={addConstraint}
 						>
-							Add Constraint
+							{t("services.swarmSettings.forms.placement.addConstraint")}
 						</Button>
 					</div>
 				</div>
 
 				<div>
-					<FormLabel>Preferences</FormLabel>
+					<FormLabel>
+						{t("services.swarmSettings.forms.placement.preferencesLabel")}
+					</FormLabel>
 					<FormDescription>
-						Spread preferences for task distribution (e.g.,
-						"node.labels.region")
+						{t("services.swarmSettings.forms.placement.preferencesDescription")}
 					</FormDescription>
 					<div className="space-y-2 mt-2">
 						{preferences.map((pref: any, index: number) => (
@@ -241,7 +250,9 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 								<Input
 									value={pref.SpreadDescriptor}
 									onChange={(e) => updatePreference(index, e.target.value)}
-									placeholder="node.labels.region"
+									placeholder={t(
+										"services.swarmSettings.forms.placement.preferencePlaceholder",
+									)}
 								/>
 								<Button
 									type="button"
@@ -249,7 +260,7 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 									size="sm"
 									onClick={() => removePreference(index)}
 								>
-									Remove
+									{t("button.remove")}
 								</Button>
 							</div>
 						))}
@@ -259,7 +270,7 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 							size="sm"
 							onClick={addPreference}
 						>
-							Add Preference
+							{t("services.swarmSettings.forms.placement.addPreference")}
 						</Button>
 					</div>
 				</div>
@@ -269,12 +280,22 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 					name="MaxReplicas"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Max Replicas</FormLabel>
+							<FormLabel>
+								{t("services.swarmSettings.forms.placement.maxReplicasLabel")}
+							</FormLabel>
 							<FormDescription>
-								Maximum number of replicas per node
+								{t(
+									"services.swarmSettings.forms.placement.maxReplicasDescription",
+								)}
 							</FormDescription>
 							<FormControl>
-								<Input type="number" placeholder="10" {...field} />
+								<Input
+									type="number"
+									placeholder={t(
+										"services.swarmSettings.forms.placement.maxReplicasPlaceholder",
+									)}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -282,9 +303,11 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 				/>
 
 				<div>
-					<FormLabel>Platforms</FormLabel>
+					<FormLabel>
+						{t("services.swarmSettings.forms.placement.platformsLabel")}
+					</FormLabel>
 					<FormDescription>
-						Target platforms for task scheduling
+						{t("services.swarmSettings.forms.placement.platformsDescription")}
 					</FormDescription>
 					<div className="space-y-2 mt-2">
 						{platforms.map((platform: any, index: number) => (
@@ -294,12 +317,16 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 									onChange={(e) =>
 										updatePlatform(index, "Architecture", e.target.value)
 									}
-									placeholder="amd64"
+									placeholder={t(
+										"services.swarmSettings.forms.placement.platformArchitecturePlaceholder",
+									)}
 								/>
 								<Input
 									value={platform.OS}
 									onChange={(e) => updatePlatform(index, "OS", e.target.value)}
-									placeholder="linux"
+									placeholder={t(
+										"services.swarmSettings.forms.placement.platformOsPlaceholder",
+									)}
 								/>
 								<Button
 									type="button"
@@ -307,7 +334,7 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 									size="sm"
 									onClick={() => removePlatform(index)}
 								>
-									Remove
+									{t("button.remove")}
 								</Button>
 							</div>
 						))}
@@ -317,7 +344,7 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 							size="sm"
 							onClick={addPlatform}
 						>
-							Add Platform
+							{t("services.swarmSettings.forms.placement.addPlatform")}
 						</Button>
 					</div>
 				</div>
@@ -335,10 +362,10 @@ export const PlacementForm = ({ id, type }: PlacementFormProps) => {
 							});
 						}}
 					>
-						Clear
+						{t("button.reset")}
 					</Button>
 					<Button type="submit" isLoading={isLoading}>
-						Save Placement
+						{t("services.swarmSettings.forms.placement.save")}
 					</Button>
 				</div>
 			</form>

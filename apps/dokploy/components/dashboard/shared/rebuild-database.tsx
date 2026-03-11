@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export const RebuildDatabase = ({ id, type }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 
 	const mutationMap = {
@@ -42,11 +44,12 @@ export const RebuildDatabase = ({ id, type }: Props) => {
 				mongoId: type === "mongo" ? id : "",
 				redisId: type === "redis" ? id : "",
 			});
-			toast.success("Database rebuilt successfully");
+			toast.success(t("services.databaseRebuild.toast.success"));
 			await utils.invalidate();
 		} catch (error) {
-			toast.error("Error rebuilding database", {
-				description: error instanceof Error ? error.message : "Unknown error",
+			toast.error(t("services.databaseRebuild.toast.error"), {
+				description:
+					error instanceof Error ? error.message : t("error.unknown"),
 			});
 		}
 	};
@@ -56,16 +59,17 @@ export const RebuildDatabase = ({ id, type }: Props) => {
 			<CardHeader>
 				<CardTitle className="text-xl flex items-center gap-2">
 					<AlertTriangle className="h-5 w-5 text-destructive" />
-					Danger Zone
+					{t("services.databaseRebuild.danger")}
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
-						<h3 className="text-base font-semibold">Rebuild Database</h3>
+						<h3 className="text-base font-semibold">
+							{t("services.databaseRebuild.title")}
+						</h3>
 						<p className="text-sm text-muted-foreground">
-							This action will completely reset your database to its initial
-							state. All data, tables, and configurations will be removed.
+							{t("services.databaseRebuild.description")}
 						</p>
 					</div>
 					<AlertDialog>
@@ -76,37 +80,37 @@ export const RebuildDatabase = ({ id, type }: Props) => {
 								className="w-full border-destructive/50 hover:bg-destructive/10 hover:text-destructive text-destructive"
 							>
 								<DatabaseIcon className="mr-2 h-4 w-4" />
-								Rebuild Database
+								{t("services.databaseRebuild.action")}
 							</Button>
 						</AlertDialogTrigger>
 						<AlertDialogContent>
 							<AlertDialogHeader>
 								<AlertDialogTitle className="flex items-center gap-2">
 									<AlertTriangle className="h-5 w-5 text-destructive" />
-									Are you absolutely sure?
+									{t("pages.Modal.databaseRebuild.title")}
 								</AlertDialogTitle>
 								<AlertDialogDescription className="space-y-2">
-									<p>This action will:</p>
+									<p>{t("pages.Modal.databaseRebuild.description")}</p>
 									<ul className="list-disc list-inside space-y-1">
-										<li>Stop the current database service</li>
-										<li>Delete all existing data and volumes</li>
-										<li>Reset to the default configuration</li>
-										<li>Restart the service with a clean state</li>
+										<li>{t("pages.Modal.databaseRebuild.list.stop")}</li>
+										<li>{t("pages.Modal.databaseRebuild.list.delete")}</li>
+										<li>{t("pages.Modal.databaseRebuild.list.reset")}</li>
+										<li>{t("pages.Modal.databaseRebuild.list.restart")}</li>
 									</ul>
 									<p className="font-medium text-destructive mt-4">
-										This action cannot be undone.
+										{t("pages.Modal.databaseRebuild.warning")}
 									</p>
 								</AlertDialogDescription>
 							</AlertDialogHeader>
 							<AlertDialogFooter>
-								<AlertDialogCancel>Cancel</AlertDialogCancel>
+								<AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
 								<AlertDialogAction
 									onClick={handleRebuild}
 									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 									asChild
 								>
 									<Button isLoading={isPending} type="submit">
-										Yes, rebuild database
+										{t("pages.Modal.databaseRebuild.confirm")}
 									</Button>
 								</AlertDialogAction>
 							</AlertDialogFooter>

@@ -319,7 +319,7 @@ export const ContainerFreeMonitoring = ({
 					<CardContent>
 						<div className="flex flex-col gap-2 w-full">
 							<span className="text-sm text-muted-foreground">
-								{`In: ${currentData.network.value.inputMb}  / Out: ${currentData.network.value.outputMb} `}
+								{`${t("monitoring.in")}: ${currentData.network.value.inputMb}  / ${t("monitoring.out")}: ${currentData.network.value.outputMb} `}
 							</span>
 							<DockerNetworkChart acummulativeData={acummulativeData.network} />
 						</div>

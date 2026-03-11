@@ -15,28 +15,33 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import type { ServiceType } from "../../application/advanced/show-resources";
 
-const addDockerImage = z.object({
-	dockerImage: z.string().min(1, "Docker image is required"),
-	command: z.string(),
-	args: z
-		.array(
-			z.object({
-				value: z.string().min(1, "Argument cannot be empty"),
-			}),
-		)
-		.optional(),
-});
+const createAddDockerImageSchema = (t: (key: string) => string) =>
+	z.object({
+		dockerImage: z
+			.string()
+			.min(1, t("services.customCommand.validation.imageRequired")),
+		command: z.string(),
+		args: z
+			.array(
+				z.object({
+					value: z.string().min(1, t("services.customCommand.validation.arg")),
+				}),
+			)
+			.optional(),
+	});
 
 interface Props {
 	id: string;
 	type: Exclude<ServiceType, "application">;
 }
 
-type AddDockerImage = z.infer<typeof addDockerImage>;
+type AddDockerImage = z.infer<ReturnType<typeof createAddDockerImageSchema>>;
 export const ShowCustomCommand = ({ id, type }: Props) => {
+	const { t } = useTranslation();
 	const queryMap = {
 		postgres: () =>
 			api.postgres.one.useQuery({ postgresId: id }, { enabled: !!id }),
@@ -71,7 +76,7 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 			command: "",
 			args: [],
 		},
-		resolver: zodResolver(addDockerImage),
+		resolver: zodResolver(createAddDockerImageSchema(t)),
 	});
 
 	const { fields, append, remove } = useFieldArray({
@@ -101,11 +106,11 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 			args: formData?.args?.map((arg) => arg.value).filter(Boolean),
 		})
 			.then(async () => {
-				toast.success("Custom Command Updated");
+				toast.success(t("services.customCommand.toast.updated"));
 				await refetch();
 			})
 			.catch(() => {
-				toast.error("Error updating the custom command");
+				toast.error(t("services.customCommand.toast.updateError"));
 			});
 	};
 	return (
@@ -113,7 +118,9 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 			<div className="flex w-full flex-col gap-5 ">
 				<Card className="bg-background">
 					<CardHeader>
-						<CardTitle className="text-xl">Advanced Settings</CardTitle>
+						<CardTitle className="text-xl">
+							{t("services.customCommand.title")}
+						</CardTitle>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4">
 						<Form {...form}>
@@ -127,9 +134,16 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 										name="dockerImage"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Docker Image</FormLabel>
+												<FormLabel>
+													{t("services.customCommand.image")}
+												</FormLabel>
 												<FormControl>
-													<Input placeholder="postgres:18" {...field} />
+													<Input
+														placeholder={t(
+															"services.customCommand.imagePlaceholder",
+														)}
+														{...field}
+													/>
 												</FormControl>
 
 												<FormMessage />
@@ -142,9 +156,16 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 									name="command"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Command</FormLabel>
+											<FormLabel>
+												{t("services.customCommand.command")}
+											</FormLabel>
 											<FormControl>
-												<Input placeholder="/bin/sh" {...field} />
+												<Input
+													placeholder={t(
+														"services.customCommand.commandPlaceholder",
+													)}
+													{...field}
+												/>
 											</FormControl>
 
 											<FormMessage />
@@ -154,7 +175,7 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 
 								<div className="space-y-2">
 									<div className="flex items-center justify-between">
-										<FormLabel>Arguments (Args)</FormLabel>
+										<FormLabel>{t("services.customCommand.args")}</FormLabel>
 										<Button
 											type="button"
 											variant="outline"
@@ -162,13 +183,13 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 											onClick={() => append({ value: "" })}
 										>
 											<Plus className="h-4 w-4 mr-1" />
-											Add Argument
+											{t("services.customCommand.addArg")}
 										</Button>
 									</div>
 
 									{fields.length === 0 && (
 										<p className="text-sm text-muted-foreground">
-											No arguments added yet. Click "Add Argument" to add one.
+											{t("services.customCommand.noArgs")}
 										</p>
 									)}
 
@@ -184,8 +205,12 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 															<Input
 																placeholder={
 																	index === 0
-																		? "-c"
-																		: "redis-server --port 6379"
+																		? t(
+																				"services.customCommand.argPlaceholderFirst",
+																			)
+																		: t(
+																				"services.customCommand.argPlaceholderExample",
+																			)
 																}
 																{...field}
 															/>
@@ -208,7 +233,7 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 
 								<div className="flex w-full justify-end">
 									<Button isLoading={form.formState.isSubmitting} type="submit">
-										Save
+										{t("button.save")}
 									</Button>
 								</div>
 							</form>
