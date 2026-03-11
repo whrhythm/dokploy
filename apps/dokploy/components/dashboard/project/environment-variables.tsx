@@ -142,11 +142,7 @@ export const EnvironmentVariables = ({ environmentId, children }: Props) => {
 													lineWrapping
 													language="properties"
 													wrapperClassName="h-[35rem] font-mono"
-													placeholder={`NODE_ENV=development
-DATABASE_URL=postgresql://localhost:5432/mydb
-API_KEY=your-api-key-here
-                                                            
-                                                    `}
+													placeholder={t("environment.variablesPlaceholder")}
 													{...field}
 												/>
 											</FormControl>

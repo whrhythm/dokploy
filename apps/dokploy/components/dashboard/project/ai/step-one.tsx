@@ -12,17 +12,18 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const examples = [
-	"Make a personal blog",
-	"Add a photo studio portfolio",
-	"Create a personal ad blocker",
-	"Build a social media dashboard",
-	"Sendgrid service opensource analogue",
-];
-
 export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
+	const { t } = useTranslation();
+	const examples = [
+		t("environment.Modal.aiAssistant.examples.blog"),
+		t("environment.Modal.aiAssistant.examples.portfolio"),
+		t("environment.Modal.aiAssistant.examples.adBlocker"),
+		t("environment.Modal.aiAssistant.examples.dashboard"),
+		t("environment.Modal.aiAssistant.examples.sendgrid"),
+	];
 	// Get servers from the API
 	const { data: servers } = api.server.withSSHKey.useQuery();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
@@ -39,12 +40,18 @@ export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
 		<div className="flex flex-col h-full gap-4">
 			<div className="">
 				<div className="space-y-4 ">
-					<h2 className="text-lg font-semibold">Step 1: Describe Your Needs</h2>
+					<h2 className="text-lg font-semibold">
+						{t("environment.Modal.aiAssistant.stepOne.title")}
+					</h2>
 					<div className="space-y-2">
-						<Label htmlFor="user-needs">Describe your template needs</Label>
+						<Label htmlFor="user-needs">
+							{t("environment.Modal.aiAssistant.stepOne.needsLabel")}
+						</Label>
 						<Textarea
 							id="user-needs"
-							placeholder="Describe the type of template you need, its purpose, and any specific features you'd like to include."
+							placeholder={t(
+								"environment.Modal.aiAssistant.stepOne.needsPlaceholder",
+							)}
 							value={templateInfo?.userInput}
 							onChange={(e) =>
 								setTemplateInfo({ ...templateInfo, userInput: e.target.value })
@@ -56,7 +63,7 @@ export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
 					{shouldShowServerDropdown && (
 						<div className="space-y-2">
 							<Label htmlFor="server-deploy">
-								Select the server where you want to deploy (optional)
+								{t("environment.Modal.aiAssistant.stepOne.serverLabel")}
 							</Label>
 							<Select
 								value={
@@ -82,7 +89,11 @@ export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
 							>
 								<SelectTrigger className="w-full">
 									<SelectValue
-										placeholder={!isCloud ? "Dokploy" : "Select a Server"}
+										placeholder={
+											!isCloud
+												? "Dokploy"
+												: t("environment.serverSelect.placeholder")
+										}
 									/>
 								</SelectTrigger>
 								<SelectContent>
@@ -92,7 +103,7 @@ export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
 												<span className="flex items-center gap-2 justify-between w-full">
 													<span>Dokploy</span>
 													<span className="text-muted-foreground text-xs self-center">
-														Default
+														{t("environment.serverSelect.default")}
 													</span>
 												</span>
 											</SelectItem>
@@ -103,7 +114,9 @@ export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
 											</SelectItem>
 										))}
 										<SelectLabel>
-											Servers ({servers?.length + (!isCloud ? 1 : 0)})
+											{t("environment.serverSelect.count", {
+												count: servers?.length + (!isCloud ? 1 : 0),
+											})}
 										</SelectLabel>
 									</SelectGroup>
 								</SelectContent>
@@ -112,7 +125,7 @@ export const StepOne = ({ setTemplateInfo, templateInfo }: any) => {
 					)}
 
 					<div className="space-y-2">
-						<Label>Examples:</Label>
+						<Label>{t("environment.Modal.aiAssistant.stepOne.examples")}</Label>
 						<div className="flex flex-wrap gap-2">
 							{examples.map((example, index) => (
 								<Button
