@@ -536,6 +536,7 @@ function LogoWrapper() {
 
 function SidebarLogo() {
 	const { state } = useSidebar();
+	const { t } = useTranslation();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
 	const { data: user } = api.user.get.useQuery();
 	const { data: session } = authClient.useSession();
@@ -619,7 +620,8 @@ function SidebarLogo() {
 											)}
 										>
 											<p className="text-sm font-medium leading-none">
-												{activeOrganization?.name ?? "Select Organization"}
+												{activeOrganization?.name ??
+													t("dashboard.organization.select")}
 											</p>
 										</div>
 									</div>
@@ -690,12 +692,16 @@ function SidebarLogo() {
 															})
 																.then(() => {
 																	refetch();
-																	toast.success("Default organization updated");
+																	toast.success(
+																		t("dashboard.organization.defaultUpdated"),
+																	);
 																})
 																.catch((error) => {
 																	toast.error(
 																		error?.message ||
-																			"Error setting default organization",
+																			t(
+																				"dashboard.organization.defaultUpdateError",
+																			),
 																	);
 																});
 														}}
@@ -733,13 +739,17 @@ function SidebarLogo() {
 																		.then(() => {
 																			refetch();
 																			toast.success(
-																				"Organization deleted successfully",
+																				t(
+																					"dashboard.organization.deleteSuccess",
+																				),
 																			);
 																		})
 																		.catch((error) => {
 																			toast.error(
 																				error?.message ||
-																					"Error deleting organization",
+																					t(
+																						"dashboard.organization.deleteError",
+																					),
 																			);
 																		});
 																}}
@@ -818,8 +828,10 @@ function SidebarLogo() {
 													</div>
 												</DropdownMenuItem>
 												<DialogAction
-													title="Accept Invitation"
-													description="Are you sure you want to accept this invitation?"
+													title={t("dashboard.organization.acceptTitle")}
+													description={t(
+														"dashboard.organization.acceptDescription",
+													)}
 													type="default"
 													onClick={async () => {
 														const { error } =
@@ -829,24 +841,27 @@ function SidebarLogo() {
 
 														if (error) {
 															toast.error(
-																error.message || "Error accepting invitation",
+																error.message ||
+																	t("dashboard.organization.acceptError"),
 															);
 														} else {
-															toast.success("Invitation accepted successfully");
+															toast.success(
+																t("dashboard.organization.acceptSuccess"),
+															);
 															await refetchInvitations();
 															await refetch();
 														}
 													}}
 												>
 													<Button size="sm" variant="secondary">
-														Accept Invitation
+														{t("dashboard.organization.acceptAction")}
 													</Button>
 												</DialogAction>
 											</div>
 										))
 									) : (
 										<DropdownMenuItem disabled>
-											No pending invitations
+											{t("dashboard.organization.noPendingInvitations")}
 										</DropdownMenuItem>
 									)}
 								</div>
@@ -909,6 +924,12 @@ export default function Page({ children }: Props) {
 		[...filteredHome, ...filteredSettings],
 		pathname,
 	);
+	const settingsTitles = new Set(filteredSettings.map((item) => item.title));
+	const breadcrumbLabel = activeItem
+		? settingsTitles.has(activeItem.title)
+			? translateSettingsTitle(activeItem.title)
+			: translateMenuTitle(activeItem.title)
+		: t("dashboard.breadcrumb.home");
 
 	if (!isLoaded) {
 		return <div className="w-full h-screen bg-background" />; // Placeholder mientras se carga
@@ -1193,7 +1214,7 @@ export default function Page({ children }: Props) {
 													href={activeItem?.url || "/"}
 													className="flex items-center gap-1.5"
 												>
-													{activeItem?.title}
+													{breadcrumbLabel}
 												</Link>
 											</BreadcrumbLink>
 										</BreadcrumbItem>
