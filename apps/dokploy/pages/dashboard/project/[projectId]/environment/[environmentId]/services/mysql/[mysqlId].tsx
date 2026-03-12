@@ -42,6 +42,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { UseKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { appRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
@@ -56,6 +57,7 @@ const MySql = (
 	const router = useRouter();
 	const { projectId, environmentId } = router.query;
 	const [tab, setSab] = useState<TabState>(activeTab);
+	const { t } = useTranslation();
 	const { data } = api.mysql.one.useQuery({ mysqlId });
 	const { data: auth } = api.user.get.useQuery();
 
@@ -74,7 +76,7 @@ const MySql = (
 			<UseKeyboardNav forPage="mysql" />
 			<BreadcrumbSidebar
 				list={[
-					{ name: "Projects", href: "/dashboard/projects" },
+					{ name: t("dashboard.projects"), href: "/dashboard/projects" },
 					{
 						name: data?.environment?.project?.name || "",
 						href: `/dashboard/project/${projectId}/environment/${environmentId}`,
@@ -91,8 +93,10 @@ const MySql = (
 			<div className="flex flex-col gap-4">
 				<Head>
 					<title>
-						Database: {data?.name} - {data?.environment?.project?.name} |
-						Dokploy
+						{t("services.mysql.pageTitle", {
+							name: data?.name || "",
+							project: data?.environment?.project?.name || "",
+						})}
 					</title>
 				</Head>
 				<div className="w-full">
@@ -129,7 +133,7 @@ const MySql = (
 														: "destructive"
 											}
 										>
-											{data?.server?.name || "Dokploy Server"}
+											{data?.server?.name || t("environment.dokployServer")}
 										</Badge>
 										{data?.server?.serverStatus === "inactive" && (
 											<TooltipProvider delayDuration={0}>
@@ -145,9 +149,7 @@ const MySql = (
 														side="top"
 													>
 														<span>
-															You cannot, deploy this application because the
-															server is inactive, please upgrade your plan to
-															add more servers.
+															{t("services.mysql.serverInactiveTooltip")}
 														</span>
 													</TooltipContent>
 												</Tooltip>
@@ -171,18 +173,17 @@ const MySql = (
 										<div className="max-w-3xl mx-auto flex flex-col items-center justify-center self-center gap-3">
 											<ServerOff className="size-10 text-muted-foreground self-center" />
 											<span className="text-center text-base text-muted-foreground">
-												This service is hosted on the server {data.server.name},
-												but this server has been disabled because your current
-												plan doesn't include enough servers. Please purchase
-												more servers to regain access to this application.
+												{t("services.mysql.inactivePanel", {
+													server: data.server.name,
+												})}
 											</span>
 											<span className="text-center text-base text-muted-foreground">
-												Go to{" "}
+												{t("services.mysql.goToBilling")}{" "}
 												<Link
 													href="/dashboard/settings/billing"
 													className="text-primary"
 												>
-													Billing
+													{t("settings.billing")}
 												</Link>
 											</span>
 										</div>
@@ -210,18 +211,24 @@ const MySql = (
 															: "md:grid-cols-6",
 												)}
 											>
-												<TabsTrigger value="general">General</TabsTrigger>
-												<TabsTrigger value="environment">
-													Environment
+												<TabsTrigger value="general">
+													{t("form.general")}
 												</TabsTrigger>
-												<TabsTrigger value="logs">Logs</TabsTrigger>
+												<TabsTrigger value="environment">
+													{t("tabs.environments")}
+												</TabsTrigger>
+												<TabsTrigger value="logs">{t("tabs.logs")}</TabsTrigger>
 												{((data?.serverId && isCloud) || !data?.server) && (
 													<TabsTrigger value="monitoring">
-														Monitoring
+														{t("tabs.monitoring")}
 													</TabsTrigger>
 												)}
-												<TabsTrigger value="backups">Backups</TabsTrigger>
-												<TabsTrigger value="advanced">Advanced</TabsTrigger>
+												<TabsTrigger value="backups">
+													{t("tabs.backups")}
+												</TabsTrigger>
+												<TabsTrigger value="advanced">
+													{t("tabs.advanced")}
+												</TabsTrigger>
 											</TabsList>
 										</div>
 

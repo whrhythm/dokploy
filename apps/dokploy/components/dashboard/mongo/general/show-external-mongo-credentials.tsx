@@ -24,28 +24,31 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const DockerProviderSchema = z.object({
-	externalPort: z.preprocess((a) => {
-		if (a !== null) {
-			const parsed = Number.parseInt(z.string().parse(a), 10);
-			return Number.isNaN(parsed) ? null : parsed;
-		}
-		return null;
-	}, z
-		.number()
-		.gte(0, "Range must be 0 - 65535")
-		.lte(65535, "Range must be 0 - 65535")
-		.nullable()),
-});
+const createExternalMongoSchema = (t: (key: string) => string) =>
+	z.object({
+		externalPort: z.preprocess((a) => {
+			if (a !== null) {
+				const parsed = Number.parseInt(z.string().parse(a), 10);
+				return Number.isNaN(parsed) ? null : parsed;
+			}
+			return null;
+		}, z
+			.number()
+			.gte(0, t("services.mongo.externalPortRange"))
+			.lte(65535, t("services.mongo.externalPortRange"))
+			.nullable()),
+	});
 
-type DockerProvider = z.infer<typeof DockerProviderSchema>;
+type DockerProvider = z.infer<ReturnType<typeof createExternalMongoSchema>>;
 
 interface Props {
 	mongoId: string;
 }
 export const ShowExternalMongoCredentials = ({ mongoId }: Props) => {
+	const { t } = useTranslation();
 	const { data: ip } = api.settings.getIp.useQuery();
 	const { data, refetch } = api.mongo.one.useQuery({ mongoId });
 	const { mutateAsync, isPending } = api.mongo.saveExternalPort.useMutation();
@@ -53,7 +56,7 @@ export const ShowExternalMongoCredentials = ({ mongoId }: Props) => {
 	const getIp = data?.server?.ipAddress || ip;
 	const form = useForm({
 		defaultValues: {},
-		resolver: zodResolver(DockerProviderSchema),
+		resolver: zodResolver(createExternalMongoSchema(t)),
 	});
 
 	useEffect(() => {
@@ -70,11 +73,13 @@ export const ShowExternalMongoCredentials = ({ mongoId }: Props) => {
 			mongoId,
 		})
 			.then(async () => {
-				toast.success("External Port updated");
+				toast.success(t("services.mongo.toast.externalPortUpdated"));
 				await refetch();
 			})
 			.catch((error: Error) => {
-				toast.error(error?.message || "Error saving the external port");
+				toast.error(
+					error?.message || t("services.mongo.toast.externalPortError"),
+				);
 			});
 	};
 
@@ -100,26 +105,26 @@ export const ShowExternalMongoCredentials = ({ mongoId }: Props) => {
 			<div className="flex w-full flex-col gap-5 ">
 				<Card className="bg-background">
 					<CardHeader>
-						<CardTitle className="text-xl">External Credentials</CardTitle>
+						<CardTitle className="text-xl">
+							{t("services.mongo.externalCredentials")}
+						</CardTitle>
 						<CardDescription>
-							In order to make the database reachable through the internet, you
-							must set a port and ensure that the port is not being used by
-							another application or database
+							{t("services.mongo.externalDescription")}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex w-full flex-col gap-4">
 						{!getIp && (
 							<AlertBlock type="warning">
-								You need to set an IP address in your{" "}
+								{t("services.mongo.externalMissingIpPrefix")}{" "}
 								<Link
 									href="/dashboard/settings/server"
 									className="text-primary"
 								>
 									{data?.serverId
-										? "Remote Servers -> Server -> Edit Server -> Update IP Address"
-										: "Web Server -> Server -> Update Server IP"}
+										? t("services.mongo.externalMissingIpRemote")
+										: t("services.mongo.externalMissingIpLocal")}
 								</Link>{" "}
-								to fix the database url connection.
+								{t("services.mongo.externalMissingIpSuffix")}
 							</AlertBlock>
 						)}
 						<Form {...form}>
@@ -135,10 +140,14 @@ export const ShowExternalMongoCredentials = ({ mongoId }: Props) => {
 											render={({ field }) => {
 												return (
 													<FormItem>
-														<FormLabel>External Port (Internet)</FormLabel>
+														<FormLabel>
+															{t("services.mongo.credentials.externalPort")}
+														</FormLabel>
 														<FormControl>
 															<Input
-																placeholder="27017"
+																placeholder={t(
+																	"services.mongo.credentials.externalPortPlaceholder",
+																)}
 																{...field}
 																value={field.value as string}
 															/>
@@ -153,7 +162,9 @@ export const ShowExternalMongoCredentials = ({ mongoId }: Props) => {
 								{!!data?.externalPort && (
 									<div className="grid w-full gap-8">
 										<div className="flex flex-col gap-3">
-											<Label>External Host</Label>
+											<Label>
+												{t("services.mongo.credentials.externalHost")}
+											</Label>
 											<ToggleVisibilityInput value={connectionUrl} disabled />
 										</div>
 									</div>
@@ -161,7 +172,7 @@ export const ShowExternalMongoCredentials = ({ mongoId }: Props) => {
 
 								<div className="flex justify-end">
 									<Button type="submit" isLoading={isPending}>
-										Save
+										{t("button.save")}
 									</Button>
 								</div>
 							</form>
