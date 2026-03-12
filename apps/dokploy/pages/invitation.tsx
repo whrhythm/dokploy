@@ -21,52 +21,54 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 import { api } from "@/utils/api";
 
-const registerSchema = z
-	.object({
-		name: z.string().min(1, {
-			message: "First name is required",
-		}),
-		lastName: z.string().min(1, {
-			message: "Last name is required",
-		}),
-		email: z
-			.string()
-			.min(1, {
-				message: "Email is required",
-			})
-			.email({
-				message: "Email must be a valid email",
+const createRegisterSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			name: z.string().min(1, {
+				message: t("auth.validation.firstNameRequired"),
 			}),
-		password: z
-			.string()
-			.min(1, {
-				message: "Password is required",
-			})
-			.refine((password) => password === "" || password.length >= 8, {
-				message: "Password must be at least 8 characters",
+			lastName: z.string().min(1, {
+				message: t("auth.validation.lastNameRequired"),
 			}),
-		confirmPassword: z
-			.string()
-			.min(1, {
-				message: "Password is required",
-			})
-			.refine(
-				(confirmPassword) =>
-					confirmPassword === "" || confirmPassword.length >= 8,
-				{
-					message: "Password must be at least 8 characters",
-				},
-			),
-	})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords do not match",
-		path: ["confirmPassword"],
-	});
+			email: z
+				.string()
+				.min(1, {
+					message: t("profile.validation.emailRequired"),
+				})
+				.email({
+					message: t("profile.validation.emailInvalid"),
+				}),
+			password: z
+				.string()
+				.min(1, {
+					message: t("auth.validation.passwordRequired"),
+				})
+				.refine((password) => password === "" || password.length >= 8, {
+					message: t("auth.validation.passwordMin"),
+				}),
+			confirmPassword: z
+				.string()
+				.min(1, {
+					message: t("auth.validation.passwordRequired"),
+				})
+				.refine(
+					(confirmPassword) =>
+						confirmPassword === "" || confirmPassword.length >= 8,
+					{
+						message: t("auth.validation.passwordMin"),
+					},
+				),
+		})
+		.refine((data) => data.password === data.confirmPassword, {
+			message: t("auth.validation.passwordMismatch"),
+			path: ["confirmPassword"],
+		});
 
-type Register = z.infer<typeof registerSchema>;
+type Register = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 interface Props {
 	token: string;
@@ -81,6 +83,7 @@ const Invitation = ({
 	isCloud,
 	userAlreadyExists,
 }: Props) => {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const { data } = api.user.getUserByToken.useQuery(
 		{
@@ -100,7 +103,7 @@ const Invitation = ({
 			password: "",
 			confirmPassword: "",
 		},
-		resolver: zodResolver(registerSchema),
+		resolver: zodResolver(createRegisterSchema(t)),
 	});
 
 	useEffect(() => {
@@ -136,10 +139,10 @@ const Invitation = ({
 				invitationId: token,
 			});
 
-			toast.success("Account created successfully");
+			toast.success(t("auth.invitation.toast.accountCreated"));
 			router.push("/dashboard/projects");
 		} catch {
-			toast.error("An error occurred while creating your account");
+			toast.error(t("auth.invitation.toast.createError"));
 		}
 	};
 
@@ -155,28 +158,29 @@ const Invitation = ({
 						>
 							<Logo className="size-12" />
 						</Link>
-						Invitation
+						{t("dashboard.invitation")}
 					</CardTitle>
 					{userAlreadyExists ? (
 						<div className="flex flex-col gap-4 justify-center items-center">
 							<AlertBlock type="success">
 								<div className="flex flex-col gap-2">
-									<span className="font-medium">Valid Invitation!</span>
+									<span className="font-medium">
+										{t("auth.invitation.validTitle")}
+									</span>
 									<span className="text-sm text-green-600 dark:text-green-400">
-										We detected that you already have an account with this
-										email. Please sign in to accept the invitation.
+										{t("auth.invitation.alreadyExists")}
 									</span>
 								</div>
 							</AlertBlock>
 
 							<Button asChild variant="default" className="w-full">
-								<Link href="/">Sign In</Link>
+								<Link href="/">{t("auth.login")}</Link>
 							</Button>
 						</div>
 					) : (
 						<>
 							<CardDescription>
-								Fill the form below to create your account
+								{t("auth.invitation.description")}
 							</CardDescription>
 							<div className="w-full">
 								<div className="p-3" />
@@ -202,9 +206,16 @@ const Invitation = ({
 													name="name"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>First Name</FormLabel>
+															<FormLabel>
+																{t("auth.register.firstName")}
+															</FormLabel>
 															<FormControl>
-																<Input placeholder="John" {...field} />
+																<Input
+																	placeholder={t(
+																		"auth.register.firstNamePlaceholder",
+																	)}
+																	{...field}
+																/>
 															</FormControl>
 															<FormMessage />
 														</FormItem>
@@ -215,9 +226,16 @@ const Invitation = ({
 													name="lastName"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Last Name</FormLabel>
+															<FormLabel>
+																{t("auth.register.lastName")}
+															</FormLabel>
 															<FormControl>
-																<Input placeholder="Doe" {...field} />
+																<Input
+																	placeholder={t(
+																		"auth.register.lastNamePlaceholder",
+																	)}
+																	{...field}
+																/>
 															</FormControl>
 															<FormMessage />
 														</FormItem>
@@ -228,11 +246,11 @@ const Invitation = ({
 													name="email"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Email</FormLabel>
+															<FormLabel>{t("auth.email")}</FormLabel>
 															<FormControl>
 																<Input
 																	disabled
-																	placeholder="Email"
+																	placeholder={t("auth.email")}
 																	{...field}
 																/>
 															</FormControl>
@@ -245,11 +263,11 @@ const Invitation = ({
 													name="password"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Password</FormLabel>
+															<FormLabel>{t("auth.password")}</FormLabel>
 															<FormControl>
 																<Input
 																	type="password"
-																	placeholder="Password"
+																	placeholder={t("auth.password")}
 																	{...field}
 																/>
 															</FormControl>
@@ -263,11 +281,11 @@ const Invitation = ({
 													name="confirmPassword"
 													render={({ field }) => (
 														<FormItem>
-															<FormLabel>Confirm Password</FormLabel>
+															<FormLabel>{t("auth.confirmPassword")}</FormLabel>
 															<FormControl>
 																<Input
 																	type="password"
-																	placeholder="Confirm Password"
+																	placeholder={t("auth.confirmPassword")}
 																	{...field}
 																/>
 															</FormControl>
@@ -281,7 +299,7 @@ const Invitation = ({
 													isLoading={form.formState.isSubmitting}
 													className="w-full"
 												>
-													Register
+													{t("auth.register")}
 												</Button>
 											</div>
 
@@ -292,13 +310,13 @@ const Invitation = ({
 															className="hover:underline text-muted-foreground"
 															href="/"
 														>
-															Login
+															{t("auth.login")}
 														</Link>
 														<Link
 															className="hover:underline text-muted-foreground"
 															href="/send-reset-password"
 														>
-															Lost your password?
+															{t("auth.forgotPassword")}
 														</Link>
 													</>
 												)}
