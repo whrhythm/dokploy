@@ -14,6 +14,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { type UploadFile, uploadFileSchema } from "@/utils/schema";
 
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export const SaveDragNDrop = ({ applicationId }: Props) => {
+	const { t } = useTranslation();
 	const { data, refetch } = api.application.one.useQuery({ applicationId });
 
 	const { mutateAsync, isPending } =
@@ -52,11 +54,11 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 
 		await mutateAsync(formData)
 			.then(async () => {
-				toast.success("Deployment saved");
+				toast.success(t("services.application.provider.drop.toast.saved"));
 				await refetch();
 			})
 			.catch(() => {
-				toast.error("Error saving the deployment");
+				toast.error(t("services.application.provider.drop.toast.saveError"));
 			});
 	};
 
@@ -73,9 +75,14 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 							name="dropBuildPath"
 							render={({ field }) => (
 								<FormItem className="w-full ">
-									<FormLabel>Build Path</FormLabel>
+									<FormLabel>
+										{t("services.application.provider.buildPath")}
+									</FormLabel>
 									<FormControl>
-										<Input {...field} placeholder="Build Path" />
+										<Input
+											{...field}
+											placeholder={t("services.application.provider.buildPath")}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -86,11 +93,15 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 							name="zip"
 							render={({ field }) => (
 								<FormItem className="w-full ">
-									<FormLabel>Zip file</FormLabel>
+									<FormLabel>
+										{t("services.application.provider.drop.zipFile")}
+									</FormLabel>
 									<FormControl>
 										<Dropzone
 											{...field}
-											dropMessage="Drop files or click here"
+											dropMessage={t(
+												"services.application.provider.drop.dropMessage",
+											)}
 											accept=".zip"
 											onChange={(e) => {
 												if (e instanceof FileList) {
@@ -132,7 +143,7 @@ export const SaveDragNDrop = ({ applicationId }: Props) => {
 						isLoading={isPending}
 						disabled={!zip || isPending}
 					>
-						Deploy{" "}
+						{t("button.deploy")}
 					</Button>
 				</div>
 			</form>

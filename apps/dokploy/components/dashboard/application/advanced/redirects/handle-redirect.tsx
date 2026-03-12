@@ -35,15 +35,19 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const AddRedirectchema = z.object({
-	regex: z.string().min(1, "Regex required"),
-	permanent: z.boolean().default(false),
-	replacement: z.string().min(1, "Replacement required"),
-});
+const createAddRedirectSchema = (t: (key: string) => string) =>
+	z.object({
+		regex: z.string().min(1, t("services.redirects.validation.regexRequired")),
+		permanent: z.boolean().default(false),
+		replacement: z
+			.string()
+			.min(1, t("services.redirects.validation.replacementRequired")),
+	});
 
-type AddRedirect = z.infer<typeof AddRedirectchema>;
+type AddRedirect = z.infer<ReturnType<typeof createAddRedirectSchema>>;
 
 // Default presets
 const redirectPresets = [
@@ -86,6 +90,7 @@ export const HandleRedirect = ({
 	redirectId,
 	children = <PlusIcon className="w-4 h-4" />,
 }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const [presetSelected, setPresetSelected] = useState("");
 
@@ -110,7 +115,7 @@ export const HandleRedirect = ({
 			regex: "",
 			replacement: "",
 		},
-		resolver: zodResolver(AddRedirectchema),
+		resolver: zodResolver(createAddRedirectSchema(t)),
 	});
 
 	useEffect(() => {
@@ -128,7 +133,11 @@ export const HandleRedirect = ({
 			redirectId: redirectId || "",
 		})
 			.then(async () => {
-				toast.success(redirectId ? "Redirect Updated" : "Redirect Created");
+				toast.success(
+					redirectId
+						? t("services.redirects.toast.updated")
+						: t("services.redirects.toast.created"),
+				);
 				await utils.application.one.invalidate({
 					applicationId,
 				});
@@ -141,8 +150,8 @@ export const HandleRedirect = ({
 			.catch(() => {
 				toast.error(
 					redirectId
-						? "Error updating the redirect"
-						: "Error creating the redirect",
+						? t("services.redirects.toast.updateError")
+						: t("services.redirects.toast.createError"),
 				);
 			});
 	};
@@ -181,18 +190,20 @@ export const HandleRedirect = ({
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Redirects</DialogTitle>
+					<DialogTitle>{t("services.redirects.title")}</DialogTitle>
 					<DialogDescription>
-						Redirects are used to redirect requests to another url.
+						{t("services.redirects.dialogDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
 				<div className="md:col-span-2">
-					<Label>Presets</Label>
+					<Label>{t("services.redirects.presets")}</Label>
 					<Select onValueChange={onPresetSelect} value={presetSelected}>
 						<SelectTrigger>
-							<SelectValue placeholder="No preset selected" />
+							<SelectValue
+								placeholder={t("services.redirects.noPresetSelected")}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{redirectPresets.map((preset) => (
@@ -218,9 +229,12 @@ export const HandleRedirect = ({
 								name="regex"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Regex</FormLabel>
+										<FormLabel>{t("services.redirects.regex")}</FormLabel>
 										<FormControl>
-											<Input placeholder="^http://localhost/(.*)" {...field} />
+											<Input
+												placeholder={t("services.redirects.regexPlaceholder")}
+												{...field}
+											/>
 										</FormControl>
 
 										<FormMessage />
@@ -232,9 +246,14 @@ export const HandleRedirect = ({
 								name="replacement"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Replacement</FormLabel>
+										<FormLabel>{t("services.redirects.replacement")}</FormLabel>
 										<FormControl>
-											<Input placeholder="http://mydomain/$${1}" {...field} />
+											<Input
+												placeholder={t(
+													"services.redirects.replacementPlaceholder",
+												)}
+												{...field}
+											/>
 										</FormControl>
 
 										<FormMessage />
@@ -248,10 +267,9 @@ export const HandleRedirect = ({
 								render={({ field }) => (
 									<FormItem className="flex flex-row items-center justify-between p-3 mt-4 border rounded-lg shadow-sm">
 										<div className="space-y-0.5">
-											<FormLabel>Permanent</FormLabel>
+											<FormLabel>{t("services.redirects.permanent")}</FormLabel>
 											<FormDescription>
-												Set the permanent option to true to apply a permanent
-												redirection.
+												{t("services.redirects.permanentDescription")}
 											</FormDescription>
 										</div>
 										<FormControl>
@@ -272,7 +290,7 @@ export const HandleRedirect = ({
 							form="hook-form-add-redirect"
 							type="submit"
 						>
-							{redirectId ? "Update" : "Create"}
+							{redirectId ? t("button.update") : t("button.create")}
 						</Button>
 					</DialogFooter>
 				</Form>

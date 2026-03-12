@@ -76,8 +76,8 @@ export const ShowPatches = ({ id, type }: Props) => {
 			.then((result) => {
 				setRepoPath(result);
 			})
-			.catch((err) => {
-				toast.error(err.message);
+			.catch(() => {
+				toast.error(t("services.patches.toast.createError"));
 			})
 			.finally(() => {
 				setIsLoadingRepo(false);
