@@ -899,7 +899,7 @@ export const applicationRouter = createTRPCRouter({
 					message: "Functionality not available in cloud version",
 				});
 			}
-			const stats = await getApplicationStats(input.appName);
+			const stats = await getApplicationStats(input.appName, input.gpuScope);
 
 			return stats;
 		}),

@@ -100,6 +100,7 @@ export * from "./utils/filesystem/ssh";
 export * from "./utils/gpu-setup";
 export * from "./utils/notifications/build-error";
 export * from "./utils/notifications/build-success";
+export * from "./utils/notifications/container-health";
 export * from "./utils/notifications/database-backup";
 export * from "./utils/notifications/docker-cleanup";
 export * from "./utils/notifications/dokploy-restart";

@@ -1635,6 +1635,8 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 				"monitoring.diskUsage": "磁盘使用率",
 				"monitoring.networkUsage": "网络使用率",
 				"monitoring.blockUsage": "块设备使用率",
+				"monitoring.gpuUsage": "GPU 使用率",
+				"monitoring.gpuUnavailable": "NVIDIA GPU 不可用",
 				"monitoring.used": "已使用",
 				"monitoring.limit": "限制",
 				"monitoring.cpu": "CPU",
@@ -1869,6 +1871,9 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 				"notifications.action.dokployRestartDesc": "当 Jos 重启时触发。",
 				"notifications.action.serverThreshold": "服务器阈值",
 				"notifications.action.serverThresholdDesc": "当达到服务器阈值时触发。",
+				"notifications.action.containerHealth": "容器健康检查",
+				"notifications.action.containerHealthDesc":
+					"当容器健康状态变化或变为不健康时触发。",
 				"notifications.validation.nameRequired": "名称为必填项",
 				"notifications.validation.webhookUrlRequired": "Webhook URL 为必填项",
 				"notifications.validation.botTokenRequired": "机器人令牌为必填项",

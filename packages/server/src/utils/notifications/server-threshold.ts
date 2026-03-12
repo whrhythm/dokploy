@@ -12,7 +12,7 @@ import {
 } from "./utils";
 
 interface ServerThresholdPayload {
-	Type: "CPU" | "Memory";
+	Type: "CPU" | "Memory" | "GPU" | "Disk";
 	Value: number;
 	Threshold: number;
 	Message: string;
@@ -45,7 +45,14 @@ export const sendServerThresholdNotifications = async (
 		},
 	});
 
-	const typeEmoji = payload.Type === "CPU" ? "🔲" : "💾";
+	const typeEmoji =
+		payload.Type === "CPU"
+			? "🔲"
+			: payload.Type === "Memory"
+				? "💾"
+				: payload.Type === "GPU"
+					? "🎮"
+					: "💽";
 	const typeColor = 0xff0000; // Rojo para indicar alerta
 
 	for (const notification of notificationList) {

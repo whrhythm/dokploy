@@ -600,9 +600,12 @@ export const rebuildPreviewApplication = async ({
 	return true;
 };
 
-export const getApplicationStats = async (appName: string) => {
+export const getApplicationStats = async (
+	appName: string,
+	gpuScope: "host" | "container" = "container",
+) => {
 	if (appName === "dokploy") {
-		return await getAdvancedStats(appName);
+		return await getAdvancedStats(appName, gpuScope);
 	}
 	const filter = {
 		status: ["running"],
@@ -618,7 +621,7 @@ export const getApplicationStats = async (appName: string) => {
 		return null;
 	}
 
-	const data = await getAdvancedStats(appName);
+	const data = await getAdvancedStats(appName, gpuScope);
 
 	return data;
 };

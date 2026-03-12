@@ -320,6 +320,8 @@ export const serverRouter = createTRPCRouter({
 							thresholds: {
 								cpu: input.metricsConfig.server.thresholds.cpu,
 								memory: input.metricsConfig.server.thresholds.memory,
+								gpu: input.metricsConfig.server.thresholds.gpu,
+								disk: input.metricsConfig.server.thresholds.disk,
 							},
 						},
 						containers: {
@@ -466,6 +468,11 @@ export const serverRouter = createTRPCRouter({
 					totalDisk: string;
 					networkIn: string;
 					networkOut: string;
+					gpuAvailable: boolean;
+					gpuCount: number;
+					gpuUtilization: string;
+					gpuMemoryUsedMB: string;
+					gpuMemoryTotalMB: string;
 					timestamp: string;
 				}[];
 			} catch (error) {

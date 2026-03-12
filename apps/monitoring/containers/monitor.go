@@ -1,9 +1,12 @@
 package containers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -19,6 +22,7 @@ type ContainerMonitor struct {
 	isRunning bool
 	mu        sync.Mutex
 	stopChan  chan struct{}
+	lastState map[string]string
 }
 
 func NewContainerMonitor(db *database.DB) (*ContainerMonitor, error) {
@@ -27,9 +31,23 @@ func NewContainerMonitor(db *database.DB) (*ContainerMonitor, error) {
 	}
 
 	return &ContainerMonitor{
-		db:       db,
-		stopChan: make(chan struct{}),
+		db:        db,
+		stopChan:  make(chan struct{}),
+		lastState: map[string]string{},
 	}, nil
+}
+
+type ContainerAlertPayload struct {
+	ServerType     string  `json:"ServerType"`
+	Type           string  `json:"Type"`
+	Value          float64 `json:"Value"`
+	Threshold      float64 `json:"Threshold"`
+	Message        string  `json:"Message"`
+	Timestamp      string  `json:"Timestamp"`
+	Token          string  `json:"Token"`
+	ContainerName  string  `json:"ContainerName,omitempty"`
+	CurrentStatus  string  `json:"CurrentStatus,omitempty"`
+	PreviousStatus string  `json:"PreviousStatus,omitempty"`
 }
 
 func (cm *ContainerMonitor) Start() error {
@@ -144,7 +162,103 @@ func (cm *ContainerMonitor) collectMetrics() {
 		if err := cm.db.SaveContainerMetric(metric); err != nil {
 			log.Printf("Error saving metrics for %s: %v", serviceName, err)
 		}
+
+		cm.checkAndSendContainerHealth(container)
 	}
+}
+
+func (cm *ContainerMonitor) checkAndSendContainerHealth(container Container) {
+	currentState := cm.getContainerHealthStatus(container.ID)
+	if currentState == "" {
+		return
+	}
+
+	previousState, hasPrevious := cm.lastState[container.ID]
+	cm.lastState[container.ID] = currentState
+
+	if !hasPrevious {
+		if isUnhealthyContainerState(currentState) {
+			cm.sendContainerHealthAlert(container.Name, "unknown", currentState)
+		}
+		return
+	}
+
+	if previousState == currentState {
+		return
+	}
+
+	if isUnhealthyContainerState(currentState) || isUnhealthyContainerState(previousState) {
+		cm.sendContainerHealthAlert(container.Name, previousState, currentState)
+	}
+}
+
+func isUnhealthyContainerState(state string) bool {
+	state = strings.ToLower(strings.TrimSpace(state))
+	return state == "unhealthy" || state == "exited" || state == "dead"
+}
+
+func (cm *ContainerMonitor) getContainerHealthStatus(containerID string) string {
+	cmd := exec.Command(
+		"docker",
+		"inspect",
+		containerID,
+		"--format",
+		"{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}",
+	)
+	output, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(output))
+}
+
+func (cm *ContainerMonitor) sendContainerHealthAlert(containerName, previousState, currentState string) {
+	cfg := config.GetMetricsConfig()
+
+	payload := ContainerAlertPayload{
+		ServerType:     cfg.Server.ServerType,
+		Type:           "ContainerHealth",
+		Value:          0,
+		Threshold:      0,
+		Message:        fmt.Sprintf("Container %s changed state from %s to %s", containerName, previousState, currentState),
+		Timestamp:      time.Now().UTC().Format(time.RFC3339Nano),
+		Token:          cfg.Server.Token,
+		ContainerName:  containerName,
+		CurrentStatus:  currentState,
+		PreviousStatus: previousState,
+	}
+
+	if err := sendContainerAlert(cfg.Server.UrlCallback, payload); err != nil {
+		log.Printf("failed to send container health alert: %v", err)
+	}
+}
+
+func sendContainerAlert(callbackURL string, payload ContainerAlertPayload) error {
+	if callbackURL == "" {
+		return fmt.Errorf("callback URL is not set")
+	}
+
+	wrappedPayload := map[string]interface{}{
+		"json": payload,
+	}
+
+	jsonData, err := json.Marshal(wrappedPayload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal alert payload: %v", err)
+	}
+
+	resp, err := http.Post(callbackURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to send POST request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("received non-OK response status: %s, body: %s", resp.Status, string(bodyBytes))
+	}
+
+	return nil
 }
 
 func processContainerMetrics(container Container) *database.ContainerMetric {

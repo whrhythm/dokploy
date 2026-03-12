@@ -63,6 +63,8 @@ export const server = pgTable("server", {
 				thresholds: {
 					cpu: number;
 					memory: number;
+					gpu: number;
+					disk: number;
 				};
 			};
 			containers: {
@@ -86,6 +88,8 @@ export const server = pgTable("server", {
 				thresholds: {
 					cpu: 0,
 					memory: 0,
+					gpu: 0,
+					disk: 0,
 				},
 			},
 			containers: {
@@ -192,6 +196,8 @@ export const apiUpdateServerMonitoring = createSchema
 					thresholds: z.object({
 						cpu: z.number().min(0),
 						memory: z.number().min(0),
+						gpu: z.number().min(0),
+						disk: z.number().min(0),
 					}),
 				}),
 				containers: z.object({

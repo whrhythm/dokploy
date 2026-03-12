@@ -44,6 +44,9 @@ export const setupDockerStatsMonitoringSocketServer = (
 			| "application"
 			| "stack"
 			| "docker-compose";
+		const gpuScope = (url.searchParams.get("gpuScope") || "container") as
+			| "host"
+			| "container";
 		const { user, session } = await validateRequest(req);
 
 		if (!appName) {
@@ -58,11 +61,11 @@ export const setupDockerStatsMonitoringSocketServer = (
 		const intervalId = setInterval(async () => {
 			try {
 				// Special case: when monitoring "dokploy", get host system stats instead of container stats
-				if (appName === "dokploy") {
+				if (appName === "dokploy" && gpuScope === "host") {
 					const stat = await getHostSystemStats();
 
-					await recordAdvancedStats(stat, appName);
-					const data = await getLastAdvancedStatsFile(appName);
+					await recordAdvancedStats(stat, appName, gpuScope);
+					const data = await getLastAdvancedStatsFile(appName, gpuScope);
 
 					ws.send(
 						JSON.stringify({
@@ -103,8 +106,8 @@ export const setupDockerStatsMonitoringSocketServer = (
 				}
 				const stat = JSON.parse(stdout);
 
-				await recordAdvancedStats(stat, appName);
-				const data = await getLastAdvancedStatsFile(appName);
+				await recordAdvancedStats(stat, appName, gpuScope);
+				const data = await getLastAdvancedStatsFile(appName, gpuScope);
 
 				ws.send(
 					JSON.stringify({

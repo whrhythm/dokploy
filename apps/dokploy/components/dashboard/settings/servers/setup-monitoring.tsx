@@ -60,6 +60,8 @@ const Schema = z.object({
 			thresholds: z.object({
 				cpu: z.number().min(0),
 				memory: z.number().min(0),
+				gpu: z.number().min(0),
+				disk: z.number().min(0),
 			}),
 			cronJob: z.string().min(1, {
 				message: "Cron Job is required",
@@ -134,6 +136,8 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 					thresholds: {
 						cpu: 0,
 						memory: 0,
+						gpu: 0,
+						disk: 0,
 					},
 					cronJob: "",
 				},
@@ -163,6 +167,8 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 						thresholds: {
 							cpu: data?.metricsConfig?.server?.thresholds?.cpu,
 							memory: data?.metricsConfig?.server?.thresholds?.memory,
+							gpu: data?.metricsConfig?.server?.thresholds?.gpu ?? 0,
+							disk: data?.metricsConfig?.server?.thresholds?.disk ?? 0,
 						},
 						cronJob: data?.metricsConfig?.server?.cronJob || "0 0 * * *",
 					},
@@ -549,6 +555,40 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 										</FormControl>
 										<FormDescription>
 											Alert when memory usage exceeds this percentage
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="metricsConfig.server.thresholds.gpu"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>GPU Threshold (%)</FormLabel>
+										<FormControl>
+											<NumberInput {...field} />
+										</FormControl>
+										<FormDescription>
+											Alert when NVIDIA GPU utilization exceeds this percentage
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="metricsConfig.server.thresholds.disk"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Disk Threshold (%)</FormLabel>
+										<FormControl>
+											<NumberInput {...field} />
+										</FormControl>
+										<FormDescription>
+											Alert when disk usage exceeds this percentage
 										</FormDescription>
 										<FormMessage />
 									</FormItem>

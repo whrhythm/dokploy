@@ -6,6 +6,7 @@ import { api } from "@/utils/api";
 import { DockerBlockChart } from "./docker-block-chart";
 import { DockerCpuChart } from "./docker-cpu-chart";
 import { DockerDiskChart } from "./docker-disk-chart";
+import { DockerGpuChart } from "./docker-gpu-chart";
 import { DockerMemoryChart } from "./docker-memory-chart";
 import { DockerNetworkChart } from "./docker-network-chart";
 
@@ -39,11 +40,22 @@ const defaultData = {
 		value: { diskTotal: 0, diskUsage: 0, diskUsedPercentage: 0, diskFree: 0 },
 		time: "",
 	},
+	gpu: {
+		value: {
+			available: false,
+			utilization: 0,
+			memoryUsedMb: 0,
+			memoryTotalMb: 0,
+			gpuCount: 0,
+		},
+		time: "",
+	},
 };
 
 interface Props {
 	appName: string;
 	appType?: "application" | "stack" | "docker-compose";
+	gpuScope?: "host" | "container";
 }
 export interface DockerStats {
 	cpu: {
@@ -81,6 +93,16 @@ export interface DockerStats {
 
 		time: string;
 	};
+	gpu: {
+		value: {
+			available: boolean;
+			utilization: number;
+			memoryUsedMb: number;
+			memoryTotalMb: number;
+			gpuCount: number;
+		};
+		time: string;
+	};
 }
 
 export type DockerStatsJSON = {
@@ -89,6 +111,7 @@ export type DockerStatsJSON = {
 	block: DockerStats["block"][];
 	network: DockerStats["network"][];
 	disk: DockerStats["disk"][];
+	gpu: DockerStats["gpu"][];
 };
 
 export const convertMemoryToBytes = (
@@ -118,10 +141,11 @@ export const convertMemoryToBytes = (
 export const ContainerFreeMonitoring = ({
 	appName,
 	appType = "application",
+	gpuScope = "container",
 }: Props) => {
 	const { t } = useTranslation();
 	const { data } = api.application.readAppMonitoring.useQuery(
-		{ appName },
+		{ appName, gpuScope },
 		{
 			refetchOnWindowFocus: false,
 		},
@@ -132,6 +156,7 @@ export const ContainerFreeMonitoring = ({
 		block: [],
 		network: [],
 		disk: [],
+		gpu: [],
 	});
 	const [currentData, setCurrentData] = useState<DockerStats>(defaultData);
 
@@ -144,6 +169,7 @@ export const ContainerFreeMonitoring = ({
 			block: [],
 			network: [],
 			disk: [],
+			gpu: [],
 		});
 	}, [appName]);
 
@@ -156,6 +182,7 @@ export const ContainerFreeMonitoring = ({
 			block: data.block[data.block.length - 1] ?? currentData.block,
 			network: data.network[data.network.length - 1] ?? currentData.network,
 			disk: data.disk[data.disk.length - 1] ?? currentData.disk,
+			gpu: data.gpu[data.gpu.length - 1] ?? currentData.gpu,
 		});
 		setAcummulativeData({
 			block: data?.block || [],
@@ -163,12 +190,13 @@ export const ContainerFreeMonitoring = ({
 			disk: data?.disk || [],
 			memory: data?.memory || [],
 			network: data?.network || [],
+			gpu: data?.gpu || [],
 		});
 	}, [data]);
 
 	useEffect(() => {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const wsUrl = `${protocol}//${window.location.host}/listen-docker-stats-monitoring?appName=${appName}&appType=${appType}`;
+		const wsUrl = `${protocol}//${window.location.host}/listen-docker-stats-monitoring?appName=${appName}&appType=${appType}&gpuScope=${gpuScope}`;
 		const ws = new WebSocket(wsUrl);
 
 		ws.onmessage = (e) => {
@@ -181,6 +209,7 @@ export const ContainerFreeMonitoring = ({
 				block: value.data.block ?? currentData.block,
 				disk: value.data.disk ?? currentData.disk,
 				network: value.data.network ?? currentData.network,
+				gpu: value.data.gpu ?? currentData.gpu,
 			};
 
 			setCurrentData(data);
@@ -192,6 +221,7 @@ export const ContainerFreeMonitoring = ({
 				block: [...prevData.block, data.block].slice(-MAX_DATA_POINTS),
 				network: [...prevData.network, data.network].slice(-MAX_DATA_POINTS),
 				disk: [...prevData.disk, data.disk].slice(-MAX_DATA_POINTS),
+				gpu: [...prevData.gpu, data.gpu].slice(-MAX_DATA_POINTS),
 			}));
 		};
 
@@ -200,7 +230,7 @@ export const ContainerFreeMonitoring = ({
 		};
 
 		return () => ws.close();
-	}, [appName]);
+	}, [appName, appType, gpuScope]);
 
 	return (
 		<div className="rounded-xl bg-background flex flex-col gap-4">
@@ -294,6 +324,37 @@ export const ContainerFreeMonitoring = ({
 						</CardContent>
 					</Card>
 				)}
+
+				<Card className="bg-background">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+						<CardTitle className="text-sm font-medium">
+							{t("monitoring.gpuUsage")}
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="flex flex-col gap-2 w-full">
+							{currentData.gpu.value.available ? (
+								<>
+									<span className="text-sm text-muted-foreground">
+										{`${t("monitoring.used")}: ${currentData.gpu.value.utilization}%`}
+									</span>
+									<span className="text-sm text-muted-foreground">
+										{`${(currentData.gpu.value.memoryUsedMb / 1024).toFixed(2)} GB / ${(currentData.gpu.value.memoryTotalMb / 1024).toFixed(2)} GB (${currentData.gpu.value.gpuCount})`}
+									</span>
+									<Progress
+										value={currentData.gpu.value.utilization}
+										className="w-[100%]"
+									/>
+									<DockerGpuChart acummulativeData={acummulativeData.gpu} />
+								</>
+							) : (
+								<span className="text-sm text-muted-foreground">
+									{t("monitoring.gpuUnavailable")}
+								</span>
+							)}
+						</div>
+					</CardContent>
+				</Card>
 
 				<Card className="bg-background">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -1,4 +1,11 @@
-import { Clock, Cpu, HardDrive, Loader2, MemoryStick } from "lucide-react";
+import {
+	Activity,
+	Clock,
+	Cpu,
+	HardDrive,
+	Loader2,
+	MemoryStick,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import {
 	Select,
@@ -10,6 +17,7 @@ import {
 import { api } from "@/utils/api";
 import { CPUChart } from "./cpu-chart";
 import { DiskChart } from "./disk-chart";
+import { GPUChart } from "./gpu-chart";
 import { MemoryChart } from "./memory-chart";
 import { NetworkChart } from "./network-chart";
 
@@ -31,7 +39,7 @@ const DATA_POINTS_OPTIONS = {
 	all: "All points",
 } as const;
 
-interface SystemMetrics {
+interface RawSystemMetrics {
 	cpu: string;
 	cpuModel: string;
 	cpuCores: number;
@@ -49,6 +57,37 @@ interface SystemMetrics {
 	totalDisk: string;
 	networkIn: string;
 	networkOut: string;
+	gpuAvailable: boolean;
+	gpuCount: number;
+	gpuUtilization: string;
+	gpuMemoryUsedMB: string;
+	gpuMemoryTotalMB: string;
+	timestamp: string;
+}
+
+interface SystemMetrics {
+	cpu: number;
+	cpuModel: string;
+	cpuCores: number;
+	cpuPhysicalCores: number;
+	cpuSpeed: number;
+	os: string;
+	distro: string;
+	kernel: string;
+	arch: string;
+	memUsed: number;
+	memUsedGB: number;
+	memTotal: number;
+	uptime: number;
+	diskUsed: number;
+	totalDisk: number;
+	networkIn: number;
+	networkOut: number;
+	gpuAvailable: boolean;
+	gpuCount: number;
+	gpuUtilization: number;
+	gpuMemoryUsedMB: number;
+	gpuMemoryTotalMB: number;
 	timestamp: string;
 }
 
@@ -88,7 +127,7 @@ export const ShowPaidMonitoring = ({
 	useEffect(() => {
 		if (!data) return;
 
-		const formattedData = data.map((metric: SystemMetrics) => ({
+		const formattedData = data.map((metric: RawSystemMetrics) => ({
 			timestamp: metric.timestamp,
 			cpu: Number.parseFloat(metric.cpu),
 			cpuModel: metric.cpuModel,
@@ -106,6 +145,11 @@ export const ShowPaidMonitoring = ({
 			networkOut: Number.parseFloat(metric.networkOut),
 			diskUsed: Number.parseFloat(metric.diskUsed),
 			totalDisk: Number.parseFloat(metric.totalDisk),
+			gpuAvailable: metric.gpuAvailable,
+			gpuCount: metric.gpuCount,
+			gpuUtilization: Number.parseFloat(metric.gpuUtilization),
+			gpuMemoryUsedMB: Number.parseFloat(metric.gpuMemoryUsedMB),
+			gpuMemoryTotalMB: Number.parseFloat(metric.gpuMemoryTotalMB),
 			uptime: metric.uptime,
 		}));
 
@@ -201,7 +245,7 @@ export const ShowPaidMonitoring = ({
 			</div>
 
 			{/* Stats Cards */}
-			<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+			<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
 				<div className="rounded-lg border text-card-foreground shadow-sm p-6">
 					<div className="flex items-center gap-2">
 						<Clock className="h-4 w-4 text-muted-foreground" />
@@ -237,6 +281,29 @@ export const ShowPaidMonitoring = ({
 					</div>
 					<p className="mt-2 text-2xl font-bold">{metrics.diskUsed}%</p>
 				</div>
+
+				<div className="rounded-lg border text-card-foreground shadow-sm p-6">
+					<div className="flex items-center gap-2">
+						<Activity className="h-4 w-4 text-muted-foreground" />
+						<h3 className="text-sm font-medium">NVIDIA GPU</h3>
+					</div>
+					{metrics.gpuAvailable ? (
+						<>
+							<p className="mt-2 text-2xl font-bold">
+								{metrics.gpuUtilization}%
+							</p>
+							<p className="text-sm text-muted-foreground mt-1">
+								{(metrics.gpuMemoryUsedMB / 1024).toFixed(2)} GB /{" "}
+								{(metrics.gpuMemoryTotalMB / 1024).toFixed(2)} GB (
+								{metrics.gpuCount} GPUs)
+							</p>
+						</>
+					) : (
+						<p className="mt-2 text-sm text-muted-foreground">
+							NVIDIA GPU unavailable
+						</p>
+					)}
+				</div>
 			</div>
 
 			{/* System Information */}
@@ -267,6 +334,7 @@ export const ShowPaidMonitoring = ({
 			<div className="grid gap-4 grid-cols-1 md:grid-cols-1 xl:grid-cols-2">
 				<CPUChart data={historicalData} />
 				<MemoryChart data={historicalData} />
+				<GPUChart data={historicalData} />
 				<DiskChart data={metrics} />
 				<NetworkChart data={historicalData} />
 			</div>
