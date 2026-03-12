@@ -19,6 +19,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { CreateFileDialog } from "./create-file-dialog";
 
@@ -37,6 +38,7 @@ type DirectoryEntry = {
 };
 
 export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
+	const { t } = useTranslation();
 	const [selectedFile, setSelectedFile] = useState<string | null>(null);
 	const [fileContent, setFileContent] = useState<string>("");
 	const [createFolderPath, setCreateFolderPath] = useState<string | null>(null);
@@ -108,11 +110,11 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 			patchType: "update",
 		})
 			.then(() => {
-				toast.success("Patch saved");
+				toast.success(t("services.patches.toast.saved"));
 				utils.patch.byEntityId.invalidate({ id, type });
 			})
 			.catch(() => {
-				toast.error("Failed to save patch");
+				toast.error(t("services.patches.toast.saveError"));
 			});
 	};
 
@@ -120,11 +122,11 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 		if (!selectedFile) return;
 		markForDeletion({ id, type, filePath: selectedFile })
 			.then(() => {
-				toast.success("File marked for deletion");
+				toast.success(t("services.patches.toast.fileMarkedDeletion"));
 				utils.patch.byEntityId.invalidate({ id, type });
 			})
 			.catch(() => {
-				toast.error("Failed to mark file for deletion");
+				toast.error(t("services.patches.toast.fileMarkDeletionError"));
 			});
 	};
 
@@ -139,14 +141,14 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 				patchType: "create",
 			})
 				.then(() => {
-					toast.success("File created");
+					toast.success(t("services.patches.toast.fileCreated"));
 					utils.patch.byEntityId.invalidate({ id, type });
 				})
 				.catch(() => {
-					toast.error("Failed to create file");
+					toast.error(t("services.patches.toast.fileCreateError"));
 				});
 		},
-		[id, type, saveAsPatch, utils],
+		[id, type, saveAsPatch, utils, t],
 	);
 
 	const selectedFilePatch = patches?.find(
@@ -162,11 +164,11 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 				content: fileData || "",
 			})
 			.then(() => {
-				toast.success("Deletion unmarked");
+				toast.success(t("services.patches.toast.deletionUnmarked"));
 				utils.patch.byEntityId.invalidate({ id, type });
 			})
 			.catch(() => {
-				toast.error("Failed to unmark deletion");
+				toast.error(t("services.patches.toast.deletionUnmarkError"));
 			});
 	};
 
@@ -257,11 +259,11 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 						<ArrowLeft className="h-4 w-4" />
 					</Button>
 					<div>
-						<CardTitle>Edit File</CardTitle>
+						<CardTitle>{t("services.patches.editor.editFile")}</CardTitle>
 						<CardDescription>
 							{selectedFile
-								? `Editing: ${selectedFile}`
-								: "Select a file from the tree to edit"}
+								? t("services.patches.editingFile", { value: selectedFile })
+								: t("services.patches.editor.selectFileHelp")}
 						</CardDescription>
 					</div>
 				</div>
@@ -277,7 +279,7 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 								{updatePatch.isPending && (
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 								)}
-								Unmark deletion
+								{t("services.patches.editor.unmarkDeletion")}
 							</Button>
 						) : (
 							<>
@@ -291,7 +293,7 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									)}
 									<Trash2 className="mr-2 h-4 w-4" />
-									Mark for deletion
+									{t("services.patches.editor.markForDeletion")}
 								</Button>
 								<Button
 									onClick={handleSave}
@@ -301,7 +303,7 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									)}
 									<Save className="mr-2 h-4 w-4" />
-									Save Patch
+									{t("services.patches.editor.savePatch")}
 								</Button>
 							</>
 						)}
@@ -325,7 +327,7 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 										}
 									/>
 									<span className="text-xs text-muted-foreground">
-										New file in root
+										{t("services.patches.createFile.newFileInRoot")}
 									</span>
 								</div>
 								{isDirLoading ? (
@@ -336,7 +338,7 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 									renderTree(directories)
 								) : (
 									<div className="text-sm text-muted-foreground p-4">
-										No files found
+										{t("services.patches.editor.noFilesFound")}
 									</div>
 								)}
 							</div>
@@ -357,7 +359,7 @@ export const PatchEditor = ({ id, type, repoPath, onClose }: Props) => {
 							/>
 						) : (
 							<div className="flex items-center justify-center h-full text-muted-foreground">
-								Select a file to edit
+								{t("services.patches.editor.selectFileToEdit")}
 							</div>
 						)}
 					</div>

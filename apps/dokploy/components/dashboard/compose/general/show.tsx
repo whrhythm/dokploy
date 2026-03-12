@@ -6,6 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { ComposeActions } from "./actions";
 import { ShowProviderFormCompose } from "./generic/show";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const ShowGeneralCompose = ({ composeId }: Props) => {
+	const { t } = useTranslation();
 	const { data } = api.compose.one.useQuery(
 		{ composeId },
 		{
@@ -27,14 +29,18 @@ export const ShowGeneralCompose = ({ composeId }: Props) => {
 			<Card className="bg-background">
 				<CardHeader>
 					<div className="flex flex-row gap-2 justify-between flex-wrap">
-						<CardTitle className="text-xl">Deploy Settings</CardTitle>
+						<CardTitle className="text-xl">
+							{t("services.compose.general.deploySettings")}
+						</CardTitle>
 						<Badge>
-							{data?.composeType === "docker-compose" ? "Compose" : "Stack"}
+							{data?.composeType === "docker-compose"
+								? t("services.compose.general.composeType.compose")
+								: t("services.compose.general.composeType.stack")}
 						</Badge>
 					</div>
 
 					<CardDescription>
-						Create a compose file to deploy your compose
+						{t("services.compose.general.description")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-4 flex-wrap">

@@ -12,6 +12,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const CancelQueues = ({ id, type }: Props) => {
+	const { t } = useTranslation();
 	const { mutateAsync, isPending } =
 		type === "application"
 			? api.application.cleanQueues.useMutation()
@@ -34,21 +36,21 @@ export const CancelQueues = ({ id, type }: Props) => {
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
 				<Button variant="destructive" className="w-fit" isLoading={isPending}>
-					Cancel Queues
+					{t("services.deployments.cancelQueues.button")}
 					<Ban className="size-4" />
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
-						Are you sure to cancel the incoming deployments?
+						{t("services.deployments.cancelQueues.confirmTitle")}
 					</AlertDialogTitle>
 					<AlertDialogDescription>
-						This will cancel all the incoming deployments
+						{t("services.deployments.cancelQueues.confirmDescription")}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={async () => {
 							await mutateAsync({
@@ -56,14 +58,16 @@ export const CancelQueues = ({ id, type }: Props) => {
 								composeId: id || "",
 							})
 								.then(() => {
-									toast.success("Queues are being cleaned");
+									toast.success(
+										t("services.deployments.cancelQueues.toast.success"),
+									);
 								})
 								.catch((err) => {
 									toast.error(err.message);
 								});
 						}}
 					>
-						Confirm
+						{t("button.confirm")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

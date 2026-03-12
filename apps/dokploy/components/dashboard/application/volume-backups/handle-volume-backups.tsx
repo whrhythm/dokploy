@@ -38,60 +38,60 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { CacheType } from "../domains/handle-domain";
 import { ScheduleFormField } from "../schedules/handle-schedules";
 
-const formSchema = z
-	.object({
-		name: z.string().min(1, "Name is required"),
-		cronExpression: z.string().min(1, "Cron expression is required"),
-		volumeName: z
-			.string()
-			.min(1, "Volume name is required")
-			.regex(
-				/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/,
-				"Invalid volume name. Use letters, numbers, '._-' and start with a letter/number.",
-			),
-		prefix: z.string(),
-		keepLatestCount: z.coerce
-			.number()
-			.int()
-			.gte(1, "Must be at least 1")
-			.optional()
-			.nullable(),
-		turnOff: z.boolean().default(false),
-		enabled: z.boolean().default(true),
-		serviceType: z.enum([
-			"application",
-			"compose",
-			"postgres",
-			"mariadb",
-			"mongo",
-			"mysql",
-			"redis",
-		]),
-		serviceName: z.string(),
-		destinationId: z.string().min(1, "Destination required"),
-	})
-	.superRefine((data, ctx) => {
-		if (data.serviceType === "compose" && !data.serviceName) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "Service name is required",
-				path: ["serviceName"],
-			});
-		}
-
-		if (data.serviceType === "compose" && !data.serviceName) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "Service name is required",
-				path: ["serviceName"],
-			});
-		}
-	});
+const createFormSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			name: z
+				.string()
+				.min(1, t("services.volumeBackups.validation.nameRequired")),
+			cronExpression: z
+				.string()
+				.min(1, t("services.volumeBackups.validation.cronRequired")),
+			volumeName: z
+				.string()
+				.min(1, t("services.volumeBackups.validation.volumeNameRequired"))
+				.regex(
+					/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/,
+					t("services.volumeBackups.validation.volumeNameInvalid"),
+				),
+			prefix: z.string(),
+			keepLatestCount: z.coerce
+				.number()
+				.int()
+				.gte(1, t("services.volumeBackups.validation.keepLatestMin"))
+				.optional()
+				.nullable(),
+			turnOff: z.boolean().default(false),
+			enabled: z.boolean().default(true),
+			serviceType: z.enum([
+				"application",
+				"compose",
+				"postgres",
+				"mariadb",
+				"mongo",
+				"mysql",
+				"redis",
+			]),
+			serviceName: z.string(),
+			destinationId: z
+				.string()
+				.min(1, t("services.volumeBackups.validation.destinationRequired")),
+		})
+		.superRefine((data, ctx) => {
+			if (data.serviceType === "compose" && !data.serviceName) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: t("services.volumeBackups.validation.serviceNameRequired"),
+					path: ["serviceName"],
+				});
+			}
+		});
 
 interface Props {
 	id?: string;
@@ -111,6 +111,8 @@ export const HandleVolumeBackups = ({
 	volumeBackupId,
 	volumeBackupType,
 }: Props) => {
+	const { t } = useTranslation();
+	const formSchema = createFormSchema(t);
 	const [isOpen, setIsOpen] = useState(false);
 	const [cacheType, setCacheType] = useState<CacheType>("cache");
 	const [keepLatestCountInput, setKeepLatestCountInput] = useState("");
@@ -238,7 +240,9 @@ export const HandleVolumeBackups = ({
 		})
 			.then(() => {
 				toast.success(
-					`Volume backup ${volumeBackupId ? "updated" : "created"} successfully`,
+					volumeBackupId
+						? t("services.volumeBackups.toast.updated")
+						: t("services.volumeBackups.toast.created"),
 				);
 				utils.volumeBackups.list.invalidate({
 					id,
@@ -248,7 +252,7 @@ export const HandleVolumeBackups = ({
 			})
 			.catch((error) => {
 				toast.error(
-					error instanceof Error ? error.message : "An unknown error occurred",
+					error instanceof Error ? error.message : t("errors.unknown"),
 				);
 			});
 	};
@@ -267,7 +271,7 @@ export const HandleVolumeBackups = ({
 				) : (
 					<Button>
 						<PlusCircle className="w-4 h-4 mr-2" />
-						Add Volume Backup
+						{t("services.volumeBackups.add")}
 					</Button>
 				)}
 			</DialogTrigger>
@@ -280,10 +284,12 @@ export const HandleVolumeBackups = ({
 			>
 				<DialogHeader>
 					<DialogTitle>
-						{volumeBackupId ? "Edit" : "Create"} Volume Backup
+						{volumeBackupId
+							? t("services.volumeBackups.modal.editTitle")
+							: t("services.volumeBackups.modal.createTitle")}
 					</DialogTitle>
 					<DialogDescription>
-						Create a volume backup to backup your volume to a destination
+						{t("services.volumeBackups.modal.description")}
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -294,13 +300,18 @@ export const HandleVolumeBackups = ({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="flex items-center gap-2">
-										Task Name
+										{t("services.volumeBackups.taskName")}
 									</FormLabel>
 									<FormControl>
-										<Input placeholder="Daily Database Backup" {...field} />
+										<Input
+											placeholder={t(
+												"services.volumeBackups.taskNamePlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormDescription>
-										A descriptive name for your scheduled task
+										{t("services.volumeBackups.taskNameHelp")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -316,14 +327,20 @@ export const HandleVolumeBackups = ({
 							name="destinationId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Destination</FormLabel>
+									<FormLabel>
+										{t("services.volumeBackups.destination")}
+									</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value}
 									>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select a destination" />
+												<SelectValue
+													placeholder={t(
+														"services.volumeBackups.destinationPlaceholder",
+													)}
+												/>
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -338,7 +355,7 @@ export const HandleVolumeBackups = ({
 										</SelectContent>
 									</Select>
 									<FormDescription>
-										Choose the backup destination where files will be stored
+										{t("services.volumeBackups.destinationHelp")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -360,7 +377,9 @@ export const HandleVolumeBackups = ({
 										name="serviceName"
 										render={({ field }) => (
 											<FormItem className="w-full">
-												<FormLabel>Service Name</FormLabel>
+												<FormLabel>
+													{t("services.domains.serviceName")}
+												</FormLabel>
 												<div className="flex gap-2">
 													<Select
 														onValueChange={field.onChange}
@@ -368,7 +387,11 @@ export const HandleVolumeBackups = ({
 													>
 														<FormControl>
 															<SelectTrigger>
-																<SelectValue placeholder="Select a service name" />
+																<SelectValue
+																	placeholder={t(
+																		"services.domains.serviceNamePlaceholder",
+																	)}
+																/>
 															</SelectTrigger>
 														</FormControl>
 
@@ -382,7 +405,7 @@ export const HandleVolumeBackups = ({
 																</SelectItem>
 															))}
 															<SelectItem value="none" disabled>
-																Empty
+																{t("select.none")}
 															</SelectItem>
 														</SelectContent>
 													</Select>
@@ -410,8 +433,7 @@ export const HandleVolumeBackups = ({
 																className="max-w-[10rem]"
 															>
 																<p>
-																	Fetch: Will clone the repository and load the
-																	services
+																	{t("services.domains.serviceLoad.fetchHelp")}
 																</p>
 															</TooltipContent>
 														</Tooltip>
@@ -440,9 +462,7 @@ export const HandleVolumeBackups = ({
 																className="max-w-[10rem]"
 															>
 																<p>
-																	Cache: If you previously deployed this
-																	compose, it will read the services from the
-																	last deployment/fetch from the repository
+																	{t("services.domains.serviceLoad.cacheHelp")}
 																</p>
 															</TooltipContent>
 														</Tooltip>
@@ -460,14 +480,18 @@ export const HandleVolumeBackups = ({
 										name="volumeName"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Volumes</FormLabel>
+												<FormLabel>{t("form.volumes")}</FormLabel>
 												<Select
 													onValueChange={field.onChange}
 													defaultValue={field.value || ""}
 												>
 													<FormControl>
 														<SelectTrigger>
-															<SelectValue placeholder="Select a volume name" />
+															<SelectValue
+																placeholder={t(
+																	"services.volumeBackups.volumeSelectPlaceholder",
+																)}
+															/>
 														</SelectTrigger>
 													</FormControl>
 													<SelectContent>
@@ -482,8 +506,7 @@ export const HandleVolumeBackups = ({
 													</SelectContent>
 												</Select>
 												<FormDescription>
-													Choose the volume to backup, if you dont see the
-													volume here, you can type the volume name manually
+													{t("services.volumeBackups.volumeSelectHelp")}
 												</FormDescription>
 												<FormMessage />
 											</FormItem>
@@ -498,14 +521,18 @@ export const HandleVolumeBackups = ({
 								name="volumeName"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Volumes</FormLabel>
+										<FormLabel>{t("form.volumes")}</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value || ""}
 										>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue placeholder="Select a volume name" />
+													<SelectValue
+														placeholder={t(
+															"services.volumeBackups.volumeSelectPlaceholder",
+														)}
+													/>
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
@@ -517,8 +544,7 @@ export const HandleVolumeBackups = ({
 											</SelectContent>
 										</Select>
 										<FormDescription>
-											Choose the volume to backup, if you dont see the volume
-											here, you can type the volume name manually
+											{t("services.volumeBackups.volumeSelectHelp")}
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -531,12 +557,19 @@ export const HandleVolumeBackups = ({
 							name="volumeName"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Volume Name</FormLabel>
+									<FormLabel>
+										{t("services.volumeBackups.volumeName")}
+									</FormLabel>
 									<FormControl>
-										<Input placeholder="my-volume-name" {...field} />
+										<Input
+											placeholder={t(
+												"services.volumeBackups.volumeNameInputPlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormDescription>
-										The name of the Docker volume to backup
+										{t("services.volumeBackups.volumeNameHelp")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -548,12 +581,19 @@ export const HandleVolumeBackups = ({
 							name="prefix"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Backup Prefix</FormLabel>
+									<FormLabel>
+										{t("services.volumeBackups.backupPrefix")}
+									</FormLabel>
 									<FormControl>
-										<Input placeholder="backup-" {...field} />
+										<Input
+											placeholder={t(
+												"services.volumeBackups.backupPrefixPlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormDescription>
-										Prefix for backup files (optional)
+										{t("services.volumeBackups.backupPrefixHelp")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -565,14 +605,18 @@ export const HandleVolumeBackups = ({
 							name="keepLatestCount"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Keep Latest Backups</FormLabel>
+									<FormLabel>
+										{t("services.volumeBackups.keepLatest")}
+									</FormLabel>
 									<FormControl>
 										<Input
 											{...field}
 											type="number"
 											min={1}
 											autoComplete="off"
-											placeholder="Leave empty to keep all"
+											placeholder={t(
+												"services.volumeBackups.keepLatestPlaceholder",
+											)}
 											value={keepLatestCountInput}
 											onChange={(e) => {
 												const raw = e.target.value;
@@ -586,7 +630,7 @@ export const HandleVolumeBackups = ({
 										/>
 									</FormControl>
 									<FormDescription>
-										How many recent backups to keep. Empty means no cleanup.
+										{t("services.volumeBackups.keepLatestHelp")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -603,12 +647,10 @@ export const HandleVolumeBackups = ({
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
-										Turn Off Container During Backup
+										{t("services.volumeBackups.turnOffDuringBackup")}
 									</FormLabel>
 									<FormDescription className="text-amber-600 dark:text-amber-400">
-										⚠️ The container will be temporarily stopped during backup to
-										prevent file corruption. This ensures data integrity but may
-										cause temporary service interruption.
+										{t("services.volumeBackups.turnOffDuringBackupHelp")}
 									</FormDescription>
 								</FormItem>
 							)}
@@ -624,14 +666,16 @@ export const HandleVolumeBackups = ({
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
-										Enabled
+										{t("status.active")}
 									</FormLabel>
 								</FormItem>
 							)}
 						/>
 
 						<Button type="submit" isLoading={isPending} className="w-full">
-							{volumeBackupId ? "Update" : "Create"} Volume Backup
+							{volumeBackupId
+								? t("services.volumeBackups.actions.update")
+								: t("services.volumeBackups.actions.create")}
 						</Button>
 					</form>
 				</Form>

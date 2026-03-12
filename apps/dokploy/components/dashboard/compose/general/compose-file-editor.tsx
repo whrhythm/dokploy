@@ -12,6 +12,7 @@ import {
 	FormItem,
 	FormMessage,
 } from "@/components/ui/form";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { validateAndFormatYAML } from "../../application/advanced/traefik/update-traefik-config";
 
@@ -26,6 +27,7 @@ const AddComposeFile = z.object({
 type AddComposeFile = z.infer<typeof AddComposeFile>;
 
 export const ComposeFileEditor = ({ composeId }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const { data, refetch } = api.compose.one.useQuery(
 		{
@@ -65,7 +67,7 @@ export const ComposeFileEditor = ({ composeId }: Props) => {
 		if (!valid) {
 			form.setError("composeFile", {
 				type: "manual",
-				message: error || "Invalid YAML",
+				message: error || t("services.compose.fileEditor.invalidYaml"),
 			});
 			return;
 		}
@@ -78,7 +80,7 @@ export const ComposeFileEditor = ({ composeId }: Props) => {
 			sourceType: "raw",
 		})
 			.then(async () => {
-				toast.success("Compose config Updated");
+				toast.success(t("services.compose.fileEditor.toast.updated"));
 				setHasUnsavedChanges(false);
 				refetch();
 				await utils.compose.getConvertedCompose.invalidate({
@@ -86,7 +88,7 @@ export const ComposeFileEditor = ({ composeId }: Props) => {
 				});
 			})
 			.catch(() => {
-				toast.error("Error updating the Compose config");
+				toast.error(t("services.compose.fileEditor.toast.updateError"));
 			});
 	};
 
@@ -110,12 +112,14 @@ export const ComposeFileEditor = ({ composeId }: Props) => {
 			<div className="w-full flex flex-col gap-4 ">
 				<div className="flex items-center justify-between">
 					<div>
-						<h3 className="text-lg font-medium">Compose File</h3>
+						<h3 className="text-lg font-medium">
+							{t("services.compose.fileEditor.title")}
+						</h3>
 						<p className="text-sm text-muted-foreground">
-							Configure your Docker Compose file for this service.
+							{t("services.compose.fileEditor.description")}
 							{hasUnsavedChanges && (
 								<span className="text-yellow-500 ml-2">
-									(You have unsaved changes)
+									{t("services.compose.fileEditor.unsavedChanges")}
 								</span>
 							)}
 						</p>
@@ -140,14 +144,9 @@ export const ComposeFileEditor = ({ composeId }: Props) => {
 												value={field.value}
 												className="font-mono"
 												wrapperClassName="compose-file-editor"
-												placeholder={`version: '3'
-services:
-    web:
-    image: nginx
-    ports:
-        - "80:80"
-    
-    `}
+												placeholder={t(
+													"services.compose.fileEditor.placeholder",
+												)}
 												onChange={(value) => {
 													field.onChange(value);
 												}}
@@ -170,7 +169,7 @@ services:
 						isLoading={isPending}
 						className="lg:w-fit w-full"
 					>
-						Save
+						{t("button.save")}
 					</Button>
 				</div>
 			</div>

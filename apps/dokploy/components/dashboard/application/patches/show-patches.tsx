@@ -19,6 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { EditPatchDialog } from "./edit-patch-dialog";
 import { PatchEditor } from "./patch-editor";
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export const ShowPatches = ({ id, type }: Props) => {
+	const { t } = useTranslation();
 	const [selectedFile, setSelectedFile] = useState<string | null>(null);
 	const [repoPath, setRepoPath] = useState<string | null>(null);
 	const [isLoadingRepo, setIsLoadingRepo] = useState(false);
@@ -86,17 +88,14 @@ export const ShowPatches = ({ id, type }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row items-center justify-between">
 				<div>
-					<CardTitle>Patches</CardTitle>
-					<CardDescription>
-						Apply code patches to your repository during build. Patches are
-						applied after cloning the repository and before building.
-					</CardDescription>
+					<CardTitle>{t("services.patches.title")}</CardTitle>
+					<CardDescription>{t("services.patches.description")}</CardDescription>
 				</div>
 				{patches && patches?.length > 0 && (
 					<Button onClick={handleOpenEditor} disabled={isLoadingRepo}>
 						{isLoadingRepo && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 						<FilePlus2 className="mr-2 h-4 w-4" />
-						Create Patch
+						{t("services.patches.create")}
 					</Button>
 				)}
 			</CardHeader>
@@ -111,10 +110,11 @@ export const ShowPatches = ({ id, type }: Props) => {
 							<FilePlus2 className="h-10 w-10 text-muted-foreground" />
 						</div>
 						<div className="space-y-1 text-center">
-							<p className="text-sm font-medium">No patches yet</p>
+							<p className="text-sm font-medium">
+								{t("services.patches.emptyTitle")}
+							</p>
 							<p className="max-w-sm text-sm text-muted-foreground">
-								Add file patches to modify your repo before each build—configs,
-								env, or code. Create your first patch to get started.
+								{t("services.patches.emptyDescription")}
 							</p>
 						</div>
 						<Button onClick={handleOpenEditor} disabled={isLoadingRepo}>
@@ -122,17 +122,19 @@ export const ShowPatches = ({ id, type }: Props) => {
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 							)}
 							<FilePlus2 className="mr-2 h-4 w-4" />
-							Create Patch
+							{t("services.patches.create")}
 						</Button>
 					</div>
 				) : (
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>File Path</TableHead>
-								<TableHead className="w-[80px]">Type</TableHead>
-								<TableHead className="w-[100px]">Enabled</TableHead>
-								<TableHead className="w-[100px]">Actions</TableHead>
+								<TableHead>{t("services.patches.filePath")}</TableHead>
+								<TableHead className="w-[80px]">{t("form.type")}</TableHead>
+								<TableHead className="w-[100px]">
+									{t("services.patches.enabled")}
+								</TableHead>
+								<TableHead className="w-[100px]">{t("form.actions")}</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -168,7 +170,7 @@ export const ShowPatches = ({ id, type }: Props) => {
 														enabled: checked,
 													})
 													.then(() => {
-														toast.success("Patch updated");
+														toast.success(t("services.patches.toast.updated"));
 														utils.patch.byEntityId.invalidate({
 															id,
 															type,
@@ -198,7 +200,9 @@ export const ShowPatches = ({ id, type }: Props) => {
 												onClick={() => {
 													mutateAsync({ patchId: patch.patchId })
 														.then(() => {
-															toast.success("Patch deleted");
+															toast.success(
+																t("services.patches.toast.deleted"),
+															);
 															utils.patch.byEntityId.invalidate({
 																id,
 																type,
@@ -208,7 +212,7 @@ export const ShowPatches = ({ id, type }: Props) => {
 															toast.error(err.message);
 														});
 												}}
-												title="Delete patch"
+												title={t("services.patches.deleteTitle")}
 											>
 												<Trash2 className="h-4 w-4 text-destructive" />
 											</Button>
