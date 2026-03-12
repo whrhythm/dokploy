@@ -1,3 +1,4 @@
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -6,11 +7,12 @@ interface Props {
 }
 
 export const Logo = ({ className = "size-14", logoUrl }: Props) => {
+	const { t } = useTranslation();
 	if (logoUrl) {
 		return (
 			<img
 				src={logoUrl}
-				alt="Organization Logo"
+				alt={t("logo.organization")}
 				className={cn(className, "object-contain rounded-sm")}
 			/>
 		);

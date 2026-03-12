@@ -1,3 +1,4 @@
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 // https://worldvectorlogo.com/downloaded/redis Ref
@@ -157,9 +158,10 @@ export const RedisIcon = ({ className }: Props) => {
 };
 
 export const GitlabIcon = ({ className }: Props) => {
+	const { t } = useTranslation();
 	return (
 		<svg
-			aria-label="gitlab"
+			aria-label={t("git.gitlab")}
 			width="14"
 			height="14"
 			viewBox="0 0 14 14"
@@ -187,9 +189,10 @@ export const GitlabIcon = ({ className }: Props) => {
 };
 
 export const GithubIcon = ({ className }: Props) => {
+	const { t } = useTranslation();
 	return (
 		<svg
-			aria-label="github"
+			aria-label={t("git.github")}
 			height="18"
 			viewBox="0 0 14 14"
 			width="18"

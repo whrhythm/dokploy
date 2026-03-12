@@ -15,6 +15,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Toggle } from "@/components/ui/toggle";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface Props {
 	name: string;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export const Secrets = (props: Props) => {
+	const { t } = useTranslation();
 	const [isVisible, setIsVisible] = useState(true);
 	const form = useFormContext<Record<string, string>>();
 
@@ -36,7 +38,7 @@ export const Secrets = (props: Props) => {
 				</div>
 
 				<Toggle
-					aria-label="Toggle bold"
+					aria-label={t("ui.secrets.toggleVisibility")}
 					pressed={isVisible}
 					onPressedChange={setIsVisible}
 				>
