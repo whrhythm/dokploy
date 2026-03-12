@@ -21,20 +21,22 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 
-const loginSchema = z.object({
-	email: z
-		.string()
-		.min(1, {
-			message: "Email is required",
-		})
-		.email({
-			message: "Email must be a valid email",
-		}),
-});
+const createLoginSchema = (t: (key: string) => string) =>
+	z.object({
+		email: z
+			.string()
+			.min(1, {
+				message: t("profile.validation.emailRequired"),
+			})
+			.email({
+				message: t("profile.validation.emailInvalid"),
+			}),
+	});
 
-type Login = z.infer<typeof loginSchema>;
+type Login = z.infer<ReturnType<typeof createLoginSchema>>;
 
 type AuthResponse = {
 	is2FAEnabled: boolean;
@@ -42,6 +44,7 @@ type AuthResponse = {
 };
 
 export default function Home() {
+	const { t } = useTranslation();
 	const [temp, _setTemp] = useState<AuthResponse>({
 		is2FAEnabled: false,
 		authId: "",
@@ -54,7 +57,7 @@ export default function Home() {
 		defaultValues: {
 			email: "",
 		},
-		resolver: zodResolver(loginSchema),
+		resolver: zodResolver(createLoginSchema(t)),
 	});
 
 	useEffect(() => {
@@ -68,10 +71,10 @@ export default function Home() {
 			redirectTo: "/reset-password",
 		});
 		if (error) {
-			setError(error.message || "An error occurred");
+			setError(error.message || t("error.generic"));
 			setIsLoading(false);
 		} else {
-			toast.success("Email sent", {
+			toast.success(t("auth.reset.toast.sent"), {
 				duration: 2000,
 			});
 		}
@@ -84,10 +87,10 @@ export default function Home() {
 					<Logo />
 					<span className="font-medium text-sm">Dokploy</span>
 				</Link>
-				<CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
-				<CardDescription>
-					Enter your email to reset your password
-				</CardDescription>
+				<CardTitle className="text-2xl font-bold">
+					{t("auth.resetPassword")}
+				</CardTitle>
+				<CardDescription>{t("auth.reset.description")}</CardDescription>
 
 				<div className="mx-auto w-full max-w-lg bg-transparent ">
 					<CardContent className="p-0">
@@ -108,9 +111,9 @@ export default function Home() {
 											name="email"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Email</FormLabel>
+													<FormLabel>{t("auth.email")}</FormLabel>
 													<FormControl>
-														<Input placeholder="Email" {...field} />
+														<Input placeholder={t("auth.email")} {...field} />
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -122,7 +125,7 @@ export default function Home() {
 											isLoading={isLoading}
 											className="w-full"
 										>
-											Send Reset Link
+											{t("auth.reset.sendLink")}
 										</Button>
 									</div>
 								</form>
@@ -135,7 +138,7 @@ export default function Home() {
 									className="hover:underline text-muted-foreground"
 									href="/"
 								>
-									Login
+									{t("auth.login")}
 								</Link>
 							</div>
 						</div>
