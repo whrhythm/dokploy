@@ -30,7 +30,7 @@ const Page = () => {
 export default Page;
 
 Page.getLayout = (page: ReactElement) => {
-	return <DashboardLayout metaName="SSO">{page}</DashboardLayout>;
+	return <DashboardLayout metaName="settings.sso">{page}</DashboardLayout>;
 };
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
