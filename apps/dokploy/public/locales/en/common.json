@@ -1644,6 +1644,7 @@
 	"ui.breadcrumb.more": "More",
 	"ui.sheet.close": "Close",
 	"ui.secrets.toggleVisibility": "Toggle secret visibility",
+	"ui.input.generatePassword": "Generate password",
 	"logo.organization": "Organization logo",
 	"settings.dark": "Dark",
 	"settings.light": "Light",

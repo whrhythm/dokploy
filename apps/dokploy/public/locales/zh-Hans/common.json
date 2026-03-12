@@ -1957,6 +1957,7 @@
 	"ui.breadcrumb.more": "更多",
 	"ui.sheet.close": "关闭",
 	"ui.secrets.toggleVisibility": "切换密文可见性",
+	"ui.input.generatePassword": "生成密码",
 	"logo.organization": "组织 Logo",
 	"settings.dark": "深色",
 	"settings.light": "浅色",
