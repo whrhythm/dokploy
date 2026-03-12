@@ -2837,6 +2837,8 @@
 	"monitoring.paid.storageSpace": "Storage space",
 	"monitoring.paid.usedGb": "{value} GB used",
 	"monitoring.paid.totalGb": "Of {value} GB total",
+	"monitoring.paid.memoryUsageOf": "Memory usage: {used} GB of {total} GB ({percent}%)",
+	"monitoring.paid.networkTraffic": "Network traffic: ↑ {out} KB/s ↓ {in} KB/s",
 	"services.databaseRebuild.danger": "Danger zone",
 	"services.databaseRebuild.title": "Rebuild database",
 	"services.databaseRebuild.description": "This action will completely reset your database to its initial state. All data, tables, and configurations will be removed.",

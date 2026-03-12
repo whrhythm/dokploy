@@ -3150,6 +3150,8 @@
 	"monitoring.paid.storageSpace": "存储空间",
 	"monitoring.paid.usedGb": "已使用 {value} GB",
 	"monitoring.paid.totalGb": "总计 {value} GB",
+	"monitoring.paid.memoryUsageOf": "内存使用：{used} GB / {total} GB（{percent}%）",
+	"monitoring.paid.networkTraffic": "网络流量：↑ {out} KB/s ↓ {in} KB/s",
 	"services.databaseRebuild.danger": "危险区域",
 	"services.databaseRebuild.title": "重建数据库",
 	"services.databaseRebuild.description": "此操作会将数据库完全重置为初始状态，所有数据、表和配置都将被删除。",
