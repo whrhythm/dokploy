@@ -1567,6 +1567,8 @@
 	"settings.preferences": "Preferences",
 	"settings.language": "Language",
 	"settings.theme": "Theme",
+	"ui.modeToggle.toggleTheme": "Toggle theme",
+	"ui.sidebar.toggle": "Toggle sidebar",
 	"settings.dark": "Dark",
 	"settings.light": "Light",
 	"settings.system": "System",

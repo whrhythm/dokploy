@@ -1,6 +1,7 @@
 import type { IUpdateData } from "@dokploy/server/index";
 import { Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import UpdateServer from "../dashboard/settings/web-server/update-server";
 import { Button } from "../ui/button";
@@ -14,6 +15,7 @@ import {
 const AUTO_CHECK_UPDATES_INTERVAL_MINUTES = 7;
 
 export const UpdateServerButton = () => {
+	const { t } = useTranslation();
 	const [updateData, setUpdateData] = useState<IUpdateData>({
 		latestVersion: null,
 		updateAvailable: false,
@@ -91,11 +93,11 @@ export const UpdateServerButton = () => {
 								<Download className="h-4 w-4 flex-shrink-0" />
 								{updateData ? (
 									<span className="font-medium truncate group-data-[collapsible=icon]:hidden">
-										Update Available
+										{t("webServer.Modal.update.trigger.available")}
 									</span>
 								) : (
 									<span className="font-medium truncate group-data-[collapsible=icon]:hidden">
-										Check for updates
+										{t("webServer.Modal.update.trigger.check")}
 									</span>
 								)}
 								{updateData && (
@@ -108,7 +110,7 @@ export const UpdateServerButton = () => {
 						</TooltipTrigger>
 						{updateData && (
 							<TooltipContent side="right" sideOffset={10}>
-								<p>Update Available</p>
+								<p>{t("webServer.Modal.update.trigger.available")}</p>
 							</TooltipContent>
 						)}
 					</Tooltip>
