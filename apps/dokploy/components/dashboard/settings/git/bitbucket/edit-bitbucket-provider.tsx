@@ -24,28 +24,31 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const Schema = z.object({
-	name: z.string().min(1, {
-		message: "Name is required",
-	}),
-	username: z.string().min(1, {
-		message: "Username is required",
-	}),
-	email: z.string().email().optional(),
-	workspaceName: z.string().optional(),
-	apiToken: z.string().optional(),
-	appPassword: z.string().optional(),
-});
+const createSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("settings.gitProviders.bitbucket.validation.nameRequired"),
+		}),
+		username: z.string().min(1, {
+			message: t("settings.gitProviders.bitbucket.validation.usernameRequired"),
+		}),
+		email: z.string().email().optional(),
+		workspaceName: z.string().optional(),
+		apiToken: z.string().optional(),
+		appPassword: z.string().optional(),
+	});
 
-type Schema = z.infer<typeof Schema>;
+type Schema = z.infer<ReturnType<typeof createSchema>>;
 
 interface Props {
 	bitbucketId: string;
 }
 
 export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
+	const { t } = useTranslation();
 	const { data: bitbucket } = api.bitbucket.one.useQuery(
 		{
 			bitbucketId,
@@ -68,7 +71,7 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 			apiToken: "",
 			appPassword: "",
 		},
-		resolver: zodResolver(Schema),
+		resolver: zodResolver(createSchema(t)),
 	});
 
 	const username = form.watch("username");
@@ -101,11 +104,11 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 		})
 			.then(async () => {
 				await utils.gitProvider.getAll.invalidate();
-				toast.success("Bitbucket updated successfully");
+				toast.success(t("settings.gitProviders.bitbucket.toast.updated"));
 				setIsOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error updating Bitbucket");
+				toast.error(t("settings.gitProviders.bitbucket.toast.updateError"));
 			});
 	};
 
@@ -123,7 +126,8 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 			<DialogContent className="sm:max-w-2xl ">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						Update Bitbucket <BitbucketIcon className="size-5" />
+						{t("settings.gitProviders.bitbucket.updateTitle")}{" "}
+						<BitbucketIcon className="size-5" />
 					</DialogTitle>
 				</DialogHeader>
 
@@ -137,9 +141,7 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 						<CardContent className="p-0">
 							<div className="flex flex-col gap-4">
 								<p className="text-muted-foreground text-sm">
-									Update your Bitbucket authentication. Use API Token for
-									enhanced security (recommended) or App Password for legacy
-									support.
+									{t("settings.gitProviders.bitbucket.updateDescription")}
 								</p>
 
 								<FormField
@@ -147,10 +149,12 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<FormLabel>{t("form.name")}</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Random Name eg(my-personal-account)"
+													placeholder={t(
+														"settings.gitProviders.placeholder.providerName",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -163,10 +167,14 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 									name="username"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Bitbucket Username</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.bitbucket.username")}
+											</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Your Bitbucket username"
+													placeholder={t(
+														"settings.gitProviders.bitbucket.usernamePlaceholder",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -180,11 +188,17 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 									name="email"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Email (Required for API Tokens)</FormLabel>
+											<FormLabel>
+												{t(
+													"settings.gitProviders.bitbucket.emailRequiredForTokens",
+												)}
+											</FormLabel>
 											<FormControl>
 												<Input
 													type="email"
-													placeholder="Your Bitbucket email address"
+													placeholder={t(
+														"settings.gitProviders.bitbucket.emailAddressPlaceholder",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -198,10 +212,14 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 									name="workspaceName"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Workspace Name (Optional)</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.bitbucket.workspace")}
+											</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="For organization accounts"
+													placeholder={t(
+														"settings.gitProviders.placeholder.organizationAccounts",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -212,18 +230,24 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 
 								<div className="flex flex-col gap-2 border-t pt-4">
 									<h3 className="text-sm font-medium mb-2">
-										Authentication (Update to use API Token)
+										{t("settings.gitProviders.bitbucket.authenticationTitle")}
 									</h3>
 									<FormField
 										control={form.control}
 										name="apiToken"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>API Token (Recommended)</FormLabel>
+												<FormLabel>
+													{t(
+														"settings.gitProviders.bitbucket.apiTokenRecommended",
+													)}
+												</FormLabel>
 												<FormControl>
 													<Input
 														type="password"
-														placeholder="Enter your Bitbucket API Token"
+														placeholder={t(
+															"settings.gitProviders.bitbucket.apiTokenEnter",
+														)}
 														{...field}
 													/>
 												</FormControl>
@@ -238,12 +262,16 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>
-													App Password (Legacy - will be deprecated June 2026)
+													{t(
+														"settings.gitProviders.bitbucket.appPasswordLegacy",
+													)}
 												</FormLabel>
 												<FormControl>
 													<Input
 														type="password"
-														placeholder="Enter your Bitbucket App Password"
+														placeholder={t(
+															"settings.gitProviders.bitbucket.appPasswordEnter",
+														)}
 														{...field}
 													/>
 												</FormControl>
@@ -268,17 +296,25 @@ export const EditBitbucketProvider = ({ bitbucketId }: Props) => {
 												appPassword: appPassword,
 											})
 												.then(async (message) => {
-													toast.info(`Message: ${message}`);
+													toast.info(
+														t("settings.gitProviders.toast.message", {
+															message,
+														}),
+													);
 												})
 												.catch((error) => {
-													toast.error(`Error: ${error.message}`);
+													toast.error(
+														t("settings.gitProviders.toast.error", {
+															message: error.message,
+														}),
+													);
 												});
 										}}
 									>
-										Test Connection
+										{t("settings.gitProviders.actions.testConnection")}
 									</Button>
 									<Button type="submit" isLoading={form.formState.isSubmitting}>
-										Update
+										{t("button.update")}
 									</Button>
 								</div>
 							</div>

@@ -7,6 +7,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { CPUChart } from "./cpu-chart";
 import { DiskChart } from "./disk-chart";
@@ -14,21 +15,21 @@ import { MemoryChart } from "./memory-chart";
 import { NetworkChart } from "./network-chart";
 
 const REFRESH_INTERVALS = {
-	"5000": "5 Seconds",
-	"10000": "10 Seconds",
-	"20000": "20 Seconds",
-	"30000": "30 Seconds",
+	"5000": 5,
+	"10000": 10,
+	"20000": 20,
+	"30000": 30,
 } as const;
 
 const DATA_POINTS_OPTIONS = {
-	"50": "50 points",
-	"200": "200 points",
-	"500": "500 points",
-	"800": "800 points",
-	"1200": "1200 points",
-	"1600": "1600 points",
-	"2000": "2000 points",
-	all: "All points",
+	"50": 50,
+	"200": 200,
+	"500": 500,
+	"800": 800,
+	"1200": 1200,
+	"1600": 1600,
+	"2000": 2000,
+	all: "all",
 } as const;
 
 interface SystemMetrics {
@@ -62,6 +63,7 @@ export const ShowPaidMonitoring = ({
 		"http://localhost:3001/metrics",
 	token = process.env.NEXT_PUBLIC_METRICS_TOKEN || "my-token",
 }: Props) => {
+	const { t } = useTranslation();
 	const [historicalData, setHistoricalData] = useState<SystemMetrics[]>([]);
 	const [metrics, setMetrics] = useState<SystemMetrics>({} as SystemMetrics);
 	const [dataPoints, setDataPoints] =
@@ -136,14 +138,16 @@ export const ShowPaidMonitoring = ({
 			<div className="flex min-h-[55vh] w-full items-center justify-center p-4">
 				<div className="max-w-xl text-center">
 					<p className="mb-2 text-base font-medium leading-none text-muted-foreground">
-						Error fetching metrics{" "}
+						{t("monitoring.paid.errorTitle")}
 					</p>
 					<p className="whitespace-pre-line text-sm text-destructive">
 						{queryError instanceof Error
 							? queryError.message
-							: "Failed to fetch metrics, Please check your monitoring Instance is Configured correctly."}
+							: t("services.monitoring.errorFallback")}
 					</p>
-					<p className="text-sm text-muted-foreground">URL: {BASE_URL}</p>
+					<p className="text-sm text-muted-foreground">
+						{t("services.monitoring.errorUrl", { url: BASE_URL })}
+					</p>
 				</div>
 			</div>
 		);
@@ -151,11 +155,15 @@ export const ShowPaidMonitoring = ({
 
 	return (
 		<div className="space-y-4 pt-5 pb-10 w-full md:px-4">
-			<div className="flex items-center justify-between flex-wrap	 gap-2">
-				<h2 className="text-2xl font-bold tracking-tight">System Monitoring</h2>
+			<div className="flex items-center justify-between flex-wrap gap-2">
+				<h2 className="text-2xl font-bold tracking-tight">
+					{t("monitoring.paid.title")}
+				</h2>
 				<div className="flex items-center gap-4 flex-wrap">
 					<div>
-						<span className="text-sm text-muted-foreground">Data points:</span>
+						<span className="text-sm text-muted-foreground">
+							{t("services.monitoring.dataPoints")}
+						</span>
 						<Select
 							value={dataPoints}
 							onValueChange={(value: keyof typeof DATA_POINTS_OPTIONS) =>
@@ -163,12 +171,18 @@ export const ShowPaidMonitoring = ({
 							}
 						>
 							<SelectTrigger className="w-[180px]">
-								<SelectValue placeholder="Select points" />
+								<SelectValue
+									placeholder={t("services.monitoring.dataPointsPlaceholder")}
+								/>
 							</SelectTrigger>
 							<SelectContent>
 								{Object.entries(DATA_POINTS_OPTIONS).map(([value, label]) => (
 									<SelectItem key={value} value={value}>
-										{label}
+										{label === "all"
+											? t("services.monitoring.dataPointsAll")
+											: t("services.monitoring.dataPointsValue", {
+													value: label as number,
+												})}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -177,7 +191,7 @@ export const ShowPaidMonitoring = ({
 
 					<div>
 						<span className="text-sm text-muted-foreground">
-							Refresh interval:
+							{t("services.monitoring.refreshInterval")}
 						</span>
 						<Select
 							value={refreshInterval}
@@ -186,12 +200,16 @@ export const ShowPaidMonitoring = ({
 							}
 						>
 							<SelectTrigger className="w-[180px]">
-								<SelectValue placeholder="Select interval" />
+								<SelectValue
+									placeholder={t("services.monitoring.refreshPlaceholder")}
+								/>
 							</SelectTrigger>
 							<SelectContent>
 								{Object.entries(REFRESH_INTERVALS).map(([value, label]) => (
 									<SelectItem key={value} value={value}>
-										{label}
+										{t("services.monitoring.refreshSeconds", {
+											seconds: label,
+										})}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -205,7 +223,9 @@ export const ShowPaidMonitoring = ({
 				<div className="rounded-lg border text-card-foreground shadow-sm p-6">
 					<div className="flex items-center gap-2">
 						<Clock className="h-4 w-4 text-muted-foreground" />
-						<h3 className="text-sm font-medium">Uptime</h3>
+						<h3 className="text-sm font-medium">
+							{t("monitoring.paid.uptime")}
+						</h3>
 					</div>
 					<p className="mt-2 text-2xl font-bold">
 						{formatUptime(metrics.uptime || 0)}
@@ -215,7 +235,9 @@ export const ShowPaidMonitoring = ({
 				<div className="rounded-lg border text-card-foreground shadow-sm p-6">
 					<div className="flex items-center gap-2">
 						<Cpu className="h-4 w-4 text-muted-foreground" />
-						<h3 className="text-sm font-medium">CPU Usage</h3>
+						<h3 className="text-sm font-medium">
+							{t("services.monitoring.cpuUsage")}
+						</h3>
 					</div>
 					<p className="mt-2 text-2xl font-bold">{metrics.cpu}%</p>
 				</div>
@@ -223,7 +245,9 @@ export const ShowPaidMonitoring = ({
 				<div className="rounded-lg border text-card-foreground bg-transparent shadow-sm p-6">
 					<div className="flex items-center gap-2">
 						<MemoryStick className="h-4 w-4 text-muted-foreground" />
-						<h3 className="text-sm font-medium">Memory Usage</h3>
+						<h3 className="text-sm font-medium">
+							{t("services.monitoring.memoryUsage")}
+						</h3>
 					</div>
 					<p className="mt-2 text-2xl font-bold">
 						{metrics.memUsedGB} GB / {metrics.memTotal} GB
@@ -233,7 +257,7 @@ export const ShowPaidMonitoring = ({
 				<div className="rounded-lg border text-card-foreground shadow-sm p-6">
 					<div className="flex items-center gap-2">
 						<HardDrive className="h-4 w-4 text-muted-foreground" />
-						<h3 className="text-sm font-medium">Disk Usage</h3>
+						<h3 className="text-sm font-medium">{t("monitoring.diskUsage")}</h3>
 					</div>
 					<p className="mt-2 text-2xl font-bold">{metrics.diskUsed}%</p>
 				</div>
@@ -241,23 +265,33 @@ export const ShowPaidMonitoring = ({
 
 			{/* System Information */}
 			<div className="rounded-lg border text-card-foreground shadow-sm p-6">
-				<h3 className="text-lg font-medium mb-4">System Information</h3>
+				<h3 className="text-lg font-medium mb-4">
+					{t("monitoring.paid.systemInfo")}
+				</h3>
 				<div className="grid gap-4 md:grid-cols-2">
 					<div>
-						<h4 className="text-sm font-medium text-muted-foreground">CPU</h4>
+						<h4 className="text-sm font-medium text-muted-foreground">
+							{t("services.monitoring.chart.cpu")}
+						</h4>
 						<p className="mt-1">{metrics.cpuModel}</p>
 						<p className="text-sm text-muted-foreground mt-1">
-							{metrics.cpuPhysicalCores} Physical Cores ({metrics.cpuCores}{" "}
-							Threads) @ {metrics.cpuSpeed}GHz
+							{t("monitoring.paid.cpuDetails", {
+								physical: metrics.cpuPhysicalCores,
+								cores: metrics.cpuCores,
+								speed: metrics.cpuSpeed,
+							})}
 						</p>
 					</div>
 					<div>
 						<h4 className="text-sm font-medium text-muted-foreground">
-							Operating System
+							{t("monitoring.paid.operatingSystem")}
 						</h4>
 						<p className="mt-1">{metrics.distro}</p>
 						<p className="text-sm text-muted-foreground mt-1">
-							Kernel: {metrics.kernel} ({metrics.arch})
+							{t("monitoring.paid.kernel", {
+								kernel: metrics.kernel,
+								arch: metrics.arch,
+							})}
 						</p>
 					</div>
 				</div>

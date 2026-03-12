@@ -33,27 +33,31 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const formSchema = z
-	.object({
-		rollbackActive: z.boolean(),
-		rollbackRegistryId: z.string().optional(),
-	})
-	.superRefine((values, ctx) => {
-		if (
-			values.rollbackActive &&
-			(!values.rollbackRegistryId || values.rollbackRegistryId === "none")
-		) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["rollbackRegistryId"],
-				message: "Registry is required when rollbacks are enabled",
-			});
-		}
-	});
+const createFormSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			rollbackActive: z.boolean(),
+			rollbackRegistryId: z.string().optional(),
+		})
+		.superRefine((values, ctx) => {
+			if (
+				values.rollbackActive &&
+				(!values.rollbackRegistryId || values.rollbackRegistryId === "none")
+			) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["rollbackRegistryId"],
+					message: t(
+						"services.application.rollbackSettings.validation.registryRequired",
+					),
+				});
+			}
+		});
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof createFormSchema>>;
 
 interface Props {
 	applicationId: string;
@@ -61,6 +65,7 @@ interface Props {
 }
 
 export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const { data: application, refetch } = api.application.one.useQuery(
 		{
@@ -77,7 +82,7 @@ export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
 	const { data: registries } = api.registry.all.useQuery();
 
 	const form = useForm<FormValues>({
-		resolver: zodResolver(formSchema),
+		resolver: zodResolver(createFormSchema(t)),
 		defaultValues: {
 			rollbackActive: application?.rollbackActive ?? false,
 			rollbackRegistryId: application?.rollbackRegistryId || "",
@@ -103,12 +108,14 @@ export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
 					: data.rollbackRegistryId,
 		})
 			.then(() => {
-				toast.success("Rollback settings updated");
+				toast.success(t("services.application.rollbackSettings.toast.updated"));
 				setIsOpen(false);
 				refetch();
 			})
 			.catch(() => {
-				toast.error("Failed to update rollback settings");
+				toast.error(
+					t("services.application.rollbackSettings.toast.updateError"),
+				);
 			});
 	};
 
@@ -117,14 +124,14 @@ export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Rollback Settings</DialogTitle>
+					<DialogTitle>
+						{t("services.application.rollbackSettings.title")}
+					</DialogTitle>
 					<DialogDescription>
-						Configure how rollbacks work for this application
+						{t("services.application.rollbackSettings.description")}
 					</DialogDescription>
 					<AlertBlock>
-						Having rollbacks enabled increases storage usage. Be careful with
-						this option. Note that manually cleaning the cache may delete
-						rollback images, making them unavailable for future rollbacks.
+						{t("services.application.rollbackSettings.warning")}
 					</AlertBlock>
 				</DialogHeader>
 
@@ -137,10 +144,10 @@ export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 									<div className="space-y-0.5">
 										<FormLabel className="text-base">
-											Enable Rollbacks
+											{t("services.application.rollbackSettings.enable")}
 										</FormLabel>
 										<FormDescription>
-											Allow rolling back to previous deployments
+											{t("services.application.rollbackSettings.enableHelp")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -159,21 +166,27 @@ export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
 								name="rollbackRegistryId"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Rollback Registry</FormLabel>
+										<FormLabel>
+											{t("services.application.rollbackSettings.registry")}
+										</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											value={field.value || "none"}
 										>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue placeholder="Select a registry" />
+													<SelectValue
+														placeholder={t(
+															"services.buildServer.selectRegistry",
+														)}
+													/>
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
 												<SelectGroup>
 													<SelectItem value="none">
 														<span className="flex items-center gap-2">
-															<span>None</span>
+															<span>{t("common.none")}</span>
 														</span>
 													</SelectItem>
 													{registries?.map((registry) => (
@@ -185,25 +198,38 @@ export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
 														</SelectItem>
 													))}
 													<SelectLabel>
-														Registries ({registries?.length || 0})
+														{t(
+															"services.application.rollbackSettings.registries",
+															{
+																count: registries?.length || 0,
+															},
+														)}
 													</SelectLabel>
 												</SelectGroup>
 											</SelectContent>
 										</Select>
 										{!registries || registries.length === 0 ? (
 											<FormDescription className="text-amber-600 dark:text-amber-500">
-												No registries available. Please{" "}
+												{t(
+													"services.application.rollbackSettings.noRegistriesPrefix",
+												)}{" "}
 												<Link
 													href="/dashboard/settings/registry"
 													className="underline font-medium hover:text-amber-700 dark:hover:text-amber-400"
 												>
-													configure a registry
+													{t(
+														"services.application.rollbackSettings.configureRegistry",
+													)}
 												</Link>{" "}
-												first to enable rollbacks.
+												{t(
+													"services.application.rollbackSettings.noRegistriesSuffix",
+												)}
 											</FormDescription>
 										) : (
 											<FormDescription>
-												Select a registry where rollback images will be stored.
+												{t(
+													"services.application.rollbackSettings.registryHelp",
+												)}
 											</FormDescription>
 										)}
 										<FormMessage />
@@ -213,7 +239,7 @@ export const ShowRollbackSettings = ({ applicationId, children }: Props) => {
 						)}
 
 						<Button type="submit" className="w-full" isLoading={isPending}>
-							Save Settings
+							{t("services.application.rollbackSettings.save")}
 						</Button>
 					</form>
 				</Form>

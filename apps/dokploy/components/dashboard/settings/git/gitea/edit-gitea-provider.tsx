@@ -24,26 +24,37 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { getGiteaOAuthUrl } from "@/utils/gitea-utils";
 import { useUrl } from "@/utils/hooks/use-url";
 
-const formSchema = z.object({
-	name: z.string().min(1, "Name is required"),
-	giteaUrl: z.string().min(1, "Gitea URL is required"),
-	giteaInternalUrl: z
-		.union([z.string().url(), z.literal("")])
-		.optional()
-		.transform((v) => (v === "" ? undefined : v)),
-	clientId: z.string().min(1, "Client ID is required"),
-	clientSecret: z.string().min(1, "Client Secret is required"),
-});
+const createFormSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z
+			.string()
+			.min(1, t("settings.gitProviders.gitea.validation.nameRequired")),
+		giteaUrl: z
+			.string()
+			.min(1, t("settings.gitProviders.gitea.validation.urlRequired")),
+		giteaInternalUrl: z
+			.union([z.string().url(), z.literal("")])
+			.optional()
+			.transform((v) => (v === "" ? undefined : v)),
+		clientId: z
+			.string()
+			.min(1, t("settings.gitProviders.gitea.validation.clientIdRequired")),
+		clientSecret: z
+			.string()
+			.min(1, t("settings.gitProviders.gitea.validation.clientSecretRequired")),
+	});
 
 interface Props {
 	giteaId: string;
 }
 
 export const EditGiteaProvider = ({ giteaId }: Props) => {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const {
@@ -63,8 +74,10 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 		if (!router.isReady) return;
 
 		if (connected) {
-			toast.success("Successfully connected to Gitea", {
-				description: "Your Gitea provider has been authorized.",
+			toast.success(t("settings.gitProviders.gitea.toast.connected"), {
+				description: t(
+					"settings.gitProviders.gitea.toast.connectedDescription",
+				),
 				id: "gitea-connection-success",
 			});
 			refetch();
@@ -79,7 +92,7 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 		}
 
 		if (error) {
-			toast.error("Gitea Connection Failed", {
+			toast.error(t("settings.gitProviders.gitea.toast.connectionFailed"), {
 				description: decodeURIComponent(error as string),
 				id: "gitea-connection-error",
 			});
@@ -95,7 +108,7 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 	}, [router.query, router.isReady, refetch]);
 
 	const form = useForm({
-		resolver: zodResolver(formSchema),
+		resolver: zodResolver(createFormSchema(t)),
 		defaultValues: {
 			name: "",
 			giteaUrl: "https://gitea.com",
@@ -117,7 +130,9 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 		}
 	}, [gitea, form]);
 
-	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+	const onSubmit = async (
+		values: z.infer<ReturnType<typeof createFormSchema>>,
+	) => {
 		await mutateAsync({
 			giteaId: giteaId,
 			gitProviderId: gitea?.gitProvider?.gitProviderId || "",
@@ -129,19 +144,19 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 		})
 			.then(async () => {
 				await utils.gitProvider.getAll.invalidate();
-				toast.success("Gitea provider updated successfully");
+				toast.success(t("settings.gitProviders.gitea.toast.updated"));
 				await refetch();
 				setOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error updating Gitea provider");
+				toast.error(t("settings.gitProviders.gitea.toast.updateError"));
 			});
 	};
 
 	const handleTestConnection = async () => {
 		try {
 			const result = await testConnection({ giteaId });
-			toast.success("Gitea Connection Verified", {
+			toast.success(t("settings.gitProviders.gitea.toast.connectionVerified"), {
 				description: result,
 			});
 		} catch (error: any) {
@@ -155,13 +170,13 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 					typeof url === "string" ? url : (url as any).url || "",
 				);
 
-			toast.error("Gitea Not Connected", {
+			toast.error(t("settings.gitProviders.gitea.toast.notConnected"), {
 				description:
-					error.message || "Please complete the OAuth authorization process.",
+					error.message || t("settings.gitProviders.gitea.toast.oauthRequired"),
 				action:
 					authUrl && authUrl !== "#"
 						? {
-								label: "Authorize Now",
+								label: t("settings.gitProviders.gitea.authorizeNow"),
 								onClick: () => window.open(authUrl, "_blank"),
 							}
 						: undefined,
@@ -195,9 +210,11 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Edit Gitea Provider</DialogTitle>
+					<DialogTitle>
+						{t("settings.gitProviders.gitea.editTitle")}
+					</DialogTitle>
 					<DialogDescription>
-						Update your Gitea provider details.
+						{t("settings.gitProviders.gitea.editDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -207,10 +224,12 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Name</FormLabel>
+									<FormLabel>{t("form.name")}</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="My Gitea"
+											placeholder={t(
+												"settings.gitProviders.gitea.namePlaceholder",
+											)}
 											{...field}
 											autoFocus={false}
 										/>
@@ -224,7 +243,7 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 							name="giteaUrl"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Gitea URL</FormLabel>
+									<FormLabel>{t("settings.gitProviders.gitea.url")}</FormLabel>
 									<FormControl>
 										<Input placeholder="https://gitea.example.com" {...field} />
 									</FormControl>
@@ -237,7 +256,9 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 							name="giteaInternalUrl"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Internal URL (Optional)</FormLabel>
+									<FormLabel>
+										{t("settings.gitProviders.internalUrl")}
+									</FormLabel>
 									<FormControl>
 										<Input
 											placeholder="http://gitea:3000"
@@ -246,9 +267,7 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 										/>
 									</FormControl>
 									<FormDescription>
-										Use when Gitea runs on the same instance as Dokploy. Used
-										for OAuth token exchange to reach Gitea via internal network
-										(e.g. Docker service name).
+										{t("settings.gitProviders.gitea.internalUrlDescription")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -259,9 +278,12 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 							name="clientId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Client ID</FormLabel>
+									<FormLabel>{t("settings.gitProviders.clientId")}</FormLabel>
 									<FormControl>
-										<Input placeholder="Client ID" {...field} />
+										<Input
+											placeholder={t("settings.gitProviders.clientId")}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -272,11 +294,13 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 							name="clientSecret"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Client Secret</FormLabel>
+									<FormLabel>
+										{t("settings.gitProviders.clientSecret")}
+									</FormLabel>
 									<FormControl>
 										<Input
 											type="password"
-											placeholder="Client Secret"
+											placeholder={t("settings.gitProviders.clientSecret")}
 											{...field}
 										/>
 									</FormControl>
@@ -292,7 +316,7 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 								onClick={handleTestConnection}
 								isLoading={isTesting}
 							>
-								Test Connection
+								{t("settings.gitProviders.actions.testConnection")}
 							</Button>
 
 							<Button
@@ -311,11 +335,11 @@ export const EditGiteaProvider = ({ giteaId }: Props) => {
 									}
 								}}
 							>
-								Connect to Gitea
+								{t("settings.gitProviders.gitea.connect")}
 							</Button>
 
 							<Button type="submit" isLoading={isUpdating}>
-								Save
+								{t("button.save")}
 							</Button>
 						</div>
 					</form>

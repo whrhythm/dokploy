@@ -26,36 +26,43 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { useUrl } from "@/utils/hooks/use-url";
 
-const Schema = z.object({
-	name: z.string().min(1, {
-		message: "Name is required",
-	}),
-	gitlabUrl: z.string().min(1, {
-		message: "GitLab URL is required",
-	}),
-	gitlabInternalUrl: z
-		.union([z.string().url(), z.literal("")])
-		.optional()
-		.transform((v) => (v === "" ? undefined : v)),
-	applicationId: z.string().min(1, {
-		message: "Application ID is required",
-	}),
-	applicationSecret: z.string().min(1, {
-		message: "Application Secret is required",
-	}),
+const createSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("settings.gitProviders.gitlab.validation.nameRequired"),
+		}),
+		gitlabUrl: z.string().min(1, {
+			message: t("settings.gitProviders.gitlab.validation.urlRequired"),
+		}),
+		gitlabInternalUrl: z
+			.union([z.string().url(), z.literal("")])
+			.optional()
+			.transform((v) => (v === "" ? undefined : v)),
+		applicationId: z.string().min(1, {
+			message: t(
+				"settings.gitProviders.gitlab.validation.applicationIdRequired",
+			),
+		}),
+		applicationSecret: z.string().min(1, {
+			message: t(
+				"settings.gitProviders.gitlab.validation.applicationSecretRequired",
+			),
+		}),
 
-	redirectUri: z.string().min(1, {
-		message: "Redirect URI is required",
-	}),
-	groupName: z.string().optional(),
-});
+		redirectUri: z.string().min(1, {
+			message: t("settings.gitProviders.gitlab.validation.redirectUriRequired"),
+		}),
+		groupName: z.string().optional(),
+	});
 
-type Schema = z.infer<typeof Schema>;
+type Schema = z.infer<ReturnType<typeof createSchema>>;
 
 export const AddGitlabProvider = () => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [isOpen, setIsOpen] = useState(false);
 	const url = useUrl();
@@ -73,7 +80,7 @@ export const AddGitlabProvider = () => {
 			gitlabUrl: "https://gitlab.com",
 			gitlabInternalUrl: "",
 		},
-		resolver: zodResolver(Schema),
+		resolver: zodResolver(createSchema(t)),
 	});
 
 	const gitlabUrl = form.watch("gitlabUrl");
@@ -103,11 +110,11 @@ export const AddGitlabProvider = () => {
 		})
 			.then(async () => {
 				await utils.gitProvider.getAll.invalidate();
-				toast.success("GitLab created successfully");
+				toast.success(t("settings.gitProviders.gitlab.toast.created"));
 				setIsOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error configuring GitLab");
+				toast.error(t("settings.gitProviders.gitlab.toast.configureError"));
 			});
 	};
 
@@ -119,13 +126,14 @@ export const AddGitlabProvider = () => {
 					className="flex items-center space-x-1 bg-purple-700 text-white hover:bg-purple-600"
 				>
 					<GitlabIcon />
-					<span>GitLab</span>
+					<span>{t("git.gitlab")}</span>
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-2xl  ">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						GitLab Provider <GitlabIcon className="size-5" />
+						{t("settings.gitProviders.gitlab.title")}{" "}
+						<GitlabIcon className="size-5" />
 					</DialogTitle>
 				</DialogHeader>
 
@@ -139,12 +147,11 @@ export const AddGitlabProvider = () => {
 						<CardContent className="p-0">
 							<div className="flex flex-col gap-4">
 								<p className="text-muted-foreground text-sm">
-									To integrate your GitLab account, you need to create a new
-									application in your GitLab settings. Follow these steps:
+									{t("settings.gitProviders.gitlab.intro")}
 								</p>
 								<ol className="list-decimal list-inside text-sm text-muted-foreground">
 									<li className="flex flex-row gap-2 items-center">
-										Go to your GitLab profile settings{" "}
+										{t("settings.gitProviders.gitlab.steps.goToSettings")}
 										<Link
 											href={`${gitlabUrl}/-/profile/applications`}
 											target="_blank"
@@ -152,21 +159,24 @@ export const AddGitlabProvider = () => {
 											<ExternalLink className="w-fit text-primary size-4" />
 										</Link>
 									</li>
-									<li>Navigate to Applications</li>
+									<li>{t("settings.gitProviders.gitlab.steps.navigate")}</li>
 									<li>
-										Create a new application with the following details:
+										{t("settings.gitProviders.gitlab.steps.createApp")}
 										<ul className="list-disc list-inside ml-4">
-											<li>Name: Dokploy</li>
+											<li>
+												{t("settings.gitProviders.gitlab.steps.exampleName")}
+											</li>
 											<li>
 												Redirect URI:{" "}
 												<span className="text-primary">{webhookUrl}</span>{" "}
 											</li>
-											<li>Scopes: api, read_user, read_repository</li>
+											<li>
+												{t("settings.gitProviders.gitlab.steps.exampleScopes")}
+											</li>
 										</ul>
 									</li>
 									<li>
-										After creating, you'll receive an Application ID and Secret,
-										copy them and paste them below.
+										{t("settings.gitProviders.gitlab.steps.copyCredentials")}
 									</li>
 								</ol>
 								<FormField
@@ -174,10 +184,12 @@ export const AddGitlabProvider = () => {
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<FormLabel>{t("form.name")}</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Random Name eg(my-personal-account)"
+													placeholder={t(
+														"settings.gitProviders.placeholder.providerName",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -191,7 +203,9 @@ export const AddGitlabProvider = () => {
 									name="gitlabUrl"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Gitlab URL</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.gitlab.url")}
+											</FormLabel>
 											<FormControl>
 												<Input placeholder="https://gitlab.com/" {...field} />
 											</FormControl>
@@ -205,7 +219,9 @@ export const AddGitlabProvider = () => {
 									name="gitlabInternalUrl"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Internal URL (Optional)</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.internalUrl")}
+											</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="http://gitlab:80"
@@ -214,9 +230,9 @@ export const AddGitlabProvider = () => {
 												/>
 											</FormControl>
 											<FormDescription>
-												Use when GitLab runs on the same instance as Dokploy.
-												Used for OAuth token exchange to reach GitLab via
-												internal network (e.g. Docker service name).
+												{t(
+													"settings.gitProviders.gitlab.internalUrlDescription",
+												)}
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -228,11 +244,13 @@ export const AddGitlabProvider = () => {
 									name="redirectUri"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Redirect URI</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.redirectUri")}
+											</FormLabel>
 											<FormControl>
 												<Input
 													disabled
-													placeholder="Random Name eg(my-personal-account)"
+													placeholder={t("settings.gitProviders.redirectUri")}
 													{...field}
 												/>
 											</FormControl>
@@ -246,9 +264,16 @@ export const AddGitlabProvider = () => {
 									name="applicationId"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Application ID</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.gitlab.applicationId")}
+											</FormLabel>
 											<FormControl>
-												<Input placeholder="Application ID" {...field} />
+												<Input
+													placeholder={t(
+														"settings.gitProviders.gitlab.applicationId",
+													)}
+													{...field}
+												/>
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -260,11 +285,15 @@ export const AddGitlabProvider = () => {
 									name="applicationSecret"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Application Secret</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.gitlab.applicationSecret")}
+											</FormLabel>
 											<FormControl>
 												<Input
 													type="password"
-													placeholder="Application Secret"
+													placeholder={t(
+														"settings.gitProviders.gitlab.applicationSecret",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -279,11 +308,13 @@ export const AddGitlabProvider = () => {
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>
-												Group Name (Optional, Comma-Separated List)
+												{t("settings.gitProviders.gitlab.groupName")}
 											</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="For organization/group access use the slugish name of the group eg: my-org"
+													placeholder={t(
+														"settings.gitProviders.gitlab.groupNamePlaceholder",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -293,7 +324,7 @@ export const AddGitlabProvider = () => {
 								/>
 
 								<Button isLoading={form.formState.isSubmitting}>
-									Configure GitLab App
+									{t("settings.gitProviders.gitlab.configure")}
 								</Button>
 							</div>
 						</CardContent>

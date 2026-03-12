@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/use-translation";
 import { sshKeyCreate, type sshKeyType } from "@/server/db/validations";
 import { api } from "@/utils/api";
 
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export const HandleSSHKeys = ({ sshKeyId }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 
 	const [isOpen, setIsOpen] = useState(false);
@@ -84,8 +86,8 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 			.then(async () => {
 				toast.success(
 					sshKeyId
-						? "SSH key updated successfully"
-						: "SSH key created successfully",
+						? t("settings.sshKeys.toast.updated")
+						: t("settings.sshKeys.toast.created"),
 				);
 				await utils.sshKey.all.invalidate();
 				form.reset();
@@ -94,8 +96,8 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 			.catch(() => {
 				toast.error(
 					sshKeyId
-						? "Error updating the SSH key"
-						: "Error creating the SSH key",
+						? t("settings.sshKeys.toast.updateError")
+						: t("settings.sshKeys.toast.createError"),
 				);
 			});
 	};
@@ -104,12 +106,12 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 		generateMutation
 			.mutateAsync(type)
 			.then(async (data) => {
-				toast.success("SSH Key Generated");
+				toast.success(t("settings.sshKeys.toast.generated"));
 				form.setValue("privateKey", data.privateKey);
 				form.setValue("publicKey", data.publicKey);
 			})
 			.catch(() => {
-				toast.error("Error generating the SSH Key");
+				toast.error(t("settings.sshKeys.toast.generateError"));
 			});
 
 	const downloadKey = (content: string, keyType: "private" | "public") => {
@@ -148,18 +150,15 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 				) : (
 					<Button className="cursor-pointer space-x-3">
 						<PlusIcon className="h-4 w-4" />
-						Add SSH Key
+						{t("settings.sshKeys.add")}
 					</Button>
 				)}
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>SSH Key</DialogTitle>
+					<DialogTitle>{t("settings.sshKeys.title")}</DialogTitle>
 					<DialogDescription className="space-y-4">
-						<div>
-							In this section you can add one of your keys or generate a new
-							one.
-						</div>
+						<div>{t("settings.sshKeys.modal.description")}</div>
 						{!sshKeyId && (
 							<div className="flex gap-4">
 								<Button
@@ -173,7 +172,7 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 									}
 									type="button"
 								>
-									Generate RSA SSH Key
+									{t("settings.sshKeys.generateRsa")}
 								</Button>
 								<Button
 									variant={"secondary"}
@@ -186,7 +185,7 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 									}
 									type="button"
 								>
-									Generate ED25519 SSH Key
+									{t("settings.sshKeys.generateEd25519")}
 								</Button>
 							</div>
 						)}
@@ -205,9 +204,12 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 							render={({ field }) => {
 								return (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>{t("form.name")}</FormLabel>
 										<FormControl>
-											<Input placeholder={"Personal projects"} {...field} />
+											<Input
+												placeholder={t("settings.sshKeys.form.namePlaceholder")}
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -221,10 +223,12 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 							render={({ field }) => {
 								return (
 									<FormItem>
-										<FormLabel>Description</FormLabel>
+										<FormLabel>{t("form.description")}</FormLabel>
 										<FormControl>
 											<Input
-												placeholder={"Used on my personal Hetzner VPS"}
+												placeholder={t(
+													"settings.sshKeys.form.descriptionPlaceholder",
+												)}
 												{...field}
 											/>
 										</FormControl>
@@ -239,11 +243,15 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 							render={({ field }) => (
 								<FormItem>
 									<div className="space-y-0.5">
-										<FormLabel>Private Key</FormLabel>
+										<FormLabel>
+											{t("settings.sshKeys.form.privateKey")}
+										</FormLabel>
 									</div>
 									<FormControl>
 										<Textarea
-											placeholder={"-----BEGIN RSA PRIVATE KEY-----"}
+											placeholder={t(
+												"settings.sshKeys.form.privateKeyPlaceholder",
+											)}
 											rows={5}
 											{...field}
 										/>
@@ -258,10 +266,17 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 							render={({ field }) => (
 								<FormItem>
 									<div className="space-y-0.5">
-										<FormLabel>Public Key</FormLabel>
+										<FormLabel>
+											{t("settings.sshKeys.form.publicKey")}
+										</FormLabel>
 									</div>
 									<FormControl>
-										<Input placeholder={"ssh-rsa AAAAB3NzaC1yc2E"} {...field} />
+										<Input
+											placeholder={t(
+												"settings.sshKeys.form.publicKeyPlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -280,7 +295,7 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 										className="flex items-center gap-2"
 									>
 										<DownloadIcon className="h-4 w-4" />
-										Private Key
+										{t("settings.sshKeys.download.private")}
 									</Button>
 								)}
 								{form.watch("publicKey") && (
@@ -294,12 +309,12 @@ export const HandleSSHKeys = ({ sshKeyId }: Props) => {
 										className="flex items-center gap-2"
 									>
 										<DownloadIcon className="h-4 w-4" />
-										Public Key
+										{t("settings.sshKeys.download.public")}
 									</Button>
 								)}
 							</div>
 							<Button isLoading={isPending} type="submit">
-								{sshKeyId ? "Update" : "Create"}
+								{sshKeyId ? t("button.update") : t("button.create")}
 							</Button>
 						</DialogFooter>
 					</form>
