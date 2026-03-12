@@ -39,6 +39,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { domain } from "@/server/db/validations/domain";
 import { api } from "@/utils/api";
 
@@ -55,6 +56,7 @@ export const AddPreviewDomain = ({
 	domainId = "",
 	children,
 }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const utils = api.useUtils();
 	const { data, refetch } = api.domain.one.useQuery(
@@ -106,12 +108,16 @@ export const AddPreviewDomain = ({
 	}, [form, form.reset, data, isPending]);
 
 	const dictionary = {
-		success: domainId ? "Domain Updated" : "Domain Created",
-		error: domainId ? "Error updating the domain" : "Error creating the domain",
-		submit: domainId ? "Update" : "Create",
+		success: domainId
+			? t("services.domains.toast.updated")
+			: t("services.domains.toast.created"),
+		error: domainId
+			? t("services.domains.toast.updateError")
+			: t("services.domains.toast.createError"),
+		submit: domainId ? t("button.update") : t("button.create"),
 		dialogDescription: domainId
-			? "In this section you can edit a domain"
-			: "In this section you can add domains",
+			? t("services.domains.modal.editDescription")
+			: t("services.domains.modal.addDescription"),
 	};
 
 	const onSubmit = async (data: Domain) => {
@@ -142,7 +148,7 @@ export const AddPreviewDomain = ({
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Domain</DialogTitle>
+					<DialogTitle>{t("form.domain")}</DialogTitle>
 					<DialogDescription>{dictionary.dialogDescription}</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -162,15 +168,17 @@ export const AddPreviewDomain = ({
 										<FormItem>
 											{isTraefikMeDomain && (
 												<AlertBlock type="info">
-													<strong>Note:</strong> traefik.me is a public HTTP
-													service and does not support SSL/HTTPS. HTTPS and
-													certificate options will not have any effect.
+													<strong>{t("services.domains.note")}:</strong>{" "}
+													{t("services.domains.traefikNotice")}
 												</AlertBlock>
 											)}
-											<FormLabel>Host</FormLabel>
+											<FormLabel>{t("form.host")}</FormLabel>
 											<div className="flex gap-2">
 												<FormControl>
-													<Input placeholder="api.dokploy.com" {...field} />
+													<Input
+														placeholder={t("services.domains.hostPlaceholder")}
+														{...field}
+													/>
 												</FormControl>
 												<TooltipProvider delayDuration={0}>
 													<Tooltip>
@@ -202,7 +210,7 @@ export const AddPreviewDomain = ({
 															sideOffset={5}
 															className="max-w-[10rem]"
 														>
-															<p>Generate traefik.me domain</p>
+															<p>{t("services.domains.generateTraefik")}</p>
 														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>
@@ -219,7 +227,7 @@ export const AddPreviewDomain = ({
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Path</FormLabel>
+												<FormLabel>{t("form.path")}</FormLabel>
 												<FormControl>
 													<Input placeholder={"/"} {...field} />
 												</FormControl>
@@ -235,7 +243,9 @@ export const AddPreviewDomain = ({
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Container Port</FormLabel>
+												<FormLabel>
+													{t("services.domains.containerPort")}
+												</FormLabel>
 												<FormControl>
 													<NumberInput placeholder={"3000"} {...field} />
 												</FormControl>
@@ -251,9 +261,9 @@ export const AddPreviewDomain = ({
 									render={({ field }) => (
 										<FormItem className="flex flex-row items-center justify-between p-3 mt-4 border rounded-lg shadow-sm">
 											<div className="space-y-0.5">
-												<FormLabel>HTTPS</FormLabel>
+												<FormLabel>{t("domain.https")}</FormLabel>
 												<FormDescription>
-													Automatically provision SSL Certificate.
+													{t("services.domains.httpsHelp")}
 												</FormDescription>
 												<FormMessage />
 											</div>
@@ -273,21 +283,29 @@ export const AddPreviewDomain = ({
 										name="certificateType"
 										render={({ field }) => (
 											<FormItem className="col-span-2">
-												<FormLabel>Certificate Provider</FormLabel>
+												<FormLabel>
+													{t("services.domains.certificateProvider")}
+												</FormLabel>
 												<Select
 													onValueChange={field.onChange}
 													defaultValue={field.value || ""}
 												>
 													<FormControl>
 														<SelectTrigger>
-															<SelectValue placeholder="Select a certificate provider" />
+															<SelectValue
+																placeholder={t(
+																	"services.domains.certificateProviderPlaceholder",
+																)}
+															/>
 														</SelectTrigger>
 													</FormControl>
 
 													<SelectContent>
-														<SelectItem value="none">None</SelectItem>
+														<SelectItem value="none">
+															{t("select.none")}
+														</SelectItem>
 														<SelectItem value={"letsencrypt"}>
-															Let's Encrypt
+															{t("services.domains.letsEncrypt")}
 														</SelectItem>
 													</SelectContent>
 												</Select>

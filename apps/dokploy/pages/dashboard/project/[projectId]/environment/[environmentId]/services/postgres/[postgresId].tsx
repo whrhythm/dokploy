@@ -42,6 +42,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { UseKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { appRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
@@ -56,6 +57,7 @@ const Postgresql = (
 	const router = useRouter();
 	const { projectId, environmentId } = router.query;
 	const [tab, setSab] = useState<TabState>(activeTab);
+	const { t } = useTranslation();
 	const { data } = api.postgres.one.useQuery({ postgresId });
 	const { data: auth } = api.user.get.useQuery();
 
@@ -74,7 +76,7 @@ const Postgresql = (
 			<UseKeyboardNav forPage="postgres" />
 			<BreadcrumbSidebar
 				list={[
-					{ name: "Projects", href: "/dashboard/projects" },
+					{ name: t("dashboard.projects"), href: "/dashboard/projects" },
 					{
 						name: data?.environment?.project?.name || "",
 						href: `/dashboard/project/${projectId}/environment/${environmentId}`,
@@ -90,7 +92,10 @@ const Postgresql = (
 			/>
 			<Head>
 				<title>
-					Database: {data?.name} - {data?.environment?.project?.name} | Dokploy
+					{t("services.postgres.pageTitle", {
+						name: data?.name || "",
+						project: data?.environment?.project?.name || "",
+					})}
 				</title>
 			</Head>
 			<div className="w-full">
@@ -127,7 +132,7 @@ const Postgresql = (
 													: "destructive"
 										}
 									>
-										{data?.server?.name || "Dokploy Server"}
+										{data?.server?.name || t("environment.dokployServer")}
 									</Badge>
 									{data?.server?.serverStatus === "inactive" && (
 										<TooltipProvider delayDuration={0}>
@@ -143,9 +148,7 @@ const Postgresql = (
 													side="top"
 												>
 													<span>
-														You cannot, deploy this application because the
-														server is inactive, please upgrade your plan to add
-														more servers.
+														{t("services.postgres.serverInactiveTooltip")}
 													</span>
 												</TooltipContent>
 											</Tooltip>
@@ -169,18 +172,17 @@ const Postgresql = (
 									<div className="max-w-3xl mx-auto flex flex-col items-center justify-center self-center gap-3">
 										<ServerOff className="size-10 text-muted-foreground self-center" />
 										<span className="text-center text-base text-muted-foreground">
-											This service is hosted on the server {data.server.name},
-											but this server has been disabled because your current
-											plan doesn't include enough servers. Please purchase more
-											servers to regain access to this application.
+											{t("services.postgres.inactivePanel", {
+												server: data.server.name,
+											})}
 										</span>
 										<span className="text-center text-base text-muted-foreground">
-											Go to{" "}
+											{t("services.postgres.goToBilling")}{" "}
 											<Link
 												href="/dashboard/settings/billing"
 												className="text-primary"
 											>
-												Billing
+												{t("settings.billing")}
 											</Link>
 										</span>
 									</div>
@@ -210,14 +212,24 @@ const Postgresql = (
 														: "md:grid-cols-6",
 											)}
 										>
-											<TabsTrigger value="general">General</TabsTrigger>
-											<TabsTrigger value="environment">Environment</TabsTrigger>
-											<TabsTrigger value="logs">Logs</TabsTrigger>
+											<TabsTrigger value="general">
+												{t("form.general")}
+											</TabsTrigger>
+											<TabsTrigger value="environment">
+												{t("tabs.environments")}
+											</TabsTrigger>
+											<TabsTrigger value="logs">{t("tabs.logs")}</TabsTrigger>
 											{((data?.serverId && isCloud) || !data?.server) && (
-												<TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+												<TabsTrigger value="monitoring">
+													{t("tabs.monitoring")}
+												</TabsTrigger>
 											)}
-											<TabsTrigger value="backups">Backups</TabsTrigger>
-											<TabsTrigger value="advanced">Advanced</TabsTrigger>
+											<TabsTrigger value="backups">
+												{t("tabs.backups")}
+											</TabsTrigger>
+											<TabsTrigger value="advanced">
+												{t("tabs.advanced")}
+											</TabsTrigger>
 										</TabsList>
 									</div>
 

@@ -11,6 +11,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/hooks/use-translation";
 import { TerminalLine } from "../../docker/logs/terminal-line";
 import { type LogLine, parseLogs } from "../../docker/logs/utils";
 
@@ -28,6 +29,7 @@ export const ShowDeployment = ({
 	serverId,
 	errorMessage,
 }: Props) => {
+	const { t } = useTranslation();
 	const [data, setData] = useState("");
 	const [showExtraLogs, setShowExtraLogs] = useState(false);
 	const [filteredLogs, setFilteredLogs] = useState<LogLine[]>([]);
@@ -143,12 +145,14 @@ export const ShowDeployment = ({
 		>
 			<DialogContent className={"sm:max-w-5xl"}>
 				<DialogHeader>
-					<DialogTitle>Deployment</DialogTitle>
+					<DialogTitle>{t("services.deployments.title")}</DialogTitle>
 					<DialogDescription className="flex items-center gap-2">
 						<span className="flex items-center gap-2">
-							See all the details of this deployment |{" "}
+							{t("services.deployments.modal.description")} |{" "}
 							<Badge variant="blank" className="text-xs">
-								{filteredLogs.length} lines
+								{t("services.deployments.modal.lines", {
+									count: filteredLogs.length,
+								})}
 							</Badge>
 						</span>
 
@@ -179,7 +183,7 @@ export const ShowDeployment = ({
 									htmlFor="show-extra-logs"
 									className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 								>
-									Show Extra Logs
+									{t("services.deployments.modal.showExtraLogs")}
 								</label>
 							</div>
 						)}

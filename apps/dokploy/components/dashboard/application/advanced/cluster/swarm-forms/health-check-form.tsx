@@ -14,6 +14,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 export const healthCheckFormSchema = z.object({
@@ -30,6 +31,7 @@ interface HealthCheckFormProps {
 }
 
 export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
+	const { t } = useTranslation();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const queryMap = {
@@ -107,10 +109,14 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 				healthCheckSwarm: hasAnyValue ? formData : null,
 			});
 
-			toast.success("Health check updated successfully");
+			toast.success(
+				t("services.swarmSettings.forms.healthCheck.toast.updated"),
+			);
 			refetch();
 		} catch {
-			toast.error("Error updating health check");
+			toast.error(
+				t("services.swarmSettings.forms.healthCheck.toast.updateError"),
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -137,10 +143,13 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 				<div>
-					<FormLabel>Test Commands</FormLabel>
+					<FormLabel>
+						{t("services.swarmSettings.forms.healthCheck.testCommandsLabel")}
+					</FormLabel>
 					<FormDescription>
-						Command to run for health check (e.g., ["CMD-SHELL", "curl -f
-						http://localhost:3000/health"])
+						{t(
+							"services.swarmSettings.forms.healthCheck.testCommandsDescription",
+						)}
 					</FormDescription>
 					<div className="space-y-2 mt-2">
 						{testCommands.map((cmd: string, index: number) => (
@@ -150,8 +159,12 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 									onChange={(e) => updateTestCommand(index, e.target.value)}
 									placeholder={
 										index === 0
-											? "CMD-SHELL"
-											: "curl -f http://localhost:3000/health"
+											? t(
+													"services.swarmSettings.forms.healthCheck.testCommandPlaceholderFirst",
+												)
+											: t(
+													"services.swarmSettings.forms.healthCheck.testCommandPlaceholderExample",
+												)
 									}
 								/>
 								<Button
@@ -160,7 +173,7 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 									size="sm"
 									onClick={() => removeTestCommand(index)}
 								>
-									Remove
+									{t("button.remove")}
 								</Button>
 							</div>
 						))}
@@ -170,7 +183,7 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 							size="sm"
 							onClick={addTestCommand}
 						>
-							Add Command
+							{t("services.swarmSettings.forms.healthCheck.addCommand")}
 						</Button>
 					</div>
 				</div>
@@ -180,12 +193,22 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 					name="Interval"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Interval (nanoseconds)</FormLabel>
+							<FormLabel>
+								{t("services.swarmSettings.forms.healthCheck.intervalLabel")}
+							</FormLabel>
 							<FormDescription>
-								Time between health checks (e.g., 10000000000 for 10 seconds)
+								{t(
+									"services.swarmSettings.forms.healthCheck.intervalDescription",
+								)}
 							</FormDescription>
 							<FormControl>
-								<Input type="number" placeholder="10000000000" {...field} />
+								<Input
+									type="number"
+									placeholder={t(
+										"services.swarmSettings.forms.healthCheck.intervalPlaceholder",
+									)}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -197,12 +220,22 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 					name="Timeout"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Timeout (nanoseconds)</FormLabel>
+							<FormLabel>
+								{t("services.swarmSettings.forms.healthCheck.timeoutLabel")}
+							</FormLabel>
 							<FormDescription>
-								Maximum time to wait for health check response
+								{t(
+									"services.swarmSettings.forms.healthCheck.timeoutDescription",
+								)}
 							</FormDescription>
 							<FormControl>
-								<Input type="number" placeholder="10000000000" {...field} />
+								<Input
+									type="number"
+									placeholder={t(
+										"services.swarmSettings.forms.healthCheck.timeoutPlaceholder",
+									)}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -214,12 +247,22 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 					name="StartPeriod"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Start Period (nanoseconds)</FormLabel>
+							<FormLabel>
+								{t("services.swarmSettings.forms.healthCheck.startPeriodLabel")}
+							</FormLabel>
 							<FormDescription>
-								Initial grace period before health checks begin
+								{t(
+									"services.swarmSettings.forms.healthCheck.startPeriodDescription",
+								)}
 							</FormDescription>
 							<FormControl>
-								<Input type="number" placeholder="10000000000" {...field} />
+								<Input
+									type="number"
+									placeholder={t(
+										"services.swarmSettings.forms.healthCheck.startPeriodPlaceholder",
+									)}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -231,13 +274,22 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 					name="Retries"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Retries</FormLabel>
+							<FormLabel>
+								{t("services.swarmSettings.forms.healthCheck.retriesLabel")}
+							</FormLabel>
 							<FormDescription>
-								Number of consecutive failures needed to consider container
-								unhealthy
+								{t(
+									"services.swarmSettings.forms.healthCheck.retriesDescription",
+								)}
 							</FormDescription>
 							<FormControl>
-								<Input type="number" placeholder="3" {...field} />
+								<Input
+									type="number"
+									placeholder={t(
+										"services.swarmSettings.forms.healthCheck.retriesPlaceholder",
+									)}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -258,10 +310,10 @@ export const HealthCheckForm = ({ id, type }: HealthCheckFormProps) => {
 							});
 						}}
 					>
-						Clear
+						{t("button.reset")}
 					</Button>
 					<Button type="submit" isLoading={isLoading}>
-						Save Health Check
+						{t("services.swarmSettings.forms.healthCheck.save")}
 					</Button>
 				</div>
 			</form>

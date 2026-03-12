@@ -25,22 +25,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const updatePostgresSchema = z.object({
-	name: z.string().min(1, {
-		message: "Name is required",
-	}),
-	description: z.string().optional(),
-});
+const createUpdatePostgresSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("services.redis.validation.nameRequired"),
+		}),
+		description: z.string().optional(),
+	});
 
-type UpdatePostgres = z.infer<typeof updatePostgresSchema>;
+type UpdatePostgres = z.infer<ReturnType<typeof createUpdatePostgresSchema>>;
 
 interface Props {
 	postgresId: string;
 }
 
 export const UpdatePostgres = ({ postgresId }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const utils = api.useUtils();
 	const { mutateAsync, error, isError, isPending } =
@@ -58,7 +61,7 @@ export const UpdatePostgres = ({ postgresId }: Props) => {
 			description: data?.description ?? "",
 			name: data?.name ?? "",
 		},
-		resolver: zodResolver(updatePostgresSchema),
+		resolver: zodResolver(createUpdatePostgresSchema(t)),
 	});
 	useEffect(() => {
 		if (data) {
@@ -76,14 +79,14 @@ export const UpdatePostgres = ({ postgresId }: Props) => {
 			description: formData.description || "",
 		})
 			.then(() => {
-				toast.success("Postgres updated successfully");
+				toast.success(t("services.postgres.toast.updated"));
 				utils.postgres.one.invalidate({
 					postgresId: postgresId,
 				});
 				setIsOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error updating Postgres");
+				toast.error(t("services.postgres.toast.updateError"));
 			})
 			.finally(() => {});
 	};
@@ -101,8 +104,10 @@ export const UpdatePostgres = ({ postgresId }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Modify Postgres</DialogTitle>
-					<DialogDescription>Update the Postgres data</DialogDescription>
+					<DialogTitle>{t("services.postgres.update.title")}</DialogTitle>
+					<DialogDescription>
+						{t("services.postgres.update.description")}
+					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
@@ -119,9 +124,14 @@ export const UpdatePostgres = ({ postgresId }: Props) => {
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<FormLabel>{t("form.name")}</FormLabel>
 											<FormControl>
-												<Input placeholder="Vandelay Industries" {...field} />
+												<Input
+													placeholder={t(
+														"services.application.namePlaceholder",
+													)}
+													{...field}
+												/>
 											</FormControl>
 
 											<FormMessage />
@@ -133,10 +143,12 @@ export const UpdatePostgres = ({ postgresId }: Props) => {
 									name="description"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Description</FormLabel>
+											<FormLabel>{t("form.description")}</FormLabel>
 											<FormControl>
 												<Textarea
-													placeholder="Description about your project..."
+													placeholder={t(
+														"services.application.descriptionPlaceholder",
+													)}
 													className="resize-none"
 													{...field}
 												/>
@@ -153,7 +165,7 @@ export const UpdatePostgres = ({ postgresId }: Props) => {
 										type="submit"
 										className="flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-offset-2"
 									>
-										Update
+										{t("button.update")}
 									</Button>
 								</DialogFooter>
 							</form>

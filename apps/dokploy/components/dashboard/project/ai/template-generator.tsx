@@ -23,6 +23,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { StepOne } from "./step-one";
 import { StepThree } from "./step-three";
@@ -77,15 +78,15 @@ const defaultTemplateInfo: TemplateInfo = {
 export const { useStepper, steps, Scoped } = defineStepper(
 	{
 		id: "needs",
-		title: "Describe your needs",
+		title: "environment.Modal.aiAssistant.steps.needs",
 	},
 	{
 		id: "variant",
-		title: "Choose a Variant",
+		title: "environment.Modal.aiAssistant.steps.variant",
 	},
 	{
 		id: "review",
-		title: "Review and Finalize",
+		title: "environment.Modal.aiAssistant.steps.review",
 	},
 );
 
@@ -95,6 +96,7 @@ interface Props {
 }
 
 export const TemplateGenerator = ({ environmentId }: Props) => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const stepper = useStepper();
 	const { data: aiSettings } = api.ai.getAll.useQuery();
@@ -136,7 +138,7 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 			configFiles: templateInfo?.details?.configFiles || [],
 		})
 			.then(async () => {
-				toast.success("Compose Created");
+				toast.success(t("environment.Modal.aiAssistant.toast.created"));
 				setOpen(false);
 				// Invalidate the project query to refresh the environment data
 				await utils.environment.one.invalidate({
@@ -144,7 +146,7 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 				});
 			})
 			.catch(() => {
-				toast.error("Error creating the compose");
+				toast.error(t("environment.Modal.aiAssistant.toast.error"));
 			});
 	};
 
@@ -161,17 +163,22 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-4xl w-full  flex flex-col">
 				<DialogHeader>
-					<DialogTitle>AI Assistant</DialogTitle>
+					<DialogTitle>{t("environment.Modal.aiAssistant.title")}</DialogTitle>
 					<DialogDescription>
-						Create a custom template based on your needs
+						{t("environment.Modal.aiAssistant.description")}
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-4">
 					<div className="flex justify-between">
-						<h2 className="text-lg font-semibold">Steps</h2>
+						<h2 className="text-lg font-semibold">
+							{t("environment.Modal.aiAssistant.stepsLabel")}
+						</h2>
 						<div className="flex items-center gap-2">
 							<span className="text-sm text-muted-foreground">
-								Step {stepper.current.index + 1} of {steps.length}
+								{t("environment.Modal.aiAssistant.stepCount", {
+									current: stepper.current.index + 1,
+									total: steps.length,
+								})}
 							</span>
 							<div />
 						</div>
@@ -201,7 +208,9 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 											>
 												{index + 1}
 											</Button>
-											<span className="text-sm font-medium">{step.title}</span>
+											<span className="text-sm font-medium">
+												{t(step.title)}
+											</span>
 										</li>
 										{index < array.length - 1 && (
 											<Separator
@@ -222,16 +231,20 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 									{!haveAtleasOneProviderEnabled && (
 										<AlertBlock type="warning">
 											<div className="flex flex-col w-full">
-												<span>AI features are not enabled</span>
 												<span>
-													To use AI-powered template generation, please{" "}
+													{t("environment.Modal.aiAssistant.disabledTitle")}
+												</span>
+												<span>
+													{t(
+														"environment.Modal.aiAssistant.disabledDescription",
+													)}{" "}
 													<Link
 														href="/dashboard/settings/ai"
 														className="font-medium underline underline-offset-4"
 													>
-														enable AI in your settings
+														{t("environment.Modal.aiAssistant.disabledLink")}
 													</Link>
-													.
+													{t("environment.Modal.aiAssistant.disabledSuffix")}
 												</span>
 											</div>
 										</AlertBlock>
@@ -246,7 +259,7 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 														htmlFor="user-needs"
 														className="text-sm font-medium"
 													>
-														Select AI Provider
+														{t("environment.Modal.aiAssistant.selectProvider")}
 													</label>
 													<Select
 														value={templateInfo.aiId}
@@ -258,7 +271,11 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 														}
 													>
 														<SelectTrigger>
-															<SelectValue placeholder="Select an AI provider" />
+															<SelectValue
+																placeholder={t(
+																	"environment.Modal.aiAssistant.selectProviderPlaceholder",
+																)}
+															/>
 														</SelectTrigger>
 														<SelectContent>
 															{aiSettings.map((ai) => (
@@ -302,7 +319,7 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 								disabled={stepper.isFirst}
 								variant="secondary"
 							>
-								Back
+								{t("button.back")}
 							</Button>
 							<Button
 								disabled={isDisabled()}
@@ -328,7 +345,7 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 									// }
 								}}
 							>
-								{stepper.isLast ? "Create" : "Next"}
+								{stepper.isLast ? t("button.create") : t("button.next")}
 							</Button>
 						</div>
 					</div>

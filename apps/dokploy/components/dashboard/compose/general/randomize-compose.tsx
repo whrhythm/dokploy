@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -37,6 +38,7 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 export const RandomizeCompose = ({ composeId }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [compose, setCompose] = useState<string>("");
 	const [_isOpen, _setIsOpen] = useState(false);
@@ -79,10 +81,10 @@ export const RandomizeCompose = ({ composeId }: Props) => {
 			.then(async (_data) => {
 				await randomizeCompose();
 				await refetch();
-				toast.success("Compose updated");
+				toast.success(t("services.compose.randomize.toast.updated"));
 			})
 			.catch(() => {
-				toast.error("Error randomizing the compose");
+				toast.error(t("services.compose.randomize.toast.updateError"));
 			});
 	};
 
@@ -99,27 +101,22 @@ export const RandomizeCompose = ({ composeId }: Props) => {
 	return (
 		<div className="w-full">
 			<DialogHeader>
-				<DialogTitle>Randomize Compose (Experimental)</DialogTitle>
+				<DialogTitle>{t("pages.Modal.composeRandomize.title")}</DialogTitle>
 				<DialogDescription>
-					Use this in case you want to deploy the same compose file and you have
-					conflicts with some property like volumes, networks, etc.
+					{t("pages.Modal.composeRandomize.description")}
 				</DialogDescription>
 			</DialogHeader>
 			<div className="text-sm text-muted-foreground flex flex-col gap-2">
-				<span>
-					This will randomize the compose file and will add a suffix to the
-					property to avoid conflicts
-				</span>
+				<span>{t("services.compose.randomize.summary")}</span>
 				<ul className="list-disc list-inside">
-					<li>volumes</li>
-					<li>networks</li>
-					<li>services</li>
-					<li>configs</li>
-					<li>secrets</li>
+					<li>{t("services.compose.randomize.items.volumes")}</li>
+					<li>{t("services.compose.randomize.items.networks")}</li>
+					<li>{t("services.compose.randomize.items.services")}</li>
+					<li>{t("services.compose.randomize.items.configs")}</li>
+					<li>{t("services.compose.randomize.items.secrets")}</li>
 				</ul>
 				<AlertBlock type="info">
-					When you activate this option, we will include a env `COMPOSE_PREFIX`
-					variable to the compose file so you can use it in your compose file.
+					{t("services.compose.randomize.alert")}
 				</AlertBlock>
 			</div>
 			{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -145,10 +142,14 @@ export const RandomizeCompose = ({ composeId }: Props) => {
 								name="suffix"
 								render={({ field }) => (
 									<FormItem className="flex flex-col justify-center max-sm:items-center w-full mt-4">
-										<FormLabel>Suffix</FormLabel>
+										<FormLabel>
+											{t("services.compose.randomize.suffixLabel")}
+										</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="Enter a suffix (Optional, example: prod)"
+												placeholder={t(
+													"services.compose.randomize.suffixPlaceholder",
+												)}
 												{...field}
 											/>
 										</FormControl>
@@ -162,9 +163,11 @@ export const RandomizeCompose = ({ composeId }: Props) => {
 								render={({ field }) => (
 									<FormItem className="mt-4 flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 										<div className="space-y-0.5">
-											<FormLabel>Apply Randomize</FormLabel>
+											<FormLabel>
+												{t("services.compose.randomize.applyLabel")}
+											</FormLabel>
 											<FormDescription>
-												Apply randomize to the compose file.
+												{t("services.compose.randomize.applyDescription")}
 											</FormDescription>
 										</div>
 										<FormControl>
@@ -184,7 +187,7 @@ export const RandomizeCompose = ({ composeId }: Props) => {
 								type="submit"
 								className="lg:w-fit"
 							>
-								Save
+								{t("button.save")}
 							</Button>
 							<Button
 								type="button"
@@ -194,7 +197,7 @@ export const RandomizeCompose = ({ composeId }: Props) => {
 								}}
 								className="lg:w-fit"
 							>
-								Random
+								{t("services.compose.randomize.random")}
 							</Button>
 						</div>
 					</div>

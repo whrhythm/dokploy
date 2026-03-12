@@ -22,6 +22,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 export type Services = {
@@ -52,6 +53,7 @@ export const DuplicateProject = ({
 	services,
 	selectedServiceIds,
 }: DuplicateProjectProps) => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
@@ -104,8 +106,8 @@ export const DuplicateProject = ({
 
 				toast.success(
 					duplicateType === "new-project"
-						? "Project duplicated successfully"
-						: "Services duplicated successfully",
+						? t("project.toast.duplicated")
+						: t("environment.toast.servicesDuplicated"),
 				);
 				setOpen(false);
 				if (duplicateType === "new-project") {
@@ -121,17 +123,17 @@ export const DuplicateProject = ({
 
 	const handleDuplicate = async () => {
 		if (duplicateType === "new-project" && !name) {
-			toast.error("Project name is required");
+			toast.error(t("project.validation.nameRequired"));
 			return;
 		}
 
 		if (duplicateType === "existing-environment") {
 			if (!selectedTargetProject) {
-				toast.error("Please select a target project");
+				toast.error(t("environment.toast.selectTargetProject"));
 				return;
 			}
 			if (!selectedTargetEnvironment) {
-				toast.error("Please select a target environment");
+				toast.error(t("environment.toast.selectTargetEnvironment"));
 				return;
 			}
 		}
@@ -168,20 +170,20 @@ export const DuplicateProject = ({
 			<DialogTrigger asChild>
 				<Button variant="ghost" className="w-full justify-start">
 					<Copy className="mr-2 h-4 w-4" />
-					Duplicate
+					{t("button.duplicate")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Duplicate Services</DialogTitle>
+					<DialogTitle>{t("pages.Modal.servicesDuplicate.title")}</DialogTitle>
 					<DialogDescription>
-						Choose where to duplicate the selected services
+						{t("pages.Modal.servicesDuplicate.description")}
 					</DialogDescription>
 				</DialogHeader>
 
 				<div className="grid gap-4 py-4">
 					<div className="grid gap-2">
-						<Label>Duplicate to</Label>
+						<Label>{t("pages.Modal.servicesDuplicate.targetLabel")}</Label>
 						<RadioGroup
 							value={duplicateType}
 							onValueChange={(value) => {
@@ -196,7 +198,9 @@ export const DuplicateProject = ({
 						>
 							<div className="flex items-center space-x-2">
 								<RadioGroupItem value="new-project" id="new-project" />
-								<Label htmlFor="new-project">New project</Label>
+								<Label htmlFor="new-project">
+									{t("pages.Modal.servicesDuplicate.target.newProject")}
+								</Label>
 							</div>
 							<div className="flex items-center space-x-2">
 								<RadioGroupItem
@@ -204,7 +208,9 @@ export const DuplicateProject = ({
 									id="existing-environment"
 								/>
 								<Label htmlFor="existing-environment">
-									Existing environment
+									{t(
+										"pages.Modal.servicesDuplicate.target.existingEnvironment",
+									)}
 								</Label>
 							</div>
 						</RadioGroup>
@@ -213,22 +219,26 @@ export const DuplicateProject = ({
 					{duplicateType === "new-project" && (
 						<>
 							<div className="grid gap-2">
-								<Label htmlFor="name">Name</Label>
+								<Label htmlFor="name">{t("form.name")}</Label>
 								<Input
 									id="name"
 									value={name}
 									onChange={(e) => setName(e.target.value)}
-									placeholder="New project name"
+									placeholder={t(
+										"pages.Modal.servicesDuplicate.namePlaceholder",
+									)}
 								/>
 							</div>
 
 							<div className="grid gap-2">
-								<Label htmlFor="description">Description</Label>
+								<Label htmlFor="description">{t("form.description")}</Label>
 								<Input
 									id="description"
 									value={description}
 									onChange={(e) => setDescription(e.target.value)}
-									placeholder="Project description (optional)"
+									placeholder={t(
+										"pages.Modal.servicesDuplicate.descriptionPlaceholder",
+									)}
 								/>
 							</div>
 						</>
@@ -240,14 +250,14 @@ export const DuplicateProject = ({
 								.length === 0 ? (
 								<div className="flex flex-col items-center justify-center gap-2 py-4 text-center">
 									<p className="text-sm text-muted-foreground">
-										No other projects available. Create a new project first.
+										{t("environment.noTargetProjects")}
 									</p>
 								</div>
 							) : (
 								<>
 									{/* Step 1: Select Project */}
 									<div className="grid gap-2">
-										<Label>Target Project</Label>
+										<Label>{t("environment.targetProject")}</Label>
 										<Select
 											value={selectedTargetProject}
 											onValueChange={(value) => {
@@ -256,7 +266,11 @@ export const DuplicateProject = ({
 											}}
 										>
 											<SelectTrigger>
-												<SelectValue placeholder="Select target project" />
+												<SelectValue
+													placeholder={t(
+														"environment.targetProjectPlaceholder",
+													)}
+												/>
 											</SelectTrigger>
 											<SelectContent>
 												{allProjects
@@ -276,13 +290,17 @@ export const DuplicateProject = ({
 									{/* Step 2: Select Environment (only show if project is selected) */}
 									{selectedTargetProject && (
 										<div className="grid gap-2">
-											<Label>Target Environment</Label>
+											<Label>{t("environment.targetEnvironment")}</Label>
 											<Select
 												value={selectedTargetEnvironment}
 												onValueChange={setSelectedTargetEnvironment}
 											>
 												<SelectTrigger>
-													<SelectValue placeholder="Select target environment" />
+													<SelectValue
+														placeholder={t(
+															"environment.targetEnvironmentPlaceholder",
+														)}
+													/>
 												</SelectTrigger>
 												<SelectContent>
 													{selectedProjectEnvironments?.map((env) => (
@@ -303,7 +321,9 @@ export const DuplicateProject = ({
 					)}
 
 					<div className="grid gap-2">
-						<Label>Selected services to duplicate</Label>
+						<Label>
+							{t("pages.Modal.servicesDuplicate.selectedServicesLabel")}
+						</Label>
 						<div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-md p-4">
 							{selectedServices.map((service) => (
 								<div key={service.id} className="flex items-center space-x-2">
@@ -322,7 +342,7 @@ export const DuplicateProject = ({
 						onClick={() => setOpen(false)}
 						disabled={isPending}
 					>
-						Cancel
+						{t("button.cancel")}
 					</Button>
 					<Button
 						onClick={handleDuplicate}
@@ -337,13 +357,13 @@ export const DuplicateProject = ({
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 								{duplicateType === "new-project"
-									? "Duplicating to new project..."
-									: "Duplicating to environment..."}
+									? t("pages.Modal.servicesDuplicate.loading.newProject")
+									: t("pages.Modal.servicesDuplicate.loading.environment")}
 							</>
 						) : duplicateType === "new-project" ? (
-							"Duplicate to new project"
+							t("pages.Modal.servicesDuplicate.action.newProject")
 						) : (
-							"Duplicate to environment"
+							t("pages.Modal.servicesDuplicate.action.environment")
 						)}
 					</Button>
 				</DialogFooter>

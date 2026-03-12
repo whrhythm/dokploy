@@ -16,6 +16,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import {
 	EndpointSpecForm,
@@ -37,76 +38,66 @@ type MenuItem = {
 	docDescription: string;
 };
 
-const menuItems: MenuItem[] = [
+const menuItems = (t: (key: string) => string): MenuItem[] => [
 	{
 		id: "health-check",
-		label: "Health Check",
-		description: "Configure health check settings",
-		docDescription:
-			"Configure HEALTHCHECK to test a container's health. Determines if a container is healthy by running a command inside the container. Test, Interval, Timeout, StartPeriod, and Retries control health monitoring.",
+		label: t("services.swarmSettings.menu.healthCheck"),
+		description: t("services.swarmSettings.menu.healthCheckDescription"),
+		docDescription: t("services.swarmSettings.menu.healthCheckDoc"),
 	},
 	{
 		id: "restart-policy",
-		label: "Restart Policy",
-		description: "Configure restart policy",
-		docDescription:
-			"Configure the restart policy for containers in the service. Condition (none, on-failure, any), Delay (nanoseconds between restarts), MaxAttempts, and Window control restart behavior.",
+		label: t("services.swarmSettings.menu.restartPolicy"),
+		description: t("services.swarmSettings.menu.restartPolicyDescription"),
+		docDescription: t("services.swarmSettings.menu.restartPolicyDoc"),
 	},
 	{
 		id: "placement",
-		label: "Placement",
-		description: "Configure placement constraints",
-		docDescription:
-			"Control which nodes service tasks can be scheduled on. Constraints (node.id==xyz), Preferences (spread.node.labels.zone), MaxReplicas, and Platforms specify task placement rules.",
+		label: t("services.swarmSettings.menu.placement"),
+		description: t("services.swarmSettings.menu.placementDescription"),
+		docDescription: t("services.swarmSettings.menu.placementDoc"),
 	},
 	{
 		id: "update-config",
-		label: "Update Config",
-		description: "Configure update strategy",
-		docDescription:
-			"Configure how the service should be updated. Parallelism (tasks updated simultaneously), Delay, FailureAction (pause, continue, rollback), Monitor, MaxFailureRatio, and Order (stop-first, start-first) control updates.",
+		label: t("services.swarmSettings.menu.updateConfig"),
+		description: t("services.swarmSettings.menu.updateConfigDescription"),
+		docDescription: t("services.swarmSettings.menu.updateConfigDoc"),
 	},
 	{
 		id: "rollback-config",
-		label: "Rollback Config",
-		description: "Configure rollback strategy",
-		docDescription:
-			"Configure automated rollback on update failure. Uses same parameters as UpdateConfig: Parallelism, Delay, FailureAction, Monitor, MaxFailureRatio, and Order.",
+		label: t("services.swarmSettings.menu.rollbackConfig"),
+		description: t("services.swarmSettings.menu.rollbackConfigDescription"),
+		docDescription: t("services.swarmSettings.menu.rollbackConfigDoc"),
 	},
 	{
 		id: "mode",
-		label: "Mode",
-		description: "Configure service mode",
-		docDescription:
-			"Set service mode to either 'Replicated' with a specified number of tasks (Replicas), or 'Global' (one task per node).",
+		label: t("services.swarmSettings.menu.mode"),
+		description: t("services.swarmSettings.menu.modeDescription"),
+		docDescription: t("services.swarmSettings.menu.modeDoc"),
 	},
 	{
 		id: "network",
-		label: "Network",
-		description: "Configure network attachments",
-		docDescription:
-			"Attach the service to one or more networks. Specify the network name (Target) and optional network aliases for service discovery.",
+		label: t("services.swarmSettings.menu.network"),
+		description: t("services.swarmSettings.menu.networkDescription"),
+		docDescription: t("services.swarmSettings.menu.networkDoc"),
 	},
 	{
 		id: "labels",
-		label: "Labels",
-		description: "Configure service labels",
-		docDescription:
-			"Add metadata to services using labels. Labels are key-value pairs (e.g., com.example.foo=bar) for organizing and filtering services.",
+		label: t("services.swarmSettings.menu.labels"),
+		description: t("services.swarmSettings.menu.labelsDescription"),
+		docDescription: t("services.swarmSettings.menu.labelsDoc"),
 	},
 	{
 		id: "stop-grace-period",
-		label: "Stop Grace Period",
-		description: "Configure stop grace period",
-		docDescription:
-			"Time to wait before forcefully killing a container. Specified in nanoseconds (e.g., 10000000000 = 10 seconds). Allows containers to shutdown gracefully.",
+		label: t("services.swarmSettings.menu.stopGracePeriod"),
+		description: t("services.swarmSettings.menu.stopGracePeriodDescription"),
+		docDescription: t("services.swarmSettings.menu.stopGracePeriodDoc"),
 	},
 	{
 		id: "endpoint-spec",
-		label: "Endpoint Spec",
-		description: "Configure endpoint specification",
-		docDescription:
-			"Configure endpoint mode for service discovery. Mode 'vip' (virtual IP - default) uses a single virtual IP. Mode 'dnsrr' (DNS round-robin) returns DNS entries for all tasks.",
+		label: t("services.swarmSettings.menu.endpointSpec"),
+		description: t("services.swarmSettings.menu.endpointSpecDescription"),
+		docDescription: t("services.swarmSettings.menu.endpointSpecDoc"),
 	},
 ];
 
@@ -123,6 +114,8 @@ interface Props {
 }
 
 export const AddSwarmSettings = ({ id, type }: Props) => {
+	const { t } = useTranslation();
+	const items = menuItems(t);
 	const [activeMenu, setActiveMenu] = useState<string>("health-check");
 	const [open, setOpen] = useState(false);
 	return (
@@ -130,20 +123,19 @@ export const AddSwarmSettings = ({ id, type }: Props) => {
 			<DialogTrigger asChild>
 				<Button variant="secondary" className="cursor-pointer w-fit">
 					<Settings className="size-4 text-muted-foreground" />
-					Swarm Settings
+					{t("services.swarmSettings.trigger")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-6xl max-h-[85vh]">
 				<DialogHeader>
-					<DialogTitle>Swarm Settings</DialogTitle>
+					<DialogTitle>{t("pages.Modal.swarmSettings.title")}</DialogTitle>
 					<DialogDescription>
-						Configure swarm settings for your service.
+						{t("pages.Modal.swarmSettings.description")}
 					</DialogDescription>
 				</DialogHeader>
 				<div>
 					<AlertBlock type="info">
-						Changing settings such as placements may cause the logs/monitoring,
-						backups and other features to be unavailable.
+						{t("services.swarmSettings.warning")}
 					</AlertBlock>
 				</div>
 
@@ -152,7 +144,7 @@ export const AddSwarmSettings = ({ id, type }: Props) => {
 					<div className="w-64 flex-shrink-0 border-r pr-4 overflow-y-auto">
 						<nav className="space-y-1">
 							<TooltipProvider>
-								{menuItems.map((item) => (
+								{items.map((item) => (
 									<Tooltip key={item.id}>
 										<TooltipTrigger asChild>
 											<button

@@ -12,6 +12,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const ClearDeployments = ({ id, type }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const { mutateAsync, isPending } =
 		type === "application"
@@ -30,22 +32,21 @@ export const ClearDeployments = ({ id, type }: Props) => {
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
 				<Button variant="outline" className="w-fit" isLoading={isPending}>
-					Clear deployments
+					{t("services.deployments.clear.button")}
 					<Paintbrush className="size-4" />
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
-						Are you sure you want to clear old deployments?
+						{t("services.deployments.clear.confirmTitle")}
 					</AlertDialogTitle>
 					<AlertDialogDescription>
-						This will delete all old deployment records and logs, keeping only
-						the active deployment (the most recent successful one).
+						{t("services.deployments.clear.confirmDescription")}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={async () => {
 							await mutateAsync({
@@ -53,7 +54,7 @@ export const ClearDeployments = ({ id, type }: Props) => {
 								composeId: id || "",
 							})
 								.then(async () => {
-									toast.success("Old deployments cleared successfully");
+									toast.success(t("services.deployments.clear.toast.success"));
 									await utils.deployment.allByType.invalidate({
 										id,
 										type: type as "application" | "compose",
@@ -64,7 +65,7 @@ export const ClearDeployments = ({ id, type }: Props) => {
 								});
 						}}
 					>
-						Confirm
+						{t("button.confirm")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

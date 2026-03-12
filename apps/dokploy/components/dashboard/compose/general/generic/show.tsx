@@ -12,6 +12,7 @@ import {
 } from "@/components/icons/data-tools-icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { ComposeFileEditor } from "../compose-file-editor";
 import { ShowConvertedCompose } from "../show-converted-compose";
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export const ShowProviderFormCompose = ({ composeId }: Props) => {
+	const { t } = useTranslation();
 	const { data: githubProviders, isPending: isLoadingGithub } =
 		api.github.githubProviders.useQuery();
 	const { data: gitlabProviders, isPending: isLoadingGitlab } =
@@ -48,13 +50,13 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 	const handleDisconnect = async () => {
 		try {
 			await disconnectGitProvider({ composeId });
-			toast.success("Repository disconnected successfully");
+			toast.success(t("services.compose.provider.disconnectSuccess"));
 			await refetch();
 		} catch (error) {
 			toast.error(
-				`Failed to disconnect repository: ${
-					error instanceof Error ? error.message : "Unknown error"
-				}`,
+				t("services.compose.provider.disconnectError", {
+					value: error instanceof Error ? error.message : t("errors.unknown"),
+				}),
 			);
 		}
 	};
@@ -65,9 +67,11 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 				<CardHeader>
 					<CardTitle className="flex items-start justify-between">
 						<div className="flex flex-col gap-2">
-							<span className="flex flex-col space-y-0.5">Provider</span>
+							<span className="flex flex-col space-y-0.5">
+								{t("services.compose.provider.title")}
+							</span>
 							<p className="flex items-center text-sm font-normal text-muted-foreground">
-								Select the source of your code
+								{t("services.compose.provider.description")}
 							</p>
 						</div>
 						<div className="hidden space-y-1 text-sm font-normal md:block">
@@ -79,7 +83,7 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 					<div className="flex min-h-[25vh] items-center justify-center">
 						<div className="flex items-center gap-2 text-muted-foreground">
 							<Loader2 className="size-4 animate-spin" />
-							<span>Loading providers...</span>
+							<span>{t("services.compose.provider.loading")}</span>
 						</div>
 					</div>
 				</CardContent>
@@ -98,9 +102,11 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 				<CardHeader>
 					<CardTitle className="flex items-start justify-between">
 						<div className="flex flex-col gap-2">
-							<span className="flex flex-col space-y-0.5">Provider</span>
+							<span className="flex flex-col space-y-0.5">
+								{t("services.compose.provider.title")}
+							</span>
 							<p className="flex items-center text-sm font-normal text-muted-foreground">
-								Repository connection through unauthorized provider
+								{t("services.compose.provider.unauthorized")}
 							</p>
 						</div>
 						<div className="hidden space-y-1 text-sm font-normal md:block">
@@ -123,9 +129,11 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 			<CardHeader>
 				<CardTitle className="flex items-start justify-between">
 					<div className="flex flex-col gap-2">
-						<span className="flex flex-col space-y-0.5">Provider</span>
+						<span className="flex flex-col space-y-0.5">
+							{t("services.compose.provider.title")}
+						</span>
 						<p className="flex items-center text-sm font-normal text-muted-foreground">
-							Select the source of your code
+							{t("services.compose.provider.description")}
 						</p>
 					</div>
 					<div className="hidden space-y-1 text-sm font-normal md:flex flex-row items-center gap-2">
@@ -149,41 +157,42 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
 							>
 								<GithubIcon className="size-4 text-current fill-current" />
-								GitHub
+								{t("services.compose.provider.tabs.github")}
 							</TabsTrigger>
 							<TabsTrigger
 								value="gitlab"
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
 							>
 								<GitlabIcon className="size-4 text-current fill-current" />
-								GitLab
+								{t("services.compose.provider.tabs.gitlab")}
 							</TabsTrigger>
 							<TabsTrigger
 								value="bitbucket"
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
 							>
 								<BitbucketIcon className="size-4 text-current fill-current" />
-								Bitbucket
+								{t("services.compose.provider.tabs.bitbucket")}
 							</TabsTrigger>
 							<TabsTrigger
 								value="gitea"
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
 							>
-								<GiteaIcon className="size-4 text-current fill-current" /> Gitea
+								<GiteaIcon className="size-4 text-current fill-current" />
+								{t("services.compose.provider.tabs.gitea")}
 							</TabsTrigger>
 							<TabsTrigger
 								value="git"
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
 							>
 								<GitIcon />
-								Git
+								{t("services.compose.provider.tabs.git")}
 							</TabsTrigger>
 							<TabsTrigger
 								value="raw"
 								className="rounded-none border-b-2 gap-2 border-b-transparent data-[state=active]:border-b-2 data-[state=active]:border-b-border"
 							>
 								<CodeIcon className="size-4" />
-								Raw
+								{t("services.compose.provider.tabs.raw")}
 							</TabsTrigger>
 						</TabsList>
 					</div>
@@ -195,15 +204,16 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<GithubIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using GitHub, you need to configure your account
-									first. Please, go to{" "}
+									{t("services.compose.provider.missingProvider", {
+										value: t("services.compose.provider.tabs.github"),
+									})}{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										{t("settings.title")}
 									</Link>{" "}
-									to do so.
+									{t("services.compose.provider.missingProviderSuffix")}
 								</span>
 							</div>
 						)}
@@ -215,15 +225,16 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<GitlabIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using GitLab, you need to configure your account
-									first. Please, go to{" "}
+									{t("services.compose.provider.missingProvider", {
+										value: t("services.compose.provider.tabs.gitlab"),
+									})}{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										{t("settings.title")}
 									</Link>{" "}
-									to do so.
+									{t("services.compose.provider.missingProviderSuffix")}
 								</span>
 							</div>
 						)}
@@ -235,15 +246,16 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<BitbucketIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using Bitbucket, you need to configure your account
-									first. Please, go to{" "}
+									{t("services.compose.provider.missingProvider", {
+										value: t("services.compose.provider.tabs.bitbucket"),
+									})}{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										{t("settings.title")}
 									</Link>{" "}
-									to do so.
+									{t("services.compose.provider.missingProviderSuffix")}
 								</span>
 							</div>
 						)}
@@ -255,15 +267,16 @@ export const ShowProviderFormCompose = ({ composeId }: Props) => {
 							<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 								<GiteaIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									To deploy using Gitea, you need to configure your account
-									first. Please, go to{" "}
+									{t("services.compose.provider.missingProvider", {
+										value: t("services.compose.provider.tabs.gitea"),
+									})}{" "}
 									<Link
 										href="/dashboard/settings/git-providers"
 										className="text-foreground"
 									>
-										Settings
+										{t("settings.title")}
 									</Link>{" "}
-									to do so.
+									{t("services.compose.provider.missingProviderSuffix")}
 								</span>
 							</div>
 						)}

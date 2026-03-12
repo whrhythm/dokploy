@@ -12,6 +12,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export const ShowConvertedCompose = ({ composeId }: Props) => {
+	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const {
 		data: compose,
@@ -49,22 +51,20 @@ export const ShowConvertedCompose = ({ composeId }: Props) => {
 			<DialogTrigger asChild>
 				<Button className="max-lg:w-full" variant="outline">
 					<Puzzle className="h-4 w-4" />
-					Preview Compose
+					{t("services.compose.preview.trigger")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-6xl max-h-[50rem]">
 				<DialogHeader>
-					<DialogTitle>Converted Compose</DialogTitle>
+					<DialogTitle>{t("pages.Modal.composePreview.title")}</DialogTitle>
 					<DialogDescription>
-						Preview your docker-compose file with added domains. Note: At least
-						one domain must be specified for this conversion to take effect.
+						{t("pages.Modal.composePreview.description")}
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
 				<AlertBlock type="info" className="mb-4">
-					Preview your docker-compose file with added domains. Note: At least
-					one domain must be specified for this conversion to take effect.
+					{t("pages.Modal.composePreview.description")}
 				</AlertBlock>
 				{isPending ? (
 					<div className="flex flex-row items-center justify-center min-h-[25rem] border p-4 rounded-md">
@@ -74,7 +74,7 @@ export const ShowConvertedCompose = ({ composeId }: Props) => {
 					<div className="border p-4 rounded-md flex flex-col items-center justify-center min-h-[25rem]">
 						<Puzzle className="h-8 w-8 text-muted-foreground mb-2" />
 						<span className="text-muted-foreground">
-							No converted compose data available.
+							{t("services.compose.preview.empty")}
 						</span>
 					</div>
 				) : (
@@ -87,16 +87,21 @@ export const ShowConvertedCompose = ({ composeId }: Props) => {
 									mutateAsync({ composeId })
 										.then(() => {
 											refetch();
-											toast.success("Fetched source type");
+											toast.success(
+												t("services.compose.preview.toast.refetched"),
+											);
 										})
 										.catch((err) => {
-											toast.error("Error fetching source type", {
-												description: err.message,
-											});
+											toast.error(
+												t("services.compose.preview.toast.refetchError"),
+												{
+													description: err.message,
+												},
+											);
 										});
 								}}
 							>
-								Refresh <RefreshCw className="ml-2 h-4 w-4" />
+								{t("button.refresh")} <RefreshCw className="ml-2 h-4 w-4" />
 							</Button>
 						</div>
 

@@ -608,8 +608,12 @@ export const HandleSchedules = ({ id, scheduleId, scheduleType }: Props) => {
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
-													<SelectItem value="bash">Bash</SelectItem>
-													<SelectItem value="sh">Sh</SelectItem>
+													<SelectItem value="bash">
+														{t("schedule.form.shellTypeBash")}
+													</SelectItem>
+													<SelectItem value="sh">
+														{t("schedule.form.shellTypeSh")}
+													</SelectItem>
 												</SelectContent>
 											</Select>
 											<FormDescription>

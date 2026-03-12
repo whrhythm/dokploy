@@ -23,6 +23,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api, type RouterOutputs } from "@/utils/api";
 import { ShowRollbackSettings } from "../rollbacks/show-rollback-settings";
 import { CancelQueues } from "./cancel-queues";
@@ -58,6 +59,7 @@ export const ShowDeployments = ({
 	refreshToken,
 	serverId,
 }: Props) => {
+	const { t } = useTranslation();
 	const [activeLog, setActiveLog] = useState<
 		RouterOutputs["deployment"]["all"][number] | null
 	>(null);
@@ -142,9 +144,11 @@ export const ShowDeployments = ({
 		<Card className="bg-background border-none">
 			<CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
 				<div className="flex flex-col gap-2">
-					<CardTitle className="text-xl">Deployments</CardTitle>
+					<CardTitle className="text-xl">
+						{t("services.deployments.title")}
+					</CardTitle>
 					<CardDescription>
-						See the last 10 deployments for this {type}
+						{t("services.deployments.description", { value: type })}
 					</CardDescription>
 				</div>
 				<div className="flex flex-row items-center flex-wrap gap-2">
@@ -160,7 +164,8 @@ export const ShowDeployments = ({
 					{type === "application" && (
 						<ShowRollbackSettings applicationId={id}>
 							<Button variant="outline">
-								Configure Rollbacks <Settings className="size-4" />
+								{t("services.deployments.configureRollbacks")}{" "}
+								<Settings className="size-4" />
 							</Button>
 						</ShowRollbackSettings>
 					)}
@@ -175,11 +180,10 @@ export const ShowDeployments = ({
 						<div className="flex flex-col gap-3">
 							<div>
 								<div className="font-medium text-sm mb-1">
-									Build appears to be stuck
+									{t("services.deployments.stuck.title")}
 								</div>
 								<p className="text-sm">
-									Hey! Looks like the build has been running for more than 10
-									minutes. Would you like to cancel this deployment?
+									{t("services.deployments.stuck.description")}
 								</p>
 							</div>
 							<Button
@@ -200,29 +204,28 @@ export const ShowDeployments = ({
 												composeId: id,
 											});
 										}
-										toast.success("Deployment cancellation requested");
+										toast.success(
+											t("services.deployments.stuck.toast.cancelRequested"),
+										);
 									} catch (error) {
 										toast.error(
 											error instanceof Error
 												? error.message
-												: "Failed to cancel deployment",
+												: t("services.deployments.stuck.toast.cancelError"),
 										);
 									}
 								}}
 							>
-								Cancel Deployment
+								{t("services.deployments.actions.cancelDeployment")}
 							</Button>
 						</div>
 					</AlertBlock>
 				)}
 				{refreshToken && (
 					<div className="flex flex-col gap-2 text-sm">
-						<span>
-							If you want to re-deploy this application use this URL in the
-							config of your git provider or docker
-						</span>
+						<span>{t("services.deployments.webhook.description")}</span>
 						<div className="flex flex-row items-center gap-2 flex-wrap">
-							<span>Webhook URL: </span>
+							<span>{t("services.deployments.webhook.urlLabel")}: </span>
 							<div className="flex flex-row items-center gap-2">
 								<span className="break-all text-muted-foreground">
 									{`${url}/api/deploy${
@@ -241,14 +244,14 @@ export const ShowDeployments = ({
 					<div className="flex w-full flex-row items-center justify-center gap-3 pt-10 min-h-[25vh]">
 						<Loader2 className="size-6 text-muted-foreground animate-spin" />
 						<span className="text-base text-muted-foreground">
-							Loading deployments...
+							{t("deployment.loading")}
 						</span>
 					</div>
 				) : deployments?.length === 0 ? (
 					<div className="flex w-full flex-col items-center justify-center gap-3 pt-10 min-h-[25vh]">
 						<RocketIcon className="size-8 text-muted-foreground" />
 						<span className="text-base text-muted-foreground">
-							No deployments found
+							{t("deployment.emptyTitle")}
 						</span>
 					</div>
 				) : (
@@ -297,19 +300,19 @@ export const ShowDeployments = ({
 													className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit mt-1 cursor-pointer"
 													aria-label={
 														isExpanded
-															? "Collapse commit message"
-															: "Expand commit message"
+															? t("services.deployments.actions.collapseCommit")
+															: t("services.deployments.actions.expandCommit")
 													}
 												>
 													{isExpanded ? (
 														<>
 															<ChevronUp className="size-3" />
-															Show less
+															{t("services.deployments.actions.showLess")}
 														</>
 													) : (
 														<>
 															<ChevronDown className="size-3" />
-															Show more
+															{t("services.deployments.actions.showMore")}
 														</>
 													)}
 												</button>
@@ -345,18 +348,28 @@ export const ShowDeployments = ({
 										<div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
 											{deployment.pid && deployment.status === "running" && (
 												<DialogAction
-													title="Kill Process"
-													description="Are you sure you want to kill the process?"
+													title={t("services.deployments.killProcess.title")}
+													description={t(
+														"services.deployments.killProcess.description",
+													)}
 													type="default"
 													onClick={async () => {
 														await killProcess({
 															deploymentId: deployment.deploymentId,
 														})
 															.then(() => {
-																toast.success("Process killed successfully");
+																toast.success(
+																	t(
+																		"services.deployments.killProcess.toast.success",
+																	),
+																);
 															})
 															.catch(() => {
-																toast.error("Error killing process");
+																toast.error(
+																	t(
+																		"services.deployments.killProcess.toast.error",
+																	),
+																);
 															});
 													}}
 												>
@@ -366,7 +379,7 @@ export const ShowDeployments = ({
 														isLoading={isKillingProcess}
 														className="w-full sm:w-auto"
 													>
-														Kill Process
+														{t("services.deployments.actions.killProcess")}
 													</Button>
 												</DialogAction>
 											)}
@@ -376,22 +389,28 @@ export const ShowDeployments = ({
 												}}
 												className="w-full sm:w-auto"
 											>
-												View
+												{t("button.view")}
 											</Button>
 
 											{canDelete && (
 												<DialogAction
-													title="Delete Deployment"
-													description="Are you sure you want to delete this deployment? This action cannot be undone."
+													title={t("services.deployments.delete.title")}
+													description={t(
+														"services.deployments.delete.description",
+													)}
 													type="default"
 													onClick={async () => {
 														try {
 															await removeDeployment({
 																deploymentId: deployment.deploymentId,
 															});
-															toast.success("Deployment deleted successfully");
+															toast.success(
+																t("services.deployments.delete.toast.success"),
+															);
 														} catch (error) {
-															toast.error("Error deleting deployment");
+															toast.error(
+																t("services.deployments.delete.toast.error"),
+															);
 														}
 													}}
 												>
@@ -400,7 +419,7 @@ export const ShowDeployments = ({
 														size="sm"
 														isLoading={isRemovingDeployment}
 													>
-														Delete
+														{t("button.delete")}
 														<Trash2 className="size-4" />
 													</Button>
 												</DialogAction>
@@ -410,17 +429,14 @@ export const ShowDeployments = ({
 												deployment.status === "done" &&
 												type === "application" && (
 													<DialogAction
-														title="Rollback to this deployment"
+														title={t("services.deployments.rollback.title")}
 														description={
 															<div className="flex flex-col gap-3">
 																<p>
-																	Are you sure you want to rollback to this
-																	deployment?
+																	{t("services.deployments.rollback.confirm")}
 																</p>
 																<AlertBlock type="info" className="text-sm">
-																	Please wait a few seconds while the image is
-																	pulled from the registry. Your application
-																	should be running shortly.
+																	{t("services.deployments.rollback.hint")}
 																</AlertBlock>
 															</div>
 														}
@@ -431,11 +447,17 @@ export const ShowDeployments = ({
 															})
 																.then(() => {
 																	toast.success(
-																		"Rollback initiated successfully",
+																		t(
+																			"services.deployments.rollback.toast.success",
+																		),
 																	);
 																})
 																.catch(() => {
-																	toast.error("Error initiating rollback");
+																	toast.error(
+																		t(
+																			"services.deployments.rollback.toast.error",
+																		),
+																	);
 																});
 														}}
 													>
@@ -446,7 +468,7 @@ export const ShowDeployments = ({
 															className="w-full sm:w-auto"
 														>
 															<RefreshCcw className="size-4 text-primary group-hover:text-red-500" />
-															Rollback
+															{t("services.deployments.actions.rollback")}
 														</Button>
 													</DialogAction>
 												)}

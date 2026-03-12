@@ -54,6 +54,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { UseKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useTranslation } from "@/hooks/use-translation";
 import { appRouter } from "@/server/api/root";
 import { api } from "@/utils/api";
 
@@ -73,6 +74,7 @@ const Service = (
 	const [_toggleMonitoring, _setToggleMonitoring] = useState(false);
 	const { applicationId, activeTab } = props;
 	const router = useRouter();
+	const { t } = useTranslation();
 	const { projectId, environmentId } = router.query;
 	const [tab, setTab] = useState<TabState>(activeTab);
 
@@ -106,7 +108,7 @@ const Service = (
 			<UseKeyboardNav forPage="application" />
 			<BreadcrumbSidebar
 				list={[
-					{ name: "Projects", href: "/dashboard/projects" },
+					{ name: t("dashboard.projects"), href: "/dashboard/projects" },
 					{
 						name: data?.environment?.project?.name || "",
 						href: `/dashboard/project/${projectId}/environment/${environmentId}`,
@@ -122,7 +124,10 @@ const Service = (
 			/>
 			<Head>
 				<title>
-					Application: {data?.name} - {data?.environment.project.name} | Dokploy
+					{t("services.application.pageTitle", {
+						value: data?.name || "",
+						id: data?.environment?.project?.name || "",
+					})}
 				</title>
 			</Head>
 			<div className="w-full">
@@ -155,7 +160,7 @@ const Service = (
 										onClick={() => {
 											if (data?.server?.ipAddress) {
 												copy(data.server.ipAddress);
-												toast.success("IP Address Copied!");
+												toast.success(t("services.compose.toast.ipCopied"));
 											}
 										}}
 										variant={
@@ -166,7 +171,7 @@ const Service = (
 													: "destructive"
 										}
 									>
-										{data?.server?.name || "Dokploy Server"}
+										{data?.server?.name || t("environment.dokployServer")}
 									</Badge>
 									{data?.server?.serverStatus === "inactive" && (
 										<TooltipProvider delayDuration={0}>
@@ -182,9 +187,7 @@ const Service = (
 													side="top"
 												>
 													<span>
-														You cannot, deploy this application because the
-														server is inactive, please upgrade your plan to add
-														more servers.
+														{t("services.compose.inactiveServer.tooltip")}
 													</span>
 												</TooltipContent>
 											</Tooltip>
@@ -208,18 +211,19 @@ const Service = (
 									<div className="max-w-3xl mx-auto flex flex-col items-center justify-center self-center gap-3">
 										<ServerOff className="size-10 text-muted-foreground self-center" />
 										<span className="text-center text-base text-muted-foreground">
-											This service is hosted on the server {data.server.name},
-											but this server has been disabled because your current
-											plan doesn't include enough servers. Please purchase more
-											servers to regain access to this application.
+											{t("services.compose.inactiveServer.message", {
+												value: data.server.name,
+											})}
 										</span>
 										<span className="text-center text-base text-muted-foreground">
-											Go to{" "}
+											{t("services.compose.inactiveServer.billingPrompt", {
+												value: t("settings.billing"),
+											})}{" "}
 											<Link
 												href="/dashboard/settings/billing"
 												className="text-primary"
 											>
-												Billing
+												{t("settings.billing")}
 											</Link>
 										</span>
 									</div>
@@ -237,25 +241,43 @@ const Service = (
 								>
 									<div className="flex flex-row items-center justify-between w-full overflow-auto">
 										<TabsList className="flex gap-8 max-md:gap-4 justify-start">
-											<TabsTrigger value="general">General</TabsTrigger>
-											<TabsTrigger value="environment">Environment</TabsTrigger>
-											<TabsTrigger value="domains">Domains</TabsTrigger>
-											<TabsTrigger value="deployments">Deployments</TabsTrigger>
+											<TabsTrigger value="general">
+												{t("services.application.tabs.general")}
+											</TabsTrigger>
+											<TabsTrigger value="environment">
+												{t("services.application.tabs.environment")}
+											</TabsTrigger>
+											<TabsTrigger value="domains">
+												{t("services.application.tabs.domains")}
+											</TabsTrigger>
+											<TabsTrigger value="deployments">
+												{t("services.application.tabs.deployments")}
+											</TabsTrigger>
 											<TabsTrigger value="preview-deployments">
-												Preview Deployments
+												{t("services.application.tabs.previewDeployments")}
 											</TabsTrigger>
-											<TabsTrigger value="schedules">Schedules</TabsTrigger>
+											<TabsTrigger value="schedules">
+												{t("services.application.tabs.schedules")}
+											</TabsTrigger>
 											<TabsTrigger value="volume-backups">
-												Volume Backups
+												{t("services.application.tabs.volumeBackups")}
 											</TabsTrigger>
-											<TabsTrigger value="logs">Logs</TabsTrigger>
+											<TabsTrigger value="logs">
+												{t("services.application.tabs.logs")}
+											</TabsTrigger>
 											{data?.sourceType !== "docker" && (
-												<TabsTrigger value="patches">Patches</TabsTrigger>
+												<TabsTrigger value="patches">
+													{t("services.application.tabs.patches")}
+												</TabsTrigger>
 											)}
 											{((data?.serverId && isCloud) || !data?.server) && (
-												<TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+												<TabsTrigger value="monitoring">
+													{t("services.application.tabs.monitoring")}
+												</TabsTrigger>
 											)}
-											<TabsTrigger value="advanced">Advanced</TabsTrigger>
+											<TabsTrigger value="advanced">
+												{t("services.application.tabs.advanced")}
+											</TabsTrigger>
 										</TabsList>
 									</div>
 

@@ -512,12 +512,22 @@ const EnvironmentPage = (
 						break;
 				}
 				success++;
-			} catch {
-				toast.error(`Error starting service ${serviceId}`);
+			} catch (error) {
+				toast.error(
+					t("environment.toast.bulkStartError", {
+						id: serviceId,
+						error: error instanceof Error ? error.message : t("error.unknown"),
+					}),
+				);
 			}
 		}
 		if (success > 0) {
-			toast.success(`${success} services started successfully`);
+			toast.success(
+				t("environment.toast.bulkStartSuccess", {
+					count: success,
+					service: success === 1 ? t("project.service") : t("project.services"),
+				}),
+			);
 			refetch();
 		}
 		setIsBulkActionLoading(false);
@@ -559,12 +569,22 @@ const EnvironmentPage = (
 						break;
 				}
 				success++;
-			} catch {
-				toast.error(`Error stopping service ${serviceId}`);
+			} catch (error) {
+				toast.error(
+					t("environment.toast.bulkStopError", {
+						id: serviceId,
+						error: error instanceof Error ? error.message : t("error.unknown"),
+					}),
+				);
 			}
 		}
 		if (success > 0) {
-			toast.success(`${success} services stopped successfully`);
+			toast.success(
+				t("environment.toast.bulkStopSuccess", {
+					count: success,
+					service: success === 1 ? t("project.service") : t("project.services"),
+				}),
+			);
 			refetch();
 		}
 		setSelectedServices([]);
@@ -574,11 +594,11 @@ const EnvironmentPage = (
 
 	const handleBulkMove = async () => {
 		if (!selectedTargetProject) {
-			toast.error("Please select a target project");
+			toast.error(t("environment.toast.selectTargetProject"));
 			return;
 		}
 		if (!selectedTargetEnvironment) {
-			toast.error("Please select a target environment");
+			toast.error(t("environment.toast.selectTargetEnvironment"));
 			return;
 		}
 
@@ -640,12 +660,20 @@ const EnvironmentPage = (
 				success++;
 			} catch (error) {
 				toast.error(
-					`Error moving service ${serviceId}: ${error instanceof Error ? error.message : "Unknown error"}`,
+					t("environment.toast.bulkMoveError", {
+						id: serviceId,
+						error: error instanceof Error ? error.message : t("error.unknown"),
+					}),
 				);
 			}
 		}
 		if (success > 0) {
-			toast.success(`${success} services moved successfully`);
+			toast.success(
+				t("environment.toast.bulkMoveSuccess", {
+					count: success,
+					service: success === 1 ? t("project.service") : t("project.services"),
+				}),
+			);
 			refetch();
 		}
 		setSelectedServices([]);
@@ -709,12 +737,20 @@ const EnvironmentPage = (
 				success++;
 			} catch (error) {
 				toast.error(
-					`Error deleting service ${serviceId}: ${error instanceof Error ? error.message : "Unknown error"}`,
+					t("environment.toast.bulkDeleteError", {
+						id: serviceId,
+						error: error instanceof Error ? error.message : t("error.unknown"),
+					}),
 				);
 			}
 		}
 		if (success > 0) {
-			toast.success(`${success} services deleted successfully`);
+			toast.success(
+				t("environment.toast.bulkDeleteSuccess", {
+					count: success,
+					service: success === 1 ? t("project.service") : t("project.services"),
+				}),
+			);
 			refetch();
 		}
 		setSelectedServices([]);
@@ -773,18 +809,27 @@ const EnvironmentPage = (
 			} catch (error) {
 				failed++;
 				toast.error(
-					`Error deploying service ${serviceId}: ${error instanceof Error ? error.message : "Unknown error"}`,
+					t("environment.toast.bulkDeployError", {
+						id: serviceId,
+						error: error instanceof Error ? error.message : t("error.unknown"),
+					}),
 				);
 			}
 		}
 		if (success > 0) {
 			toast.success(
-				`${success} service${success !== 1 ? "s" : ""} deployed successfully`,
+				t("environment.toast.bulkDeploySuccess", {
+					count: success,
+					service: success === 1 ? t("project.service") : t("project.services"),
+				}),
 			);
 		}
 		if (failed > 0) {
 			toast.error(
-				`${failed} service${failed !== 1 ? "s" : ""} failed to deploy`,
+				t("environment.toast.bulkDeployFailed", {
+					count: failed,
+					service: failed === 1 ? t("project.service") : t("project.services"),
+				}),
 			);
 		}
 
@@ -873,7 +918,10 @@ const EnvironmentPage = (
 			/>
 			<Head>
 				<title>
-					Environment: {currentEnvironment.name} | {projectData?.name} | Dokploy
+					{t("environment.pageTitle", {
+						environment: currentEnvironment.name,
+						project: projectData?.name || "",
+					})}
 				</title>
 			</Head>
 			<div className="w-full">
@@ -1110,8 +1158,7 @@ const EnvironmentPage = (
 																<div className="flex flex-col items-center justify-center gap-2 py-4">
 																	<FolderInput className="h-8 w-8 text-muted-foreground" />
 																	<p className="text-sm text-muted-foreground text-center">
-																		No other projects available. Create a new
-																		project first to move services.
+																		{t("environment.noTargetProjects")}
 																	</p>
 																</div>
 															) : (
@@ -1122,7 +1169,7 @@ const EnvironmentPage = (
 																			htmlFor="target-project"
 																			className="text-sm font-medium"
 																		>
-																			Target Project
+																			{t("environment.targetProject")}
 																		</label>
 																		<Select
 																			value={selectedTargetProject}
@@ -1132,7 +1179,11 @@ const EnvironmentPage = (
 																			}}
 																		>
 																			<SelectTrigger>
-																				<SelectValue placeholder="Select target project" />
+																				<SelectValue
+																					placeholder={t(
+																						"environment.targetProjectPlaceholder",
+																					)}
+																				/>
 																			</SelectTrigger>
 																			<SelectContent>
 																				{allProjects?.map((project) => (
@@ -1154,7 +1205,7 @@ const EnvironmentPage = (
 																				htmlFor="target-environment"
 																				className="text-sm font-medium"
 																			>
-																				Target Environment
+																				{t("environment.targetEnvironment")}
 																			</label>
 																			<Select
 																				value={selectedTargetEnvironment}
@@ -1163,7 +1214,11 @@ const EnvironmentPage = (
 																				}
 																			>
 																				<SelectTrigger>
-																					<SelectValue placeholder="Select target environment" />
+																					<SelectValue
+																						placeholder={t(
+																							"environment.targetEnvironmentPlaceholder",
+																						)}
+																					/>
 																				</SelectTrigger>
 																				<SelectContent>
 																					{selectedProjectEnvironments
@@ -1196,7 +1251,7 @@ const EnvironmentPage = (
 																	setSelectedTargetEnvironment("");
 																}}
 															>
-																Cancel
+																{t("button.cancel")}
 															</Button>
 															<Button
 																onClick={handleBulkMove}
@@ -1207,7 +1262,7 @@ const EnvironmentPage = (
 																	!selectedTargetEnvironment
 																}
 															>
-																Move Services
+																{t("environment.moveServices")}
 															</Button>
 														</DialogFooter>
 													</DialogContent>
@@ -1220,12 +1275,17 @@ const EnvironmentPage = (
 												>
 													<DialogContent>
 														<DialogHeader>
-															<DialogTitle>Delete Services</DialogTitle>
+															<DialogTitle>
+																{t("environment.Modal.bulkDelete.title")}
+															</DialogTitle>
 															<DialogDescription>
-																Are you sure you want to delete{" "}
-																{selectedServices.length} service
-																{selectedServices.length !== 1 ? "s" : ""}? This
-																action cannot be undone.
+																{t("environment.Modal.bulkDelete.description", {
+																	count: selectedServices.length,
+																	service:
+																		selectedServices.length === 1
+																			? t("project.service")
+																			: t("project.services"),
+																})}
 															</DialogDescription>
 														</DialogHeader>
 
@@ -1278,16 +1338,24 @@ const EnvironmentPage = (
 																				htmlFor="deleteVolumes"
 																				className="text-sm font-medium"
 																			>
-																				Delete volumes associated with services
+																				{t(
+																					"environment.Modal.bulkDelete.deleteVolumes",
+																				)}
 																			</label>
 																		</div>
 																		<p className="text-xs text-muted-foreground">
-																			Volume deletion is available for:{" "}
-																			{servicesWithVolumeSupport.length} compose
-																			service
-																			{servicesWithVolumeSupport.length !== 1
-																				? "s"
-																				: ""}
+																			{t(
+																				"environment.Modal.bulkDelete.volumeSupport",
+																				{
+																					count:
+																						servicesWithVolumeSupport.length,
+																					service:
+																						servicesWithVolumeSupport.length ===
+																						1
+																							? t("project.service")
+																							: t("project.services"),
+																				},
+																			)}
 																		</p>
 																	</div>
 																);
@@ -1302,7 +1370,7 @@ const EnvironmentPage = (
 																	setDeleteVolumes(false); // Reset checkbox
 																}}
 															>
-																Cancel
+																{t("button.cancel")}
 															</Button>
 															<Button
 																variant="destructive"
@@ -1313,7 +1381,7 @@ const EnvironmentPage = (
 																}}
 																disabled={isBulkActionLoading}
 															>
-																Delete Services
+																{t("environment.Modal.bulkDelete.confirm")}
 															</Button>
 														</DialogFooter>
 													</DialogContent>
@@ -1419,7 +1487,7 @@ const EnvironmentPage = (
 														>
 															<div className="flex flex-row items-center">
 																<X className="mr-2 h-4 w-4" />
-																Clear filters
+																{t("environment.clearFilters")}
 															</div>
 														</CommandItem>
 													</CommandGroup>

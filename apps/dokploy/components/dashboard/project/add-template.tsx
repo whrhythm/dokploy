@@ -67,6 +67,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 
@@ -78,6 +79,7 @@ interface Props {
 }
 
 export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
+	const { t } = useTranslation();
 	const [query, setQuery] = useState("");
 	const [open, setOpen] = useState(false);
 	const [viewMode, setViewMode] = useState<"detailed" | "icon">("detailed");
@@ -162,20 +164,26 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 					<div className="flex flex-col space-y-6">
 						<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 							<div>
-								<DialogTitle>Create from Template</DialogTitle>
+								<DialogTitle>
+									{t("environment.Modal.addTemplate.title")}
+								</DialogTitle>
 								<DialogDescription>
-									Create an open source application from a template
+									{t("environment.Modal.addTemplate.description")}
 								</DialogDescription>
 							</div>
 							<div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
 								<Input
-									placeholder="Search Template"
+									placeholder={t(
+										"environment.Modal.addTemplate.searchPlaceholder",
+									)}
 									onChange={(e) => setQuery(e.target.value)}
 									className="w-full"
 									value={query}
 								/>
 								<Input
-									placeholder="Base URL (optional)"
+									placeholder={t(
+										"environment.Modal.addTemplate.baseUrlPlaceholder",
+									)}
 									onChange={(e) =>
 										setCustomBaseUrl(e.target.value || undefined)
 									}
@@ -191,10 +199,12 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 											)}
 										>
 											{isLoadingTags
-												? "Loading...."
+												? t("environment.Modal.addTemplate.tagsLoading")
 												: selectedTags.length > 0
-													? `Selected ${selectedTags.length} tags`
-													: "Select tag"}
+													? t("environment.Modal.addTemplate.tagsSelected", {
+															count: selectedTags.length,
+														})
+													: t("environment.Modal.addTemplate.selectTag")}
 
 											<ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
 										</Button>
@@ -202,15 +212,19 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 									<PopoverContent className="p-0" align="start">
 										<Command>
 											<CommandInput
-												placeholder="Search tag..."
+												placeholder={t(
+													"environment.Modal.addTemplate.searchTagPlaceholder",
+												)}
 												className="h-9"
 											/>
 											{isLoadingTags && (
 												<span className="py-6 text-center text-sm">
-													Loading Tags....
+													{t("environment.Modal.addTemplate.tagsLoading")}
 												</span>
 											)}
-											<CommandEmpty>No tags found.</CommandEmpty>
+											<CommandEmpty>
+												{t("environment.Modal.addTemplate.noTags")}
+											</CommandEmpty>
 											<ScrollArea className="h-96">
 												<CommandGroup>
 													{tags?.map((tag) => (
@@ -295,14 +309,14 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 							<div className="flex justify-center items-center w-full h-full flex-row gap-4">
 								<Loader2 className="size-8 text-muted-foreground animate-spin min-h-[60vh]" />
 								<div className="text-lg font-medium text-muted-foreground">
-									Loading templates...
+									{t("environment.Modal.addTemplate.loading")}
 								</div>
 							</div>
 						) : templates.length === 0 ? (
 							<div className="flex justify-center items-center w-full gap-2 min-h-[50vh]">
 								<SearchIcon className="text-muted-foreground size-6" />
 								<div className="text-xl font-medium text-muted-foreground">
-									No templates found
+									{t("environment.Modal.addTemplate.noTemplates")}
 								</div>
 							</div>
 						) : (
@@ -420,18 +434,21 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 															viewMode === "detailed" && "w-auto",
 														)}
 													>
-														Create
+														{t("button.create")}
 													</Button>
 												</AlertDialogTrigger>
 												<AlertDialogContent>
 													<AlertDialogHeader>
 														<AlertDialogTitle>
-															Are you absolutely sure?
+															{t("environment.Modal.addTemplate.confirmTitle")}
 														</AlertDialogTitle>
 														<AlertDialogDescription>
-															This will create an application from the{" "}
-															{template?.name} template and add it to your
-															project.
+															{t(
+																"environment.Modal.addTemplate.confirmDescription",
+																{
+																	name: template?.name || "",
+																},
+															)}
 														</AlertDialogDescription>
 
 														{shouldShowServerDropdown && (
@@ -440,8 +457,12 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 																	<Tooltip>
 																		<TooltipTrigger asChild>
 																			<Label className="break-all w-fit flex flex-row gap-1 items-center pb-2 pt-3.5">
-																				Select a Server{" "}
-																				{!isCloud ? "(Optional)" : ""}
+																				{t("environment.serverSelect.label")}
+																				{!isCloud
+																					? t(
+																							"environment.serverSelect.optionalSuffix",
+																						)
+																					: ""}
 																				<HelpCircle className="size-4 text-muted-foreground" />
 																			</Label>
 																		</TooltipTrigger>
@@ -451,9 +472,7 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 																			side="top"
 																		>
 																			<span>
-																				If no server is selected, the
-																				application will be deployed on the
-																				server where the user is logged in.
+																				{t("environment.serverSelect.help")}
 																			</span>
 																		</TooltipContent>
 																	</Tooltip>
@@ -470,7 +489,11 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 																	<SelectTrigger>
 																		<SelectValue
 																			placeholder={
-																				!isCloud ? "Dokploy" : "Select a Server"
+																				!isCloud
+																					? "Dokploy"
+																					: t(
+																							"environment.serverSelect.placeholder",
+																						)
 																			}
 																		/>
 																	</SelectTrigger>
@@ -481,7 +504,9 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 																					<span className="flex items-center gap-2 justify-between w-full">
 																						<span>Dokploy</span>
 																						<span className="text-muted-foreground text-xs self-center">
-																							Default
+																							{t(
+																								"environment.serverSelect.default",
+																							)}
 																						</span>
 																					</span>
 																				</SelectItem>
@@ -500,8 +525,11 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 																				</SelectItem>
 																			))}
 																			<SelectLabel>
-																				Servers (
-																				{servers?.length + (!isCloud ? 1 : 0)})
+																				{t("environment.serverSelect.count", {
+																					count:
+																						servers?.length +
+																						(!isCloud ? 1 : 0),
+																				})}
 																			</SelectLabel>
 																		</SelectGroup>
 																	</SelectContent>
@@ -510,7 +538,9 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 														)}
 													</AlertDialogHeader>
 													<AlertDialogFooter>
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogCancel>
+															{t("button.cancel")}
+														</AlertDialogCancel>
 														<AlertDialogAction
 															disabled={isPending}
 															onClick={async () => {
@@ -524,22 +554,30 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 																	baseUrl: customBaseUrl,
 																});
 																toast.promise(promise, {
-																	loading: "Setting up...",
+																	loading: t(
+																		"environment.Modal.addTemplate.toast.loading",
+																	),
 																	success: () => {
 																		// Invalidate the project query to refresh the environment data
 																		utils.environment.one.invalidate({
 																			environmentId,
 																		});
 																		setOpen(false);
-																		return `${template.name} template created successfully`;
+																		return t(
+																			"environment.Modal.addTemplate.toast.success",
+																			{ name: template.name },
+																		);
 																	},
 																	error: () => {
-																		return `An error occurred deploying ${template.name} template`;
+																		return t(
+																			"environment.Modal.addTemplate.toast.error",
+																			{ name: template.name },
+																		);
 																	},
 																});
 															}}
 														>
-															Confirm
+															{t("button.confirm")}
 														</AlertDialogAction>
 													</AlertDialogFooter>
 												</AlertDialogContent>

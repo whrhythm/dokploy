@@ -12,6 +12,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { type LogLine, parseLogs } from "../../docker/logs/utils";
 import { DockerTerminalModal } from "../../settings/web-server/docker-terminal-modal";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export const ShowGeneralPostgres = ({ postgresId }: Props) => {
+	const { t } = useTranslation();
 	const { data, refetch } = api.postgres.one.useQuery(
 		{
 			postgresId: postgresId,
@@ -69,13 +71,15 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 			<div className="flex w-full flex-col gap-5 ">
 				<Card className="bg-background">
 					<CardHeader>
-						<CardTitle className="text-xl">Deploy Settings</CardTitle>
+						<CardTitle className="text-xl">
+							{t("services.postgres.deploySettings")}
+						</CardTitle>
 					</CardHeader>
 					<CardContent className="flex flex-row gap-4 flex-wrap">
 						<TooltipProvider disableHoverableContent={false}>
 							<DialogAction
-								title="Deploy PostgreSQL"
-								description="Are you sure you want to deploy this postgres?"
+								title={t("pages.Modal.postgresDeploy.title")}
+								description={t("pages.Modal.postgresDeploy.description")}
 								type="default"
 								onClick={async () => {
 									setIsDeploying(true);
@@ -92,20 +96,20 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 										<TooltipTrigger asChild>
 											<div className="flex items-center">
 												<Rocket className="size-4 mr-1" />
-												Deploy
+												{t("button.deploy")}
 											</div>
 										</TooltipTrigger>
 										<TooltipPrimitive.Portal>
 											<TooltipContent sideOffset={5} className="z-[60]">
-												<p>Downloads and sets up the PostgreSQL database</p>
+												<p>{t("services.postgres.deployHelp")}</p>
 											</TooltipContent>
 										</TooltipPrimitive.Portal>
 									</Tooltip>
 								</Button>
 							</DialogAction>
 							<DialogAction
-								title="Reload PostgreSQL"
-								description="Are you sure you want to reload this postgres?"
+								title={t("pages.Modal.postgresReload.title")}
+								description={t("pages.Modal.postgresReload.description")}
 								type="default"
 								onClick={async () => {
 									await reload({
@@ -113,11 +117,11 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 										appName: data?.appName || "",
 									})
 										.then(() => {
-											toast.success("PostgreSQL reloaded successfully");
+											toast.success(t("services.postgres.toast.reloaded"));
 											refetch();
 										})
 										.catch(() => {
-											toast.error("Error reloading PostgreSQL");
+											toast.error(t("services.postgres.toast.reloadError"));
 										});
 								}}
 							>
@@ -130,12 +134,12 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 										<TooltipTrigger asChild>
 											<div className="flex items-center">
 												<RefreshCcw className="size-4 mr-1" />
-												Reload
+												{t("services.postgres.actions.reload")}
 											</div>
 										</TooltipTrigger>
 										<TooltipPrimitive.Portal>
 											<TooltipContent sideOffset={5} className="z-[60]">
-												<p>Restart the PostgreSQL service without rebuilding</p>
+												<p>{t("services.postgres.reloadHelp")}</p>
 											</TooltipContent>
 										</TooltipPrimitive.Portal>
 									</Tooltip>
@@ -143,19 +147,19 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 							</DialogAction>
 							{data?.applicationStatus === "idle" ? (
 								<DialogAction
-									title="Start PostgreSQL"
-									description="Are you sure you want to start this postgres?"
+									title={t("pages.Modal.postgresStart.title")}
+									description={t("pages.Modal.postgresStart.description")}
 									type="default"
 									onClick={async () => {
 										await start({
 											postgresId: postgresId,
 										})
 											.then(() => {
-												toast.success("PostgreSQL started successfully");
+												toast.success(t("services.postgres.toast.started"));
 												refetch();
 											})
 											.catch(() => {
-												toast.error("Error starting PostgreSQL");
+												toast.error(t("services.postgres.toast.startError"));
 											});
 									}}
 								>
@@ -168,15 +172,12 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 											<TooltipTrigger asChild>
 												<div className="flex items-center">
 													<CheckCircle2 className="size-4 mr-1" />
-													Start
+													{t("button.start")}
 												</div>
 											</TooltipTrigger>
 											<TooltipPrimitive.Portal>
 												<TooltipContent sideOffset={5} className="z-[60]">
-													<p>
-														Start the PostgreSQL database (requires a previous
-														successful setup)
-													</p>
+													<p>{t("services.postgres.startHelp")}</p>
 												</TooltipContent>
 											</TooltipPrimitive.Portal>
 										</Tooltip>
@@ -184,18 +185,18 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 								</DialogAction>
 							) : (
 								<DialogAction
-									title="Stop PostgreSQL"
-									description="Are you sure you want to stop this postgres?"
+									title={t("pages.Modal.postgresStop.title")}
+									description={t("pages.Modal.postgresStop.description")}
 									onClick={async () => {
 										await stop({
 											postgresId: postgresId,
 										})
 											.then(() => {
-												toast.success("PostgreSQL stopped successfully");
+												toast.success(t("services.postgres.toast.stopped"));
 												refetch();
 											})
 											.catch(() => {
-												toast.error("Error stopping PostgreSQL");
+												toast.error(t("services.postgres.toast.stopError"));
 											});
 									}}
 								>
@@ -208,12 +209,12 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 											<TooltipTrigger asChild>
 												<div className="flex items-center">
 													<Ban className="size-4 mr-1" />
-													Stop
+													{t("button.stop")}
 												</div>
 											</TooltipTrigger>
 											<TooltipPrimitive.Portal>
 												<TooltipContent sideOffset={5} className="z-[60]">
-													<p>Stop the currently running PostgreSQL database</p>
+													<p>{t("services.postgres.stopHelp")}</p>
 												</TooltipContent>
 											</TooltipPrimitive.Portal>
 										</Tooltip>
@@ -233,12 +234,12 @@ export const ShowGeneralPostgres = ({ postgresId }: Props) => {
 									<TooltipTrigger asChild>
 										<div className="flex items-center">
 											<Terminal className="size-4 mr-1" />
-											Open Terminal
+											{t("services.postgres.actions.openTerminal")}
 										</div>
 									</TooltipTrigger>
 									<TooltipPrimitive.Portal>
 										<TooltipContent sideOffset={5} className="z-[60]">
-											<p>Open a terminal to the PostgreSQL container</p>
+											<p>{t("services.postgres.openTerminalHelp")}</p>
 										</TooltipContent>
 									</TooltipPrimitive.Portal>
 								</Tooltip>

@@ -13,6 +13,7 @@ import {
 	ChartLegendContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/hooks/use-translation";
 import { formatTimestamp } from "@/lib/utils";
 
 interface ContainerMetric {
@@ -37,18 +38,19 @@ interface FormattedMetric {
 	outputUnit: string;
 }
 
-const chartConfig = {
-	input: {
-		label: "Input",
-		color: "hsl(var(--chart-3))",
-	},
-	output: {
-		label: "Output",
-		color: "hsl(var(--chart-4))",
-	},
-} satisfies ChartConfig;
-
 export const ContainerNetworkChart = ({ data }: Props) => {
+	const { t } = useTranslation();
+	const chartConfig = {
+		input: {
+			label: t("services.monitoring.chart.input"),
+			color: "hsl(var(--chart-3))",
+		},
+		output: {
+			label: t("services.monitoring.chart.output"),
+			color: "hsl(var(--chart-4))",
+		},
+	} satisfies ChartConfig;
+
 	const formattedData: FormattedMetric[] = data.map((metric) => ({
 		timestamp: metric.timestamp,
 		input: metric.Network.input,
@@ -67,10 +69,11 @@ export const ContainerNetworkChart = ({ data }: Props) => {
 	return (
 		<Card className="bg-transparent">
 			<CardHeader className="border-b py-5">
-				<CardTitle>Network I/O</CardTitle>
+				<CardTitle>{t("services.monitoring.networkIo")}</CardTitle>
 				<CardDescription>
-					Input: {latestData.input}
-					{latestData.inputUnit} / Output: {latestData.output}
+					{t("services.monitoring.chart.input")}: {latestData.input}
+					{latestData.inputUnit} / {t("services.monitoring.chart.output")}:{" "}
+					{latestData.output}
 					{latestData.outputUnit}
 				</CardDescription>
 			</CardHeader>
@@ -126,7 +129,7 @@ export const ContainerNetworkChart = ({ data }: Props) => {
 											<div className="grid grid-cols-2 gap-2">
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Time
+														{t("services.monitoring.chart.time")}
 													</span>
 													<span className="font-bold">
 														{formatTimestamp(label)}
@@ -134,7 +137,7 @@ export const ContainerNetworkChart = ({ data }: Props) => {
 												</div>
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Input
+														{t("services.monitoring.chart.input")}
 													</span>
 													<span className="font-bold">
 														{data.input}
@@ -143,7 +146,7 @@ export const ContainerNetworkChart = ({ data }: Props) => {
 												</div>
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Output
+														{t("services.monitoring.chart.output")}
 													</span>
 													<span className="font-bold">
 														{data.output}
@@ -158,7 +161,7 @@ export const ContainerNetworkChart = ({ data }: Props) => {
 							}}
 						/>
 						<Area
-							name="Input"
+							name={t("services.monitoring.chart.input")}
 							dataKey="input"
 							type="monotone"
 							fill="url(#fillInput)"
@@ -166,7 +169,7 @@ export const ContainerNetworkChart = ({ data }: Props) => {
 							strokeWidth={2}
 						/>
 						<Area
-							name="Output"
+							name={t("services.monitoring.chart.output")}
 							dataKey="output"
 							type="monotone"
 							fill="url(#fillOutput)"

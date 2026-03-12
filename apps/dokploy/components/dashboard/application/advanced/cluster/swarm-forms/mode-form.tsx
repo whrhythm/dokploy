@@ -19,6 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface ModeFormProps {
@@ -27,6 +28,7 @@ interface ModeFormProps {
 }
 
 export const ModeForm = ({ id, type }: ModeFormProps) => {
+	const { t } = useTranslation();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const queryMap = {
@@ -97,7 +99,7 @@ export const ModeForm = ({ id, type }: ModeFormProps) => {
 					mongoId: id || "",
 					modeSwarm: null,
 				});
-				toast.success("Mode updated successfully");
+				toast.success(t("services.swarmSettings.forms.mode.toast.updated"));
 				refetch();
 				setIsLoading(false);
 				return;
@@ -125,10 +127,10 @@ export const ModeForm = ({ id, type }: ModeFormProps) => {
 				modeSwarm: modeData,
 			});
 
-			toast.success("Mode updated successfully");
+			toast.success(t("services.swarmSettings.forms.mode.toast.updated"));
 			refetch();
 		} catch {
-			toast.error("Error updating mode");
+			toast.error(t("services.swarmSettings.forms.mode.toast.updateError"));
 		} finally {
 			setIsLoading(false);
 		}
@@ -142,19 +144,29 @@ export const ModeForm = ({ id, type }: ModeFormProps) => {
 					name="type"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Mode Type</FormLabel>
+							<FormLabel>
+								{t("services.swarmSettings.forms.mode.typeLabel")}
+							</FormLabel>
 							<FormDescription>
-								Choose between replicated or global service mode
+								{t("services.swarmSettings.forms.mode.typeDescription")}
 							</FormDescription>
 							<Select onValueChange={field.onChange} value={field.value}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Select mode type" />
+										<SelectValue
+											placeholder={t(
+												"services.swarmSettings.forms.mode.typePlaceholder",
+											)}
+										/>
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									<SelectItem value="Replicated">Replicated</SelectItem>
-									<SelectItem value="Global">Global</SelectItem>
+									<SelectItem value="Replicated">
+										{t("services.swarmSettings.forms.mode.type.replicated")}
+									</SelectItem>
+									<SelectItem value="Global">
+										{t("services.swarmSettings.forms.mode.type.global")}
+									</SelectItem>
 								</SelectContent>
 							</Select>
 							<FormMessage />
@@ -168,10 +180,20 @@ export const ModeForm = ({ id, type }: ModeFormProps) => {
 						name="Replicas"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Replicas</FormLabel>
-								<FormDescription>Number of replicas to run</FormDescription>
+								<FormLabel>
+									{t("services.swarmSettings.forms.mode.replicasLabel")}
+								</FormLabel>
+								<FormDescription>
+									{t("services.swarmSettings.forms.mode.replicasDescription")}
+								</FormDescription>
 								<FormControl>
-									<Input type="number" placeholder="1" {...field} />
+									<Input
+										type="number"
+										placeholder={t(
+											"services.swarmSettings.forms.mode.replicasPlaceholder",
+										)}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -190,10 +212,10 @@ export const ModeForm = ({ id, type }: ModeFormProps) => {
 							});
 						}}
 					>
-						Clear
+						{t("button.reset")}
 					</Button>
 					<Button type="submit" isLoading={isLoading}>
-						Save Mode
+						{t("services.swarmSettings.forms.mode.save")}
 					</Button>
 				</div>
 			</form>

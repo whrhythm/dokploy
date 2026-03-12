@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Secrets } from "@/components/ui/secrets";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const addEnvironmentSchema = z.object({
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export const ShowEnvironment = ({ applicationId }: Props) => {
+	const { t } = useTranslation();
 	const { mutateAsync, isPending } =
 		api.application.saveEnvironment.useMutation();
 
@@ -84,11 +86,11 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 			applicationId,
 		})
 			.then(async () => {
-				toast.success("Environments Added");
+				toast.success(t("services.environment.toast.saved"));
 				await refetch();
 			})
 			.catch(() => {
-				toast.error("Error adding environment");
+				toast.error(t("services.environment.toast.saveError"));
 			});
 	};
 
@@ -125,13 +127,13 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 				>
 					<Secrets
 						name="env"
-						title="Environment Settings"
+						title={t("services.environment.settingsTitle")}
 						description={
 							<span>
-								You can add environment variables to your resource.
+								{t("services.environment.settingsDescription")}
 								{hasChanges && (
 									<span className="text-yellow-500 ml-2">
-										(You have unsaved changes)
+										{t("services.environment.unsavedChanges")}
 									</span>
 								)}
 							</span>
@@ -141,10 +143,10 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 					{data?.buildType === "dockerfile" && (
 						<Secrets
 							name="buildArgs"
-							title="Build-time Arguments"
+							title={t("services.environment.buildArgsTitle")}
 							description={
 								<span>
-									Arguments are available only at build-time. See
+									{t("services.environment.buildArgsDescription")}
 									documentation&nbsp;
 									<a
 										className="text-primary"
@@ -152,34 +154,34 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 										target="_blank"
 										rel="noopener noreferrer"
 									>
-										here
+										{t("services.environment.documentationLink")}
 									</a>
 									.
 								</span>
 							}
-							placeholder="NPM_TOKEN=xyz"
+							placeholder={t("services.environment.secretPlaceholder")}
 						/>
 					)}
 					{data?.buildType === "dockerfile" && (
 						<Secrets
 							name="buildSecrets"
-							title="Build-time Secrets"
+							title={t("services.environment.buildSecretsTitle")}
 							description={
 								<span>
-									Secrets are specially designed for sensitive information and
-									are only available at build-time. See documentation&nbsp;
+									{t("services.environment.buildSecretsDescription")}
+									documentation&nbsp;
 									<a
 										className="text-primary"
 										href="https://docs.docker.com/build/building/secrets/"
 										target="_blank"
 										rel="noopener noreferrer"
 									>
-										here
+										{t("services.environment.documentationLink")}
 									</a>
 									.
 								</span>
 							}
-							placeholder="NPM_TOKEN=xyz"
+							placeholder={t("services.environment.secretPlaceholder")}
 						/>
 					)}
 					{data?.buildType === "dockerfile" && (
@@ -189,12 +191,11 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between p-3 border rounded-lg shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel>Create Environment File</FormLabel>
+										<FormLabel>
+											{t("services.environment.createEnvFileLabel")}
+										</FormLabel>
 										<FormDescription>
-											When enabled, an .env file will be created in the same
-											directory as your Dockerfile during the build process.
-											Disable this if you don't want to generate an environment
-											file.
+											{t("services.environment.createEnvFileDescription")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -210,7 +211,7 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 					<div className="flex flex-row justify-end gap-2">
 						{hasChanges && (
 							<Button type="button" variant="outline" onClick={handleCancel}>
-								Cancel
+								{t("button.cancel")}
 							</Button>
 						)}
 						<Button
@@ -219,7 +220,7 @@ export const ShowEnvironment = ({ applicationId }: Props) => {
 							type="submit"
 							disabled={!hasChanges}
 						>
-							Save
+							{t("button.save")}
 						</Button>
 					</div>
 				</form>

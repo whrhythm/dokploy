@@ -24,14 +24,20 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const AddSecuritychema = z.object({
-	username: z.string().min(1, "Username is required"),
-	password: z.string().min(1, "Password is required"),
-});
+const createAddSecuritySchema = (t: (key: string) => string) =>
+	z.object({
+		username: z
+			.string()
+			.min(1, t("services.security.validation.usernameRequired")),
+		password: z
+			.string()
+			.min(1, t("services.security.validation.passwordRequired")),
+	});
 
-type AddSecurity = z.infer<typeof AddSecuritychema>;
+type AddSecurity = z.infer<ReturnType<typeof createAddSecuritySchema>>;
 
 interface Props {
 	applicationId: string;
@@ -44,6 +50,7 @@ export const HandleSecurity = ({
 	securityId,
 	children = <PlusIcon className="h-4 w-4" />,
 }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [isOpen, setIsOpen] = useState(false);
 	const { data, refetch } = api.security.one.useQuery(
@@ -64,7 +71,7 @@ export const HandleSecurity = ({
 			username: "",
 			password: "",
 		},
-		resolver: zodResolver(AddSecuritychema),
+		resolver: zodResolver(createAddSecuritySchema(t)),
 	});
 
 	useEffect(() => {
@@ -81,7 +88,11 @@ export const HandleSecurity = ({
 			securityId: securityId || "",
 		})
 			.then(async () => {
-				toast.success(securityId ? "Security Updated" : "Security Created");
+				toast.success(
+					securityId
+						? t("services.security.toast.updated")
+						: t("services.security.toast.created"),
+				);
 				await utils.application.one.invalidate({
 					applicationId,
 				});
@@ -94,8 +105,8 @@ export const HandleSecurity = ({
 			.catch(() => {
 				toast.error(
 					securityId
-						? "Error updating the security"
-						: "Error creating security",
+						? t("services.security.toast.updateError")
+						: t("services.security.toast.createError"),
 				);
 			});
 	};
@@ -117,9 +128,11 @@ export const HandleSecurity = ({
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Security</DialogTitle>
+					<DialogTitle>{t("services.security.title")}</DialogTitle>
 					<DialogDescription>
-						{securityId ? "Update" : "Add"} security to your application
+						{securityId
+							? t("services.security.modal.updateDescription")
+							: t("services.security.modal.addDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -136,9 +149,12 @@ export const HandleSecurity = ({
 								name="username"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Username</FormLabel>
+										<FormLabel>{t("services.security.username")}</FormLabel>
 										<FormControl>
-											<Input placeholder="test1" {...field} />
+											<Input
+												placeholder={t("services.security.usernamePlaceholder")}
+												{...field}
+											/>
 										</FormControl>
 
 										<FormMessage />
@@ -150,9 +166,13 @@ export const HandleSecurity = ({
 								name="password"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Password</FormLabel>
+										<FormLabel>{t("services.security.password")}</FormLabel>
 										<FormControl>
-											<Input placeholder="test" type="password" {...field} />
+											<Input
+												placeholder={t("services.security.passwordPlaceholder")}
+												type="password"
+												{...field}
+											/>
 										</FormControl>
 
 										<FormMessage />
@@ -168,7 +188,7 @@ export const HandleSecurity = ({
 							form="hook-form-add-security"
 							type="submit"
 						>
-							{securityId ? "Update" : "Create"}
+							{securityId ? t("button.update") : t("button.create")}
 						</Button>
 					</DialogFooter>
 				</Form>

@@ -32,19 +32,24 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const ImportSchema = z.object({
-	base64: z.string(),
-});
+const createImportSchema = (t: (key: string) => string) =>
+	z.object({
+		base64: z
+			.string()
+			.min(1, t("services.compose.import.validation.base64Required")),
+	});
 
-type ImportType = z.infer<typeof ImportSchema>;
+type ImportType = z.infer<ReturnType<typeof createImportSchema>>;
 
 interface Props {
 	composeId: string;
 }
 
 export const ShowImport = ({ composeId }: Props) => {
+	const { t } = useTranslation();
 	const [showModal, setShowModal] = useState(false);
 	const [showMountContent, setShowMountContent] = useState(false);
 	const [selectedMount, setSelectedMount] = useState<{
@@ -81,7 +86,7 @@ export const ShowImport = ({ composeId }: Props) => {
 		defaultValues: {
 			base64: "",
 		},
-		resolver: zodResolver(ImportSchema),
+		resolver: zodResolver(createImportSchema(t)),
 	});
 
 	useEffect(() => {
@@ -93,7 +98,7 @@ export const ShowImport = ({ composeId }: Props) => {
 	const onSubmit = async () => {
 		const base64 = form.getValues("base64");
 		if (!base64) {
-			toast.error("Please enter a base64 template");
+			toast.error(t("services.compose.import.toast.base64Required"));
 			return;
 		}
 
@@ -102,20 +107,20 @@ export const ShowImport = ({ composeId }: Props) => {
 				composeId,
 				base64,
 			});
-			toast.success("Template imported successfully");
+			toast.success(t("services.compose.import.toast.imported"));
 			await utils.compose.one.invalidate({
 				composeId,
 			});
 			setShowModal(false);
 		} catch {
-			toast.error("Error importing template");
+			toast.error(t("services.compose.import.toast.importError"));
 		}
 	};
 
 	const handleLoadTemplate = async () => {
 		const base64 = form.getValues("base64");
 		if (!base64) {
-			toast.error("Please enter a base64 template");
+			toast.error(t("services.compose.import.toast.base64Required"));
 			return;
 		}
 
@@ -127,7 +132,7 @@ export const ShowImport = ({ composeId }: Props) => {
 			setTemplateInfo(result);
 			setShowModal(true);
 		} catch {
-			toast.error("Error processing template");
+			toast.error(t("services.compose.import.toast.processError"));
 		}
 	};
 
@@ -143,13 +148,16 @@ export const ShowImport = ({ composeId }: Props) => {
 		<>
 			<Card className="bg-background">
 				<CardHeader>
-					<CardTitle className="text-xl">Import</CardTitle>
-					<CardDescription>Import your Template configuration</CardDescription>
+					<CardTitle className="text-xl">
+						{t("services.compose.import.title")}
+					</CardTitle>
+					<CardDescription>
+						{t("services.compose.import.description")}
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-4">
 					<AlertBlock type="warning">
-						Warning: Importing a template will remove all existing environment
-						variables, mounts, and domains from this service.
+						{t("services.compose.import.warning")}
 					</AlertBlock>
 					<Form {...form}>
 						<form
@@ -161,10 +169,14 @@ export const ShowImport = ({ composeId }: Props) => {
 								name="base64"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Configuration (Base64)</FormLabel>
+										<FormLabel>
+											{t("services.compose.import.base64Label")}
+										</FormLabel>
 										<FormControl>
 											<Textarea
-												placeholder="Enter your Base64 configuration here..."
+												placeholder={t(
+													"services.compose.import.base64Placeholder",
+												)}
 												className="font-mono min-h-[200px]"
 												{...field}
 											/>
@@ -181,20 +193,19 @@ export const ShowImport = ({ composeId }: Props) => {
 									isLoading={isLoadingTemplate}
 									onClick={handleLoadTemplate}
 								>
-									Load
+									{t("services.compose.import.actions.load")}
 								</Button>
 							</div>
 							<Dialog open={showModal} onOpenChange={setShowModal}>
 								<DialogContent className="max-w-[50vw]">
 									<DialogHeader>
 										<DialogTitle className="text-2xl font-bold">
-											Template Information
+											{t("services.compose.import.modal.title")}
 										</DialogTitle>
 										<DialogDescription className="space-y-2">
-											<p>Review the template information before importing</p>
+											<p>{t("services.compose.import.modal.description")}</p>
 											<AlertBlock type="warning">
-												Warning: This will remove all existing environment
-												variables, mounts, and domains from this service.
+												{t("services.compose.import.warning")}
 											</AlertBlock>
 										</DialogDescription>
 									</DialogHeader>
@@ -204,7 +215,7 @@ export const ShowImport = ({ composeId }: Props) => {
 											<div className="flex items-center gap-2">
 												<Code2 className="h-5 w-5 text-primary" />
 												<h3 className="text-lg font-semibold">
-													Docker Compose
+													{t("services.compose.import.sections.compose")}
 												</h3>
 											</div>
 											<CodeEditor
@@ -222,7 +233,9 @@ export const ShowImport = ({ composeId }: Props) => {
 												<div className="space-y-4">
 													<div className="flex items-center gap-2">
 														<Globe2 className="h-5 w-5 text-primary" />
-														<h3 className="text-lg font-semibold">Domains</h3>
+														<h3 className="text-lg font-semibold">
+															{t("form.domains")}
+														</h3>
 													</div>
 													<div className="grid grid-cols-1 gap-3">
 														{templateInfo.template.domains.map(
@@ -235,12 +248,18 @@ export const ShowImport = ({ composeId }: Props) => {
 																		{domain.serviceName}
 																	</div>
 																	<div className="text-sm text-muted-foreground space-y-1">
-																		<div>Port: {domain.port}</div>
+																		<div>
+																			{t("form.port")}: {domain.port}
+																		</div>
 																		{domain.host && (
-																			<div>Host: {domain.host}</div>
+																			<div>
+																				{t("form.host")}: {domain.host}
+																			</div>
 																		)}
 																		{domain.path && (
-																			<div>Path: {domain.path}</div>
+																			<div>
+																				{t("form.path")}: {domain.path}
+																			</div>
 																		)}
 																	</div>
 																</div>
@@ -256,7 +275,9 @@ export const ShowImport = ({ composeId }: Props) => {
 													<div className="flex items-center gap-2">
 														<Code2 className="h-5 w-5 text-primary" />
 														<h3 className="text-lg font-semibold">
-															Environment Variables
+															{t(
+																"services.compose.import.sections.environment",
+															)}
 														</h3>
 													</div>
 													<div className="grid grid-cols-1 gap-2">
@@ -277,7 +298,9 @@ export const ShowImport = ({ composeId }: Props) => {
 												<div className="space-y-4">
 													<div className="flex items-center gap-2">
 														<HardDrive className="h-5 w-5 text-primary" />
-														<h3 className="text-lg font-semibold">Mounts</h3>
+														<h3 className="text-lg font-semibold">
+															{t("services.compose.import.sections.mounts")}
+														</h3>
 													</div>
 													<div className="grid grid-cols-1 gap-2">
 														{templateInfo.template.mounts.map(
@@ -301,7 +324,7 @@ export const ShowImport = ({ composeId }: Props) => {
 											variant="outline"
 											onClick={() => setShowModal(false)}
 										>
-											Cancel
+											{t("button.cancel")}
 										</Button>
 										<Button
 											isLoading={isImporting}
@@ -309,7 +332,7 @@ export const ShowImport = ({ composeId }: Props) => {
 											onClick={form.handleSubmit(onSubmit)}
 											className="w-fit"
 										>
-											Import
+											{t("button.import")}
 										</Button>
 									</div>
 								</DialogContent>
@@ -325,7 +348,9 @@ export const ShowImport = ({ composeId }: Props) => {
 						<DialogTitle className="text-xl font-bold">
 							{selectedMount?.filePath}
 						</DialogTitle>
-						<DialogDescription>Mount File Content</DialogDescription>
+						<DialogDescription>
+							{t("services.compose.import.mountContentDescription")}
+						</DialogDescription>
 					</DialogHeader>
 
 					<ScrollArea className="h-[45vh] pr-4">
@@ -338,7 +363,9 @@ export const ShowImport = ({ composeId }: Props) => {
 					</ScrollArea>
 
 					<div className="flex justify-end gap-2 pt-4">
-						<Button onClick={() => setShowMountContent(false)}>Close</Button>
+						<Button onClick={() => setShowMountContent(false)}>
+							{t("button.close")}
+						</Button>
 					</div>
 				</DialogContent>
 			</Dialog>
