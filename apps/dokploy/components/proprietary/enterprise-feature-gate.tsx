@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 interface EnterpriseFeatureLockedProps {
@@ -30,12 +31,13 @@ interface EnterpriseFeatureLockedProps {
  * Use standalone or via EnterpriseFeatureGate.
  */
 export function EnterpriseFeatureLocked({
-	title = "Enterprise feature",
-	description = "This feature is part of Dokploy Enterprise. Add a valid license to use it.",
-	ctaLabel = "Go to License",
+	title,
+	description,
+	ctaLabel,
 	ctaHref = "/dashboard/settings/license",
 	compact = false,
 }: EnterpriseFeatureLockedProps) {
+	const { t } = useTranslation();
 	return (
 		<Card className="border-dashed bg-transparent">
 			<CardHeader className={compact ? "pb-2" : undefined}>
@@ -56,9 +58,11 @@ export function EnterpriseFeatureLocked({
 						/>
 					</div>
 					<div className="space-y-1">
-						<CardTitle className="text-lg">{title}</CardTitle>
+						<CardTitle className="text-lg">
+							{title ?? t("enterpriseGate.title")}
+						</CardTitle>
 						<CardDescription className="max-w-sm mx-auto">
-							{description}
+							{description ?? t("enterpriseGate.description")}
 						</CardDescription>
 					</div>
 				</div>
@@ -66,7 +70,7 @@ export function EnterpriseFeatureLocked({
 			<CardContent className={compact ? "pt-0" : undefined}>
 				<div className="flex justify-center">
 					<Button asChild variant="secondary" size={compact ? "sm" : "default"}>
-						<Link href={ctaHref}>{ctaLabel}</Link>
+						<Link href={ctaHref}>{ctaLabel ?? t("enterpriseGate.cta")}</Link>
 					</Button>
 				</div>
 			</CardContent>
@@ -91,6 +95,7 @@ export function EnterpriseFeatureGate({
 	lockedProps,
 	fallback,
 }: EnterpriseFeatureGateProps) {
+	const { t } = useTranslation();
 	const { data: haveValidLicense, isPending } =
 		api.licenseKey.haveValidLicenseKey.useQuery();
 
@@ -100,7 +105,7 @@ export function EnterpriseFeatureGate({
 			<div className="flex items-center gap-2 justify-center min-h-[25vh]">
 				<Loader2 className="size-6 text-muted-foreground animate-spin" />
 				<span className="text-sm text-muted-foreground">
-					Checking license...
+					{t("enterpriseGate.checking")}
 				</span>
 			</div>
 		);

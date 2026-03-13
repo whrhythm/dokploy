@@ -15,17 +15,19 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 
-const ssoEmailSchema = z.object({
-	email: z
-		.string()
-		.min(1, "Enter your work email")
-		.email("Enter a valid email address")
-		.transform((v) => v.trim()),
-});
+const createSsoEmailSchema = (t: (key: string) => string) =>
+	z.object({
+		email: z
+			.string()
+			.min(1, t("auth.sso.validation.workEmailRequired"))
+			.email(t("profile.validation.emailInvalid"))
+			.transform((v) => v.trim()),
+	});
 
-type SSOEmailForm = z.infer<typeof ssoEmailSchema>;
+type SSOEmailForm = z.infer<ReturnType<typeof createSsoEmailSchema>>;
 
 interface SignInWithSSOProps {
 	/** Content shown when SSO is collapsed (e.g. email/password form) */
@@ -33,10 +35,11 @@ interface SignInWithSSOProps {
 }
 
 export function SignInWithSSO({ children }: SignInWithSSOProps) {
+	const { t } = useTranslation();
 	const [expanded, setExpanded] = useState(false);
 
 	const form = useForm<SSOEmailForm>({
-		resolver: zodResolver(ssoEmailSchema),
+		resolver: zodResolver(createSsoEmailSchema(t)),
 		defaultValues: { email: "" },
 	});
 
@@ -47,7 +50,7 @@ export function SignInWithSSO({ children }: SignInWithSSOProps) {
 				callbackURL: "/dashboard/projects",
 			});
 			if (error) {
-				toast.error(error.message ?? "Failed to sign in with SSO");
+				toast.error(error.message ?? t("auth.sso.toast.signInError"));
 				return;
 			}
 			if (data?.url) {
@@ -55,7 +58,7 @@ export function SignInWithSSO({ children }: SignInWithSSOProps) {
 			}
 		} catch (err) {
 			toast.error(
-				err instanceof Error ? err.message : "Failed to sign in with SSO",
+				err instanceof Error ? err.message : t("auth.sso.toast.signInError"),
 			);
 		}
 	};
@@ -70,7 +73,7 @@ export function SignInWithSSO({ children }: SignInWithSSOProps) {
 					onClick={() => setExpanded(true)}
 				>
 					<LogIn className="mr-2 size-4" />
-					Sign in with SSO
+					{t("auth.sso.signIn")}
 				</Button>
 				{children}
 			</div>
@@ -90,7 +93,7 @@ export function SignInWithSSO({ children }: SignInWithSSOProps) {
 									<div className="flex gap-2">
 										<Input
 											type="email"
-											placeholder="you@company.com"
+											placeholder={t("auth.sso.placeholder")}
 											className="flex-1"
 											autoComplete="email"
 											disabled={form.formState.isSubmitting}
@@ -104,7 +107,7 @@ export function SignInWithSSO({ children }: SignInWithSSOProps) {
 											{form.formState.isSubmitting ? (
 												<Loader2 className="size-4 animate-spin" />
 											) : (
-												"Continue"
+												t("profile.2fa.continue")
 											)}
 										</Button>
 									</div>
@@ -118,7 +121,7 @@ export function SignInWithSSO({ children }: SignInWithSSOProps) {
 						onClick={() => setExpanded(false)}
 						className="text-xs text-muted-foreground hover:underline"
 					>
-						Use email and password instead
+						{t("auth.sso.useEmailPassword")}
 					</button>
 				</form>
 			</Form>

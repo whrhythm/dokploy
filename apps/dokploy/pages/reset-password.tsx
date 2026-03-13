@@ -21,38 +21,41 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 
-const loginSchema = z
-	.object({
-		password: z
-			.string()
-			.min(1, {
-				message: "Password is required",
-			})
-			.min(8, {
-				message: "Password must be at least 8 characters",
-			}),
-		confirmPassword: z
-			.string()
-			.min(1, {
-				message: "Password is required",
-			})
-			.min(8, {
-				message: "Password must be at least 8 characters",
-			}),
-	})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords do not match",
-		path: ["confirmPassword"],
-	});
+const createLoginSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			password: z
+				.string()
+				.min(1, {
+					message: t("services.security.validation.passwordRequired"),
+				})
+				.min(8, {
+					message: t("auth.validation.passwordMin"),
+				}),
+			confirmPassword: z
+				.string()
+				.min(1, {
+					message: t("services.security.validation.passwordRequired"),
+				})
+				.min(8, {
+					message: t("auth.validation.passwordMin"),
+				}),
+		})
+		.refine((data) => data.password === data.confirmPassword, {
+			message: t("auth.validation.passwordMismatch"),
+			path: ["confirmPassword"],
+		});
 
-type Login = z.infer<typeof loginSchema>;
+type Login = z.infer<ReturnType<typeof createLoginSchema>>;
 
 interface Props {
 	tokenResetPassword: string;
 }
 export default function Home({ tokenResetPassword }: Props) {
+	const { t } = useTranslation();
 	const [token, setToken] = useState<string | null>(tokenResetPassword);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -62,7 +65,7 @@ export default function Home({ tokenResetPassword }: Props) {
 			password: "",
 			confirmPassword: "",
 		},
-		resolver: zodResolver(loginSchema),
+		resolver: zodResolver(createLoginSchema(t)),
 	});
 
 	useEffect(() => {
@@ -85,9 +88,9 @@ export default function Home({ tokenResetPassword }: Props) {
 		});
 
 		if (error) {
-			setError(error.message || "An error occurred");
+			setError(error.message || t("error.generic"));
 		} else {
-			toast.success("Password reset successfully");
+			toast.success(t("auth.reset.toast.success"));
 			router.push("/");
 		}
 		setIsLoading(false);
@@ -99,11 +102,9 @@ export default function Home({ tokenResetPassword }: Props) {
 					<Link href="/" className="flex flex-row items-center gap-2">
 						<Logo className="size-12" />
 					</Link>
-					Reset Password
+					{t("auth.resetPassword")}
 				</CardTitle>
-				<CardDescription>
-					Enter your email to reset your password
-				</CardDescription>
+				<CardDescription>{t("auth.reset.description")}</CardDescription>
 
 				<div className="w-full">
 					<CardContent className="p-0">
@@ -123,11 +124,11 @@ export default function Home({ tokenResetPassword }: Props) {
 										name="password"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Password</FormLabel>
+												<FormLabel>{t("auth.password")}</FormLabel>
 												<FormControl>
 													<Input
 														type="password"
-														placeholder="Password"
+														placeholder={t("auth.password")}
 														{...field}
 													/>
 												</FormControl>
@@ -140,11 +141,11 @@ export default function Home({ tokenResetPassword }: Props) {
 										name="confirmPassword"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Confirm Password</FormLabel>
+												<FormLabel>{t("auth.confirmPassword")}</FormLabel>
 												<FormControl>
 													<Input
 														type="password"
-														placeholder="Password"
+														placeholder={t("auth.password")}
 														{...field}
 													/>
 												</FormControl>
@@ -158,12 +159,12 @@ export default function Home({ tokenResetPassword }: Props) {
 										isLoading={isLoading}
 										className="w-full"
 									>
-										Confirm
+										{t("button.confirm")}
 									</Button>
 								</div>
 
 								<div className="text-center text-sm flex gap-2 text-muted-foreground">
-									<Link href="/">Sign in</Link>
+									<Link href="/">{t("auth.login")}</Link>
 								</div>
 							</form>
 						</Form>

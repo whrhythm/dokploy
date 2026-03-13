@@ -7,6 +7,7 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import { useTranslation } from "@/hooks/use-translation";
 import { TerminalLine } from "../dashboard/docker/logs/terminal-line";
 import type { LogLine } from "../dashboard/docker/logs/utils";
 
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const DrawerLogs = ({ isOpen, onClose, filteredLogs }: Props) => {
+	const { t } = useTranslation();
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const [autoScroll, setAutoScroll] = useState(true);
 	const scrollToBottom = () => {
@@ -49,8 +51,8 @@ export const DrawerLogs = ({ isOpen, onClose, filteredLogs }: Props) => {
 		>
 			<SheetContent className="sm:max-w-[740px] flex flex-col">
 				<SheetHeader>
-					<SheetTitle>Deployment Logs</SheetTitle>
-					<SheetDescription>Details of the request log entry.</SheetDescription>
+					<SheetTitle>{t("drawerLogs.title")}</SheetTitle>
+					<SheetDescription>{t("drawerLogs.description")}</SheetDescription>
 				</SheetHeader>
 				<div
 					ref={scrollRef}

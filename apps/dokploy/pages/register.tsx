@@ -24,51 +24,53 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
 
-const registerSchema = z
-	.object({
-		name: z.string().min(1, {
-			message: "First name is required",
-		}),
-		lastName: z.string().min(1, {
-			message: "Last name is required",
-		}),
-		email: z
-			.string()
-			.min(1, {
-				message: "Email is required",
-			})
-			.email({
-				message: "Email must be a valid email",
+const createRegisterSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			name: z.string().min(1, {
+				message: t("auth.validation.firstNameRequired"),
 			}),
-		password: z
-			.string()
-			.min(1, {
-				message: "Password is required",
-			})
-			.refine((password) => password === "" || password.length >= 8, {
-				message: "Password must be at least 8 characters",
+			lastName: z.string().min(1, {
+				message: t("auth.validation.lastNameRequired"),
 			}),
-		confirmPassword: z
-			.string()
-			.min(1, {
-				message: "Password is required",
-			})
-			.refine(
-				(confirmPassword) =>
-					confirmPassword === "" || confirmPassword.length >= 8,
-				{
-					message: "Password must be at least 8 characters",
-				},
-			),
-	})
-	.refine((data) => data.password === data.confirmPassword, {
-		message: "Passwords do not match",
-		path: ["confirmPassword"],
-	});
+			email: z
+				.string()
+				.min(1, {
+					message: t("profile.validation.emailRequired"),
+				})
+				.email({
+					message: t("profile.validation.emailInvalid"),
+				}),
+			password: z
+				.string()
+				.min(1, {
+					message: t("auth.validation.passwordRequired"),
+				})
+				.refine((password) => password === "" || password.length >= 8, {
+					message: t("auth.validation.passwordMin"),
+				}),
+			confirmPassword: z
+				.string()
+				.min(1, {
+					message: t("auth.validation.passwordRequired"),
+				})
+				.refine(
+					(confirmPassword) =>
+						confirmPassword === "" || confirmPassword.length >= 8,
+					{
+						message: t("auth.validation.passwordMin"),
+					},
+				),
+		})
+		.refine((data) => data.password === data.confirmPassword, {
+			message: t("auth.validation.passwordMismatch"),
+			path: ["confirmPassword"],
+		});
 
-type Register = z.infer<typeof registerSchema>;
+type Register = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 interface Props {
 	hasAdmin: boolean;
@@ -76,6 +78,7 @@ interface Props {
 }
 
 const Register = ({ isCloud }: Props) => {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const [isError, setIsError] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -89,7 +92,7 @@ const Register = ({ isCloud }: Props) => {
 			password: "",
 			confirmPassword: "",
 		},
-		resolver: zodResolver(registerSchema),
+		resolver: zodResolver(createRegisterSchema(t)),
 	});
 
 	useEffect(() => {
@@ -106,9 +109,9 @@ const Register = ({ isCloud }: Props) => {
 
 		if (error) {
 			setIsError(true);
-			setError(error.message || "An error occurred");
+			setError(error.message || t("error.generic"));
 		} else {
-			toast.success("User registered successfully", {
+			toast.success(t("auth.register.toast.success"), {
 				duration: 2000,
 			});
 			if (!isCloud) {
@@ -130,11 +133,12 @@ const Register = ({ isCloud }: Props) => {
 						>
 							<Logo className="size-12" />
 						</Link>
-						{isCloud ? "Sign Up" : "Setup the server"}
+						{isCloud ? t("auth.register") : t("auth.register.setupServer")}
 					</CardTitle>
 					<CardDescription>
-						Enter your email and password to{" "}
-						{isCloud ? "create an account" : "setup the server"}
+						{isCloud
+							? t("auth.register.description")
+							: t("auth.register.setupDescription")}
 					</CardDescription>
 					<div className="mx-auto w-full max-w-lg bg-transparent">
 						{isError && (
@@ -147,10 +151,7 @@ const Register = ({ isCloud }: Props) => {
 						)}
 						{isCloud && data && (
 							<AlertBlock type="success" className="my-2">
-								<span>
-									Registered successfully, please check your inbox or spam
-									folder to confirm your account.
-								</span>
+								<span>{t("auth.register.checkInbox")}</span>
 							</AlertBlock>
 						)}
 						<CardContent className="p-0">
@@ -162,7 +163,7 @@ const Register = ({ isCloud }: Props) => {
 							)}
 							{isCloud && (
 								<p className="mb-4 text-center text-xs text-muted-foreground">
-									Or register with email
+									{t("auth.register.withEmail")}
 								</p>
 							)}
 							<Form {...form}>
@@ -176,9 +177,14 @@ const Register = ({ isCloud }: Props) => {
 											name="name"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>First Name</FormLabel>
+													<FormLabel>{t("auth.register.firstName")}</FormLabel>
 													<FormControl>
-														<Input placeholder="John" {...field} />
+														<Input
+															placeholder={t(
+																"auth.register.firstNamePlaceholder",
+															)}
+															{...field}
+														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -189,9 +195,14 @@ const Register = ({ isCloud }: Props) => {
 											name="lastName"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Last Name</FormLabel>
+													<FormLabel>{t("auth.register.lastName")}</FormLabel>
 													<FormControl>
-														<Input placeholder="Doe" {...field} />
+														<Input
+															placeholder={t(
+																"auth.register.lastNamePlaceholder",
+															)}
+															{...field}
+														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -202,9 +213,12 @@ const Register = ({ isCloud }: Props) => {
 											name="email"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Email</FormLabel>
+													<FormLabel>{t("auth.email")}</FormLabel>
 													<FormControl>
-														<Input placeholder="email@dokploy.com" {...field} />
+														<Input
+															placeholder={t("auth.register.emailPlaceholder")}
+															{...field}
+														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -215,11 +229,11 @@ const Register = ({ isCloud }: Props) => {
 											name="password"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Password</FormLabel>
+													<FormLabel>{t("auth.password")}</FormLabel>
 													<FormControl>
 														<Input
 															type="password"
-															placeholder="Password"
+															placeholder={t("auth.password")}
 															{...field}
 														/>
 													</FormControl>
@@ -233,11 +247,11 @@ const Register = ({ isCloud }: Props) => {
 											name="confirmPassword"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Confirm Password</FormLabel>
+													<FormLabel>{t("auth.confirmPassword")}</FormLabel>
 													<FormControl>
 														<Input
 															type="password"
-															placeholder="Password"
+															placeholder={t("auth.confirmPassword")}
 															{...field}
 														/>
 													</FormControl>
@@ -251,7 +265,7 @@ const Register = ({ isCloud }: Props) => {
 											isLoading={form.formState.isSubmitting}
 											className="w-full"
 										>
-											Register
+											{t("auth.register")}
 										</Button>
 									</div>
 								</form>
@@ -259,21 +273,21 @@ const Register = ({ isCloud }: Props) => {
 							<div className="flex flex-row justify-between flex-wrap">
 								{isCloud && (
 									<div className="mt-4 text-center text-sm flex gap-2 text-muted-foreground">
-										Already have account?
+										{t("auth.alreadyHaveAccount")}
 										<Link className="underline" href="/">
-											Sign in
+											{t("auth.login")}
 										</Link>
 									</div>
 								)}
 
 								<div className="mt-4 text-center text-sm flex flex-row justify-center gap-2  text-muted-foreground">
-									Need help?
+									{t("auth.register.needHelp")}
 									<Link
 										className="underline"
 										href="https://dokploy.com"
 										target="_blank"
 									>
-										Contact us
+										{t("auth.register.contactUs")}
 									</Link>
 								</div>
 							</div>

@@ -30,6 +30,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { useUrl } from "@/utils/hooks/use-url";
 import { RegisterOidcDialog } from "./register-oidc-dialog";
@@ -74,6 +75,7 @@ function parseSamlConfig(
 }
 
 export const SSOSettings = () => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [detailsProvider, setDetailsProvider] =
 		useState<ProviderForDetails | null>(null);
@@ -102,12 +104,14 @@ export const SSOSettings = () => {
 		if (!value) return;
 		try {
 			await addTrustedOrigin({ origin: value });
-			toast.success("Trusted origin added");
+			toast.success(t("settings.sso.toast.originAdded"));
 			setNewOriginInput("");
 			await utils.sso.getTrustedOrigins.invalidate();
 		} catch (err) {
 			toast.error(
-				err instanceof Error ? err.message : "Failed to add trusted origin",
+				err instanceof Error
+					? err.message
+					: t("settings.sso.toast.originAddError"),
 			);
 		}
 	};
@@ -115,12 +119,14 @@ export const SSOSettings = () => {
 	const handleRemoveOrigin = async (origin: string) => {
 		try {
 			await removeTrustedOrigin({ origin });
-			toast.success("Trusted origin removed");
+			toast.success(t("settings.sso.toast.originRemoved"));
 			if (editingOrigin === origin) setEditingOrigin(null);
 			await utils.sso.getTrustedOrigins.invalidate();
 		} catch (err) {
 			toast.error(
-				err instanceof Error ? err.message : "Failed to remove trusted origin",
+				err instanceof Error
+					? err.message
+					: t("settings.sso.toast.originRemoveError"),
 			);
 		}
 	};
@@ -140,13 +146,15 @@ export const SSOSettings = () => {
 				oldOrigin: editingOrigin,
 				newOrigin: editingValue.trim(),
 			});
-			toast.success("Trusted origin updated");
+			toast.success(t("settings.sso.toast.originUpdated"));
 			setEditingOrigin(null);
 			setEditingValue("");
 			await utils.sso.getTrustedOrigins.invalidate();
 		} catch (err) {
 			toast.error(
-				err instanceof Error ? err.message : "Failed to update trusted origin",
+				err instanceof Error
+					? err.message
+					: t("settings.sso.toast.originUpdateError"),
 			);
 		}
 	};
@@ -162,12 +170,9 @@ export const SSOSettings = () => {
 				<div className="flex flex-col gap-2">
 					<div className="flex items-center gap-2">
 						<LogIn className="size-6 text-muted-foreground" />
-						<CardTitle className="text-xl">Single Sign-On (SSO)</CardTitle>
+						<CardTitle className="text-xl">{t("settings.sso.title")}</CardTitle>
 					</div>
-					<CardDescription>
-						Configure OIDC or SAML identity providers for enterprise sign-in.
-						Users can sign in with their organization&apos;s IdP.
-					</CardDescription>
+					<CardDescription>{t("settings.sso.description")}</CardDescription>
 				</div>
 				<Button
 					variant="outline"
@@ -176,7 +181,7 @@ export const SSOSettings = () => {
 					className="shrink-0"
 				>
 					<Shield className="mr-2 size-4" />
-					Manage origins
+					{t("settings.sso.manageOrigins")}
 				</Button>
 			</div>
 
@@ -184,7 +189,7 @@ export const SSOSettings = () => {
 				<div className="flex items-center gap-2 justify-center min-h-[25vh]">
 					<Loader2 className="size-6 text-muted-foreground animate-spin" />
 					<span className="text-sm text-muted-foreground">
-						Loading providers...
+						{t("settings.sso.loadingProviders")}
 					</span>
 				</div>
 			) : (
@@ -194,13 +199,13 @@ export const SSOSettings = () => {
 							<RegisterOidcDialog>
 								<Button variant="secondary" size="sm">
 									<LogIn className="mr-2 size-4" />
-									Add OIDC provider
+									{t("settings.sso.actions.addOidc")}
 								</Button>
 							</RegisterOidcDialog>
 							<RegisterSamlDialog>
 								<Button variant="secondary" size="sm">
 									<LogIn className="mr-2 size-4" />
-									Add SAML provider
+									{t("settings.sso.actions.addSaml")}
 								</Button>
 							</RegisterSamlDialog>
 						</div>
@@ -208,7 +213,9 @@ export const SSOSettings = () => {
 
 					{providers && providers.length > 0 ? (
 						<div className="space-y-3">
-							<span className="text-sm font-medium">Registered providers</span>
+							<span className="text-sm font-medium">
+								{t("settings.sso.registeredProviders")}
+							</span>
 							<div className="grid gap-3 sm:grid-cols-2">
 								{providers.map((provider) => {
 									const isOidc = !!provider.oidcConfig;
@@ -263,13 +270,13 @@ export const SSOSettings = () => {
 													}
 												>
 													<Eye className="mr-1 size-3" />
-													View details
+													{t("settings.sso.actions.viewDetails")}
 												</Button>
 												{isOidc && (
 													<RegisterOidcDialog providerId={provider.providerId}>
 														<Button variant="ghost" size="sm">
 															<Pencil className="mr-1 size-3" />
-															Edit
+															{t("button.edit")}
 														</Button>
 													</RegisterOidcDialog>
 												)}
@@ -277,26 +284,31 @@ export const SSOSettings = () => {
 													<RegisterSamlDialog providerId={provider.providerId}>
 														<Button variant="ghost" size="sm">
 															<Pencil className="mr-1 size-3" />
-															Edit
+															{t("button.edit")}
 														</Button>
 													</RegisterSamlDialog>
 												)}
 												<DialogAction
-													title="Remove SSO provider"
-													description={`Remove provider "${provider.providerId}"? Users will no longer be able to sign in with this IdP.`}
+													title={t("settings.sso.removeProvider.title")}
+													description={t(
+														"settings.sso.removeProvider.description",
+														{ provider: provider.providerId },
+													)}
 													type="destructive"
 													onClick={async () => {
 														try {
 															await deleteProvider({
 																providerId: provider.providerId,
 															});
-															toast.success("Provider removed");
+															toast.success(
+																t("settings.sso.toast.providerRemoved"),
+															);
 															await utils.sso.listProviders.invalidate();
 														} catch (err) {
 															toast.error(
 																err instanceof Error
 																	? err.message
-																	: "Failed to remove provider",
+																	: t("settings.sso.toast.providerRemoveError"),
 															);
 														}
 													}}
@@ -308,7 +320,7 @@ export const SSOSettings = () => {
 														disabled={isDeleting}
 													>
 														<Trash2 className="mr-1 size-3" />
-														Remove
+														{t("button.remove")}
 													</Button>
 												</DialogAction>
 											</CardContent>
@@ -324,10 +336,11 @@ export const SSOSettings = () => {
 									<LogIn className="size-8 text-muted-foreground" />
 								</div>
 								<div className="space-y-1">
-									<h3 className="text-lg font-semibold">No SSO providers</h3>
+									<h3 className="text-lg font-semibold">
+										{t("settings.sso.empty.title")}
+									</h3>
 									<p className="text-sm text-muted-foreground">
-										Add an OIDC or SAML provider so users can sign in with their
-										organization&apos;s IdP (e.g. Okta, Azure AD).
+										{t("settings.sso.empty.description")}
 									</p>
 								</div>
 							</div>
@@ -335,13 +348,13 @@ export const SSOSettings = () => {
 								<RegisterOidcDialog>
 									<Button variant="secondary">
 										<LogIn className="mr-2 size-4" />
-										Add OIDC provider
+										{t("settings.sso.actions.addOidc")}
 									</Button>
 								</RegisterOidcDialog>
 								<RegisterSamlDialog>
 									<Button variant="outline">
 										<LogIn className="mr-2 size-4" />
-										Add SAML provider
+										{t("settings.sso.actions.addSaml")}
 									</Button>
 								</RegisterSamlDialog>
 							</div>
@@ -358,15 +371,15 @@ export const SSOSettings = () => {
 					{detailsProvider && (
 						<>
 							<DialogHeader>
-								<DialogTitle>SSO provider details</DialogTitle>
+								<DialogTitle>{t("settings.sso.details.title")}</DialogTitle>
 								<DialogDescription>
-									Use Edit to change provider settings (OIDC or SAML).
+									{t("settings.sso.details.description")}
 								</DialogDescription>
 							</DialogHeader>
 							<div className="grid gap-3 py-2">
 								<div className="grid gap-1">
 									<span className="text-xs font-medium text-muted-foreground">
-										Provider ID
+										{t("settings.sso.details.providerId")}
 									</span>
 									<p className="rounded-md bg-muted px-2 py-1.5 font-mono text-sm">
 										{detailsProvider.providerId}
@@ -374,7 +387,7 @@ export const SSOSettings = () => {
 								</div>
 								<div className="grid gap-1">
 									<span className="text-xs font-medium text-muted-foreground">
-										Issuer URL
+										{t("settings.sso.details.issuer")}
 									</span>
 									<p className="break-all rounded-md bg-muted px-2 py-1.5 text-sm">
 										{detailsProvider.issuer}
@@ -382,7 +395,7 @@ export const SSOSettings = () => {
 								</div>
 								<div className="grid gap-1">
 									<span className="text-xs font-medium text-muted-foreground">
-										Domain
+										{t("settings.sso.details.domain")}
 									</span>
 									<p className="rounded-md bg-muted px-2 py-1.5 text-sm">
 										{detailsProvider.domain}
@@ -398,7 +411,7 @@ export const SSOSettings = () => {
 													{oidc.clientId && (
 														<div className="grid gap-1">
 															<span className="text-xs font-medium text-muted-foreground">
-																Client ID
+																{t("settings.sso.details.clientId")}
 															</span>
 															<p className="rounded-md bg-muted px-2 py-1.5 font-mono text-sm">
 																{oidc.clientId}
@@ -408,7 +421,7 @@ export const SSOSettings = () => {
 													{oidc.scopes && oidc.scopes.length > 0 && (
 														<div className="grid gap-1">
 															<span className="text-xs font-medium text-muted-foreground">
-																Scopes
+																{t("settings.sso.details.scopes")}
 															</span>
 															<p className="rounded-md bg-muted px-2 py-1.5 text-sm">
 																{oidc.scopes.join(" ")}
@@ -428,7 +441,7 @@ export const SSOSettings = () => {
 											return (
 												<div className="grid gap-1">
 													<span className="text-xs font-medium text-muted-foreground">
-														Entry point
+														{t("settings.sso.details.entryPoint")}
 													</span>
 													<p className="break-all rounded-md bg-muted px-2 py-1.5 text-sm">
 														{saml.entryPoint}
@@ -440,7 +453,7 @@ export const SSOSettings = () => {
 								)}
 								<div className="grid gap-1">
 									<span className="text-xs font-medium text-muted-foreground">
-										Callback URL (configure in your IdP)
+										{t("settings.sso.details.callbackUrl")}
 									</span>
 									<p className="break-all rounded-md bg-muted px-2 py-1.5 font-mono text-xs">
 										{baseURL || "{baseURL}"}
@@ -451,8 +464,7 @@ export const SSOSettings = () => {
 									</p>
 									{!baseURL && (
 										<p className="text-xs text-muted-foreground">
-											Replace {"{baseURL}"} with your Dokploy URL (e.g. https://
-											your-domain.com).
+											{t("settings.sso.details.baseUrlHint")}
 										</p>
 									)}
 								</div>
@@ -462,7 +474,7 @@ export const SSOSettings = () => {
 									variant="outline"
 									onClick={() => setDetailsProvider(null)}
 								>
-									Close
+									{t("button.close")}
 								</Button>
 							</DialogFooter>
 						</>
@@ -475,19 +487,20 @@ export const SSOSettings = () => {
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2">
 							<Shield className="size-5" />
-							Trusted origins
+							{t("settings.sso.trustedOrigins.title")}
 						</DialogTitle>
 						<DialogDescription>
-							Manage allowed origins for SSO callbacks. Add, edit, or remove
-							origins for your account.
+							{t("settings.sso.trustedOrigins.description")}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4 py-2">
 						<div className="space-y-2">
-							<span className="text-sm font-medium">Current origins</span>
+							<span className="text-sm font-medium">
+								{t("settings.sso.trustedOrigins.current")}
+							</span>
 							{trustedOrigins.length === 0 ? (
 								<p className="rounded-md border border-dashed bg-muted/30 px-3 py-4 text-center text-sm text-muted-foreground">
-									No trusted origins yet. Add one below.
+									{t("settings.sso.trustedOrigins.empty")}
 								</p>
 							) : (
 								<ul className="flex flex-col gap-2">
@@ -501,7 +514,9 @@ export const SSOSettings = () => {
 													<Input
 														value={editingValue}
 														onChange={(e) => setEditingValue(e.target.value)}
-														placeholder="https://..."
+														placeholder={t(
+															"settings.sso.trustedOrigins.placeholderShort",
+														)}
 														className="flex-1 font-mono text-sm"
 														autoFocus
 													/>
@@ -510,14 +525,14 @@ export const SSOSettings = () => {
 														onClick={handleSaveEdit}
 														disabled={!editingValue.trim() || isUpdatingOrigin}
 													>
-														Save
+														{t("button.save")}
 													</Button>
 													<Button
 														size="sm"
 														variant="ghost"
 														onClick={handleCancelEdit}
 													>
-														Cancel
+														{t("button.cancel")}
 													</Button>
 												</>
 											) : (
@@ -534,8 +549,11 @@ export const SSOSettings = () => {
 														<Pencil className="size-3.5" />
 													</Button>
 													<DialogAction
-														title="Remove trusted origin"
-														description={`Remove "${origin}" from trusted origins?`}
+														title={t("settings.sso.trustedOrigins.removeTitle")}
+														description={t(
+															"settings.sso.trustedOrigins.removeDescription",
+															{ origin },
+														)}
 														type="destructive"
 														onClick={async () => handleRemoveOrigin(origin)}
 													>
@@ -556,12 +574,14 @@ export const SSOSettings = () => {
 							)}
 						</div>
 						<div className="space-y-2">
-							<span className="text-sm font-medium">Add trusted origin</span>
+							<span className="text-sm font-medium">
+								{t("settings.sso.trustedOrigins.add")}
+							</span>
 							<div className="flex gap-2">
 								<Input
 									value={newOriginInput}
 									onChange={(e) => setNewOriginInput(e.target.value)}
-									placeholder="https://example.com"
+									placeholder={t("settings.sso.trustedOrigins.placeholder")}
 									className="font-mono text-sm"
 									onKeyDown={(e) => {
 										if (e.key === "Enter") {
@@ -576,7 +596,7 @@ export const SSOSettings = () => {
 									disabled={!newOriginInput.trim() || isAddingOrigin}
 								>
 									<Plus className="mr-1 size-4" />
-									Add
+									{t("button.add")}
 								</Button>
 							</div>
 						</div>
@@ -586,7 +606,7 @@ export const SSOSettings = () => {
 							variant="outline"
 							onClick={() => setManageOriginsOpen(false)}
 						>
-							Close
+							{t("button.close")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

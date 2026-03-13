@@ -24,24 +24,27 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const Schema = z.object({
-	name: z.string().min(1, {
-		message: "Name is required",
-	}),
-	appName: z.string().min(1, {
-		message: "App Name is required",
-	}),
-});
+const createSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("settings.gitProviders.github.validation.nameRequired"),
+		}),
+		appName: z.string().min(1, {
+			message: t("settings.gitProviders.github.validation.appNameRequired"),
+		}),
+	});
 
-type Schema = z.infer<typeof Schema>;
+type Schema = z.infer<ReturnType<typeof createSchema>>;
 
 interface Props {
 	githubId: string;
 }
 
 export const EditGithubProvider = ({ githubId }: Props) => {
+	const { t } = useTranslation();
 	const { data: github } = api.github.one.useQuery(
 		{
 			githubId,
@@ -60,7 +63,7 @@ export const EditGithubProvider = ({ githubId }: Props) => {
 			name: "",
 			appName: "",
 		},
-		resolver: zodResolver(Schema),
+		resolver: zodResolver(createSchema(t)),
 	});
 
 	useEffect(() => {
@@ -79,11 +82,11 @@ export const EditGithubProvider = ({ githubId }: Props) => {
 		})
 			.then(async () => {
 				await utils.gitProvider.getAll.invalidate();
-				toast.success("Github updated successfully");
+				toast.success(t("settings.gitProviders.github.toast.updated"));
 				setIsOpen(false);
 			})
 			.catch(() => {
-				toast.error("Error updating Github");
+				toast.error(t("settings.gitProviders.github.toast.updateError"));
 			});
 	};
 
@@ -101,7 +104,8 @@ export const EditGithubProvider = ({ githubId }: Props) => {
 			<DialogContent className="sm:max-w-2xl ">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						Update Github <GithubIcon className="size-5" />
+						{t("settings.gitProviders.github.updateTitle")}{" "}
+						<GithubIcon className="size-5" />
 					</DialogTitle>
 				</DialogHeader>
 
@@ -119,10 +123,12 @@ export const EditGithubProvider = ({ githubId }: Props) => {
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<FormLabel>{t("form.name")}</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Random Name eg(my-personal-account)"
+													placeholder={t(
+														"settings.gitProviders.placeholder.providerName",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -135,10 +141,14 @@ export const EditGithubProvider = ({ githubId }: Props) => {
 									name="appName"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>App Name</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.github.appName")}
+											</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="pp Name eg(my-personal)"
+													placeholder={t(
+														"settings.gitProviders.github.appNamePlaceholder",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -157,17 +167,25 @@ export const EditGithubProvider = ({ githubId }: Props) => {
 												githubId,
 											})
 												.then(async (message) => {
-													toast.info(`Message: ${message}`);
+													toast.info(
+														t("settings.gitProviders.toast.message", {
+															message,
+														}),
+													);
 												})
 												.catch((error) => {
-													toast.error(`Error: ${error.message}`);
+													toast.error(
+														t("settings.gitProviders.toast.error", {
+															message: error.message,
+														}),
+													);
 												});
 										}}
 									>
-										Test Connection
+										{t("settings.gitProviders.actions.testConnection")}
 									</Button>
 									<Button type="submit" isLoading={form.formState.isSubmitting}>
-										Update
+										{t("button.update")}
 									</Button>
 								</div>
 							</div>

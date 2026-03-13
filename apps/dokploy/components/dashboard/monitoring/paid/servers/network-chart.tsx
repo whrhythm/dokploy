@@ -13,33 +13,36 @@ import {
 	ChartLegendContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/hooks/use-translation";
 import { formatTimestamp } from "@/lib/utils";
 
 interface NetworkChartProps {
 	data: any[];
 }
 
-const chartConfig = {
-	networkIn: {
-		label: "Network In",
-		color: "hsl(var(--chart-3))",
-	},
-	networkOut: {
-		label: "Network Out",
-		color: "hsl(var(--chart-4))",
-	},
-} satisfies ChartConfig;
-
 export function NetworkChart({ data }: NetworkChartProps) {
+	const { t } = useTranslation();
 	const latestData = data[data.length - 1] || {};
+	const chartConfig = {
+		networkIn: {
+			label: t("services.monitoring.chart.input"),
+			color: "hsl(var(--chart-3))",
+		},
+		networkOut: {
+			label: t("services.monitoring.chart.output"),
+			color: "hsl(var(--chart-4))",
+		},
+	} satisfies ChartConfig;
 
 	return (
 		<Card className="bg-transparent">
 			<CardHeader className="border-b py-5">
-				<CardTitle>Network</CardTitle>
+				<CardTitle>{t("services.monitoring.networkIo")}</CardTitle>
 				<CardDescription>
-					Network Traffic: ↑ {latestData.networkOut} KB/s ↓{" "}
-					{latestData.networkIn} KB/s
+					{t("monitoring.paid.networkTraffic", {
+						out: latestData.networkOut,
+						in: latestData.networkIn,
+					})}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
@@ -94,7 +97,7 @@ export function NetworkChart({ data }: NetworkChartProps) {
 											<div className="grid grid-cols-2 gap-2">
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Time
+														{t("services.monitoring.chart.time")}
 													</span>
 													<span className="font-bold">
 														{formatTimestamp(label)}
@@ -102,7 +105,7 @@ export function NetworkChart({ data }: NetworkChartProps) {
 												</div>
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Network
+														{t("services.monitoring.networkIo")}
 													</span>
 													<span className="font-bold">
 														↑ {data.networkOut} KB/s
@@ -117,7 +120,7 @@ export function NetworkChart({ data }: NetworkChartProps) {
 							}}
 						/>
 						<Area
-							name="Network In"
+							name={t("services.monitoring.chart.input")}
 							dataKey="networkIn"
 							type="monotone"
 							fill="url(#fillNetworkIn)"
@@ -125,7 +128,7 @@ export function NetworkChart({ data }: NetworkChartProps) {
 							strokeWidth={2}
 						/>
 						<Area
-							name="Network Out"
+							name={t("services.monitoring.chart.output")}
 							dataKey="networkOut"
 							type="monotone"
 							fill="url(#fillNetworkOut)"

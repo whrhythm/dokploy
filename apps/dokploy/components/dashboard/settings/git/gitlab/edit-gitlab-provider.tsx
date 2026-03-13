@@ -25,29 +25,32 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const Schema = z.object({
-	name: z.string().min(1, {
-		message: "Name is required",
-	}),
-	gitlabUrl: z.string().url({
-		message: "Invalid Gitlab URL",
-	}),
-	gitlabInternalUrl: z
-		.union([z.string().url(), z.literal("")])
-		.optional()
-		.transform((v) => (v === "" ? undefined : v)),
-	groupName: z.string().optional(),
-});
+const createSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("settings.gitProviders.gitlab.validation.nameRequired"),
+		}),
+		gitlabUrl: z.string().url({
+			message: t("settings.gitProviders.gitlab.validation.invalidUrl"),
+		}),
+		gitlabInternalUrl: z
+			.union([z.string().url(), z.literal("")])
+			.optional()
+			.transform((v) => (v === "" ? undefined : v)),
+		groupName: z.string().optional(),
+	});
 
-type Schema = z.infer<typeof Schema>;
+type Schema = z.infer<ReturnType<typeof createSchema>>;
 
 interface Props {
 	gitlabId: string;
 }
 
 export const EditGitlabProvider = ({ gitlabId }: Props) => {
+	const { t } = useTranslation();
 	const { data: gitlab, refetch } = api.gitlab.one.useQuery(
 		{
 			gitlabId,
@@ -68,7 +71,7 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 			gitlabUrl: "https://gitlab.com",
 			gitlabInternalUrl: "",
 		},
-		resolver: zodResolver(Schema),
+		resolver: zodResolver(createSchema(t)),
 	});
 
 	const groupName = form.watch("groupName");
@@ -93,12 +96,12 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 		})
 			.then(async () => {
 				await utils.gitProvider.getAll.invalidate();
-				toast.success("Gitlab updated successfully");
+				toast.success(t("settings.gitProviders.gitlab.toast.updated"));
 				setIsOpen(false);
 				refetch();
 			})
 			.catch(() => {
-				toast.error("Error updating Gitlab");
+				toast.error(t("settings.gitProviders.gitlab.toast.updateError"));
 			});
 	};
 
@@ -116,7 +119,8 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 			<DialogContent className="sm:max-w-2xl ">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						Update GitLab <GitlabIcon className="size-5" />
+						{t("settings.gitProviders.gitlab.updateTitle")}{" "}
+						<GitlabIcon className="size-5" />
 					</DialogTitle>
 				</DialogHeader>
 
@@ -134,10 +138,12 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<FormLabel>{t("form.name")}</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Random Name eg(my-personal-account)"
+													placeholder={t(
+														"settings.gitProviders.placeholder.providerName",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -150,7 +156,9 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 									name="gitlabUrl"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Gitlab Url</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.gitlab.url")}
+											</FormLabel>
 											<FormControl>
 												<Input placeholder="https://gitlab.com" {...field} />
 											</FormControl>
@@ -164,7 +172,9 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 									name="gitlabInternalUrl"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Internal URL (Optional)</FormLabel>
+											<FormLabel>
+												{t("settings.gitProviders.internalUrl")}
+											</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="http://gitlab:80"
@@ -173,9 +183,9 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 												/>
 											</FormControl>
 											<FormDescription>
-												Use when GitLab runs on the same instance as Dokploy.
-												Used for OAuth token exchange to reach GitLab via
-												internal network (e.g. Docker service name).
+												{t(
+													"settings.gitProviders.gitlab.internalUrlDescription",
+												)}
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -188,11 +198,13 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>
-												Group Name (Optional, Comma-Separated List)
+												{t("settings.gitProviders.gitlab.groupName")}
 											</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="For organization/group access use the slugish name of the group eg: my-org"
+													placeholder={t(
+														"settings.gitProviders.gitlab.groupNamePlaceholder",
+													)}
 													{...field}
 												/>
 											</FormControl>
@@ -212,17 +224,25 @@ export const EditGitlabProvider = ({ gitlabId }: Props) => {
 												groupName: groupName || "",
 											})
 												.then(async (message) => {
-													toast.info(`Message: ${message}`);
+													toast.info(
+														t("settings.gitProviders.toast.message", {
+															message,
+														}),
+													);
 												})
 												.catch((error) => {
-													toast.error(`Error: ${error.message}`);
+													toast.error(
+														t("settings.gitProviders.toast.error", {
+															message: error.message,
+														}),
+													);
 												});
 										}}
 									>
-										Test Connection
+										{t("settings.gitProviders.actions.testConnection")}
 									</Button>
 									<Button type="submit" isLoading={form.formState.isSubmitting}>
-										Update
+										{t("button.update")}
 									</Button>
 								</div>
 							</div>

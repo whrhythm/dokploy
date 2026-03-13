@@ -1,5 +1,6 @@
 import { EyeIcon, EyeOffIcon, RefreshCcw } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "@/hooks/use-translation";
 import { generateRandomPassword } from "@/lib/password-utils";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		ref,
 	) => {
 		const [showPassword, setShowPassword] = React.useState(false);
+		const { t } = useTranslation();
 		const inputRef = React.useRef<HTMLInputElement>(null);
 		const isPassword = type === "password";
 		const shouldShowGenerator =
@@ -91,8 +93,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 									type="button"
 									className="hover:text-foreground focus:outline-none"
 									onClick={handleGeneratePassword}
-									aria-label="Generate password"
-									title="Generate password"
+									aria-label={t("ui.input.generatePassword")}
+									title={t("ui.input.generatePassword")}
 									tabIndex={-1}
 								>
 									<RefreshCcw className="h-4 w-4" />

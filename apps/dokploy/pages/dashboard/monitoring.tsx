@@ -7,6 +7,7 @@ import { ContainerFreeMonitoring } from "@/components/dashboard/monitoring/free/
 import { ShowPaidMonitoring } from "@/components/dashboard/monitoring/paid/servers/show-paid-monitoring";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { Card } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { api } from "@/utils/api";
 
@@ -15,6 +16,7 @@ const BASE_URL = "http://localhost:3001/metrics";
 const DEFAULT_TOKEN = "metrics";
 
 const Dashboard = () => {
+	const { t } = useTranslation();
 	const [toggleMonitoring, _setToggleMonitoring] = useLocalStorage(
 		"monitoring-enabled",
 		false,
@@ -38,7 +40,7 @@ const Dashboard = () => {
 			{isPending ? (
 				<Card className="bg-sidebar  p-2.5 rounded-xl  mx-auto  items-center">
 					<div className="rounded-xl bg-background flex shadow-md px-4 min-h-[50vh] justify-center items-center text-muted-foreground">
-						Loading...
+						{t("loading")}
 						<Loader2 className="h-4 w-4 animate-spin" />
 					</div>
 				</Card>
