@@ -88,7 +88,7 @@ export const Enable2FA = () => {
 					return;
 				}
 
-				throw result.error;
+				throw new Error(t("profile.2fa.error.verify"));
 			}
 
 			if (!result.data) {
@@ -103,7 +103,7 @@ export const Enable2FA = () => {
 				const errorMessage =
 					error.message === "Failed to fetch"
 						? t("profile.2fa.error.connection")
-						: error.message;
+						: t("profile.2fa.error.verify");
 
 				toast.error(errorMessage);
 			} else {
@@ -159,7 +159,7 @@ export const Enable2FA = () => {
 			});
 
 			if (!enableData) {
-				throw new Error(error?.message || t("profile.2fa.error.enable"));
+				throw new Error(t("profile.2fa.error.enable"));
 			}
 
 			if (enableData.backupCodes) {
@@ -181,12 +181,9 @@ export const Enable2FA = () => {
 				throw new Error(t("profile.2fa.error.noTotp"));
 			}
 		} catch (error) {
-			toast.error(
-				error instanceof Error ? error.message : t("profile.2fa.error.setup"),
-			);
+			toast.error(t("profile.2fa.error.setup"));
 			passwordForm.setError("password", {
-				message:
-					error instanceof Error ? error.message : t("profile.2fa.error.setup"),
+				message: t("profile.2fa.error.setup"),
 			});
 		} finally {
 			setIsPasswordLoading(false);

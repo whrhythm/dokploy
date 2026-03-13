@@ -1868,6 +1868,8 @@
 	"profile.updateError": "更新个人资料时出错",
 	"profile.validation.emailInvalid": "请输入有效的邮箱地址",
 	"profile.validation.emailRequired": "邮箱不能为空",
+	"profile.validation.currentPasswordIncorrect": "当前密码不正确",
+	"profile.validation.newPasswordRequired": "新密码不能为空",
 	"profile.2fa.validation.passwordRequired": "密码至少 8 位",
 	"profile.2fa.validation.pinRequired": "验证码为 6 位数字",
 	"profile.2fa.error.invalidCode": "验证码无效",

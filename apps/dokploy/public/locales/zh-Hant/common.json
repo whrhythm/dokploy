@@ -45,6 +45,8 @@
 	"registry.validation.passwordRequired": "密碼不能為空",
 	"registry.validation.usernameRequired": "使用者名稱不能為空",
 	"registry.validation.urlInvalid": "Registry 位址無效。請輸入主機名稱（如 example.com 或 registry.example.com），不要包含協定（https://）或路徑。",
+	"profile.validation.currentPasswordIncorrect": "目前密碼不正確",
+	"profile.validation.newPasswordRequired": "新密碼不能為空",
 	"traefikEnv.title": "修改 Traefik 環境變數",
 	"traefikEnv.description": "更新 Traefik 環境變數設定",
 	"traefikEnv.envLabel": "環境變數",

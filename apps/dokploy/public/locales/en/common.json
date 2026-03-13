@@ -1555,6 +1555,8 @@
 	"profile.updateError": "Error updating profile",
 	"profile.validation.emailInvalid": "Enter a valid email address",
 	"profile.validation.emailRequired": "Email is required",
+	"profile.validation.currentPasswordIncorrect": "Current password is incorrect",
+	"profile.validation.newPasswordRequired": "New password is required",
 	"profile.2fa.validation.passwordRequired": "Password must be at least 8 characters",
 	"profile.2fa.validation.pinRequired": "Verification code must be 6 digits",
 	"profile.2fa.error.invalidCode": "Invalid verification code",
