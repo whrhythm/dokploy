@@ -9,10 +9,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { HandleDestinations } from "./handle-destinations";
 
 export const ShowDestinations = () => {
+	const { t } = useTranslation();
 	const { data, isPending, refetch } = api.destination.all.useQuery();
 	const { mutateAsync, isPending: isRemoving } =
 		api.destination.remove.useMutation();
@@ -23,17 +25,14 @@ export const ShowDestinations = () => {
 					<CardHeader className="">
 						<CardTitle className="text-xl flex flex-row gap-2">
 							<Database className="size-6 text-muted-foreground self-center" />
-							S3 Destinations
+							{t("s3Destinations.title")}
 						</CardTitle>
-						<CardDescription>
-							Add your providers like AWS S3, Cloudflare R2, Wasabi,
-							DigitalOcean Spaces etc.
-						</CardDescription>
+						<CardDescription>{t("s3Destinations.description")}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-2 py-8 border-t">
 						{isPending ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[25vh]">
-								<span>Loading...</span>
+								<span>{t("loading")}</span>
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
@@ -42,8 +41,7 @@ export const ShowDestinations = () => {
 									<div className="flex flex-col items-center gap-3  min-h-[25vh] justify-center">
 										<FolderUp className="size-8 self-center text-muted-foreground" />
 										<span className="text-base text-muted-foreground">
-											To create a backup it is required to set at least 1
-											provider.
+											{t("s3Destinations.emptyDescription")}
 										</span>
 										<HandleDestinations />
 									</div>
@@ -61,7 +59,7 @@ export const ShowDestinations = () => {
 																{index + 1}. {destination.name}
 															</span>
 															<span className="text-xs text-muted-foreground">
-																Created at:{" "}
+																{t("s3Destinations.createdAt")}{" "}
 																{new Date(
 																	destination.createdAt,
 																).toLocaleDateString()}
@@ -72,8 +70,10 @@ export const ShowDestinations = () => {
 																destinationId={destination.destinationId}
 															/>
 															<DialogAction
-																title="Delete Destination"
-																description="Are you sure you want to delete this destination?"
+																title={t("s3Destinations.Modal.delete.title")}
+																description={t(
+																	"s3Destinations.Modal.delete.description",
+																)}
 																type="destructive"
 																onClick={async () => {
 																	await mutateAsync({
@@ -81,12 +81,14 @@ export const ShowDestinations = () => {
 																	})
 																		.then(() => {
 																			toast.success(
-																				"Destination deleted successfully",
+																				t("s3Destinations.deleted"),
 																			);
 																			refetch();
 																		})
 																		.catch(() => {
-																			toast.error("Error deleting destination");
+																			toast.error(
+																				t("s3Destinations.deleteError"),
+																			);
 																		});
 																}}
 															>

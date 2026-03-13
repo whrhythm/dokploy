@@ -9,6 +9,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface Props {
 	title?: string | React.ReactNode;
@@ -27,6 +28,7 @@ export const DialogAction = ({
 	disabled,
 	type,
 }: Props) => {
+	const { t } = useTranslation();
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
@@ -40,13 +42,13 @@ export const DialogAction = ({
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogCancel>{t("button.cancel")}</AlertDialogCancel>
 					<AlertDialogAction
 						disabled={disabled}
 						onClick={onClick}
 						variant={type ?? "destructive"}
 					>
-						Confirm
+						{t("button.confirm")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

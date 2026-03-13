@@ -13,6 +13,7 @@ import {
 	ChartLegendContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/hooks/use-translation";
 import { formatTimestamp } from "@/lib/utils";
 
 interface ContainerMetric {
@@ -24,14 +25,15 @@ interface Props {
 	data: ContainerMetric[];
 }
 
-const chartConfig = {
-	cpu: {
-		label: "CPU",
-		color: "hsl(var(--chart-1))",
-	},
-} satisfies ChartConfig;
-
 export const ContainerCPUChart = ({ data }: Props) => {
+	const { t } = useTranslation();
+	const chartConfig = {
+		cpu: {
+			label: t("services.monitoring.chart.cpu"),
+			color: "hsl(var(--chart-1))",
+		},
+	} satisfies ChartConfig;
+
 	const formattedData = data.map((metric) => ({
 		timestamp: metric.timestamp,
 		cpu: metric.CPU,
@@ -45,8 +47,12 @@ export const ContainerCPUChart = ({ data }: Props) => {
 	return (
 		<Card className="bg-transparent">
 			<CardHeader className="border-b py-5">
-				<CardTitle>CPU</CardTitle>
-				<CardDescription>CPU Usage: {latestData.cpu}%</CardDescription>
+				<CardTitle>{t("services.monitoring.chart.cpu")}</CardTitle>
+				<CardDescription>
+					{t("services.monitoring.chart.cpuUsageValue", {
+						value: latestData.cpu,
+					})}
+				</CardDescription>
 			</CardHeader>
 			<CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
 				<ChartContainer
@@ -88,7 +94,7 @@ export const ContainerCPUChart = ({ data }: Props) => {
 											<div className="grid grid-cols-2 gap-2">
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Time
+														{t("services.monitoring.chart.time")}
 													</span>
 													<span className="font-bold">
 														{formatTimestamp(label)}
@@ -96,7 +102,7 @@ export const ContainerCPUChart = ({ data }: Props) => {
 												</div>
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														CPU
+														{t("services.monitoring.chart.cpu")}
 													</span>
 													<span className="font-bold">{data.cpu}%</span>
 												</div>
@@ -108,7 +114,7 @@ export const ContainerCPUChart = ({ data }: Props) => {
 							}}
 						/>
 						<Area
-							name="CPU"
+							name={t("services.monitoring.chart.cpu")}
 							dataKey="cpu"
 							type="monotone"
 							fill="url(#fillCPU)"

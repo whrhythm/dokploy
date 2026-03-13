@@ -41,27 +41,32 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { slugify } from "@/lib/slug";
 import { api } from "@/utils/api";
 
-const AddTemplateSchema = z.object({
-	name: z.string().min(1, {
-		message: "Name is required",
-	}),
-	appName: z
-		.string()
-		.min(1, {
-			message: "App name is required",
-		})
-		.regex(/^[a-z](?!.*--)([a-z0-9-]*[a-z])?$/, {
-			message:
-				"App name supports lowercase letters, numbers, '-' and can only start and end letters, and does not support continuous '-'",
+const createAddTemplateSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("environment.Modal.addApplication.validation.nameRequired"),
 		}),
-	description: z.string().optional(),
-	serverId: z.string().optional(),
-});
+		appName: z
+			.string()
+			.min(1, {
+				message: t(
+					"environment.Modal.addApplication.validation.appNameRequired",
+				),
+			})
+			.regex(/^[a-z](?!.*--)([a-z0-9-]*[a-z])?$/, {
+				message: t(
+					"environment.Modal.addApplication.validation.appNameInvalid",
+				),
+			}),
+		description: z.string().optional(),
+		serverId: z.string().optional(),
+	});
 
-type AddTemplate = z.infer<typeof AddTemplateSchema>;
+type AddTemplate = z.infer<ReturnType<typeof createAddTemplateSchema>>;
 
 interface Props {
 	environmentId: string;
@@ -69,6 +74,7 @@ interface Props {
 }
 
 export const AddApplication = ({ environmentId, projectName }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const { data: isCloud } = api.settings.isCloud.useQuery();
 	const [visible, setVisible] = useState(false);
@@ -90,7 +96,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 			appName: `${slug}-`,
 			description: "",
 		},
-		resolver: zodResolver(AddTemplateSchema),
+		resolver: zodResolver(createAddTemplateSchema(t)),
 	});
 
 	const onSubmit = async (data: AddTemplate) => {
@@ -102,7 +108,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 			environmentId,
 		})
 			.then(async () => {
-				toast.success("Service Created");
+				toast.success(t("environment.Modal.addApplication.toast.created"));
 				form.reset();
 				setVisible(false);
 				await utils.environment.one.invalidate({
@@ -110,7 +116,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 				});
 			})
 			.catch(() => {
-				toast.error("Error creating the service");
+				toast.error(t("environment.Modal.addApplication.toast.error"));
 			});
 	};
 
@@ -127,9 +133,11 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Create</DialogTitle>
+					<DialogTitle>
+						{t("environment.Modal.addApplication.title")}
+					</DialogTitle>
 					<DialogDescription>
-						Assign a name and description to your application
+						{t("environment.Modal.addApplication.description")}
 					</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
@@ -144,10 +152,14 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Name</FormLabel>
+									<FormLabel>
+										{t("environment.Modal.addApplication.form.name")}
+									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Frontend"
+											placeholder={t(
+												"environment.Modal.addApplication.form.namePlaceholder",
+											)}
 											{...field}
 											onChange={(e) => {
 												const val = e.target.value || "";
@@ -171,7 +183,10 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 											<Tooltip>
 												<TooltipTrigger asChild>
 													<FormLabel className="break-all w-fit flex flex-row gap-1 items-center">
-														Select a Server {!isCloud ? "(Optional)" : ""}
+														{t("environment.serverSelect.label")}
+														{!isCloud
+															? t("environment.serverSelect.optionalSuffix")
+															: ""}
 														<HelpCircle className="size-4 text-muted-foreground" />
 													</FormLabel>
 												</TooltipTrigger>
@@ -180,10 +195,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 													align="start"
 													side="top"
 												>
-													<span>
-														If no server is selected, the application will be
-														deployed on the server where the user is logged in.
-													</span>
+													<span>{t("environment.serverSelect.help")}</span>
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
@@ -196,7 +208,11 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 										>
 											<SelectTrigger>
 												<SelectValue
-													placeholder={!isCloud ? "Dokploy" : "Select a Server"}
+													placeholder={
+														!isCloud
+															? "Dokploy"
+															: t("environment.serverSelect.placeholder")
+													}
 												/>
 											</SelectTrigger>
 											<SelectContent>
@@ -206,7 +222,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 															<span className="flex items-center gap-2 justify-between w-full">
 																<span>Dokploy</span>
 																<span className="text-muted-foreground text-xs self-center">
-																	Default
+																	{t("environment.serverSelect.default")}
 																</span>
 															</span>
 														</SelectItem>
@@ -225,7 +241,9 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 														</SelectItem>
 													))}
 													<SelectLabel>
-														Servers ({servers?.length + (!isCloud ? 1 : 0)})
+														{t("environment.serverSelect.count", {
+															count: servers?.length + (!isCloud ? 1 : 0),
+														})}
 													</SelectLabel>
 												</SelectGroup>
 											</SelectContent>
@@ -241,7 +259,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="flex items-center gap-2">
-										App Name
+										{t("environment.Modal.addApplication.form.appName")}
 										<TooltipProvider delayDuration={0}>
 											<Tooltip>
 												<TooltipTrigger asChild>
@@ -249,14 +267,21 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 												</TooltipTrigger>
 												<TooltipContent side="right">
 													<p>
-														This will be the name of the Docker Swarm service
+														{t(
+															"environment.Modal.addApplication.form.appNameHelp",
+														)}
 													</p>
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
 									</FormLabel>
 									<FormControl>
-										<Input placeholder="my-app" {...field} />
+										<Input
+											placeholder={t(
+												"environment.Modal.addApplication.form.appNamePlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -267,10 +292,14 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description</FormLabel>
+									<FormLabel>
+										{t("environment.Modal.addApplication.form.description")}
+									</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Description of your service..."
+											placeholder={t(
+												"environment.Modal.addApplication.form.descriptionPlaceholder",
+											)}
 											className="resize-none"
 											{...field}
 										/>
@@ -284,7 +313,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 
 					<DialogFooter>
 						<Button isLoading={isPending} form="hook-form" type="submit">
-							Create
+							{t("button.create")}
 						</Button>
 					</DialogFooter>
 				</Form>

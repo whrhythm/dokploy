@@ -14,6 +14,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const driverOptEntrySchema = z.object({
@@ -39,6 +40,7 @@ interface NetworkFormProps {
 }
 
 export const NetworkForm = ({ id, type }: NetworkFormProps) => {
+	const { t } = useTranslation();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const queryMap = {
@@ -135,10 +137,10 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 				networkSwarm: networksToSend,
 			});
 
-			toast.success("Network configuration updated successfully");
+			toast.success(t("services.swarmSettings.forms.network.toast.updated"));
 			refetch();
 		} catch {
-			toast.error("Error updating network configuration");
+			toast.error(t("services.swarmSettings.forms.network.toast.updateError"));
 		} finally {
 			setIsLoading(false);
 		}
@@ -148,9 +150,11 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 				<div>
-					<FormLabel>Networks</FormLabel>
+					<FormLabel>
+						{t("services.swarmSettings.forms.network.title")}
+					</FormLabel>
 					<FormDescription>
-						Configure network attachments for your service
+						{t("services.swarmSettings.forms.network.description")}
 					</FormDescription>
 					<div className="space-y-2 mt-2">
 						{fields.map((field, index) => (
@@ -160,12 +164,21 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 									name={`networks.${index}.Target`}
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Network Name</FormLabel>
+											<FormLabel>
+												{t("services.swarmSettings.forms.network.nameLabel")}
+											</FormLabel>
 											<FormControl>
-												<Input {...field} placeholder="my-network" />
+												<Input
+													{...field}
+													placeholder={t(
+														"services.swarmSettings.forms.network.namePlaceholder",
+													)}
+												/>
 											</FormControl>
 											<FormDescription>
-												The name of the network to attach to
+												{t(
+													"services.swarmSettings.forms.network.nameDescription",
+												)}
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -176,25 +189,36 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 									name={`networks.${index}.Aliases`}
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Aliases (optional)</FormLabel>
+											<FormLabel>
+												{t("services.swarmSettings.forms.network.aliasesLabel")}
+											</FormLabel>
 											<FormControl>
 												<Input
 													{...field}
-													placeholder="alias1, alias2, alias3"
+													placeholder={t(
+														"services.swarmSettings.forms.network.aliasesPlaceholder",
+													)}
 												/>
 											</FormControl>
 											<FormDescription>
-												Comma-separated list of network aliases
+												{t(
+													"services.swarmSettings.forms.network.aliasesDescription",
+												)}
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
 									)}
 								/>
 								<div className="space-y-2">
-									<FormLabel>Driver options (optional)</FormLabel>
+									<FormLabel>
+										{t(
+											"services.swarmSettings.forms.network.driverOptionsLabel",
+										)}
+									</FormLabel>
 									<FormDescription>
-										e.g. com.docker.network.driver.mtu,
-										com.docker.network.driver.host_binding
+										{t(
+											"services.swarmSettings.forms.network.driverOptionsDescription",
+										)}
 									</FormDescription>
 									{(
 										form.watch(`networks.${index}.DriverOptsEntries`) ?? []
@@ -211,7 +235,9 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 														<FormControl>
 															<Input
 																{...field}
-																placeholder="com.docker.network.driver.mtu"
+																placeholder={t(
+																	"services.swarmSettings.forms.network.driverOptionKeyPlaceholder",
+																)}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -224,7 +250,12 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 												render={({ field }) => (
 													<FormItem className="flex-1 min-w-[100px]">
 														<FormControl>
-															<Input {...field} placeholder="1500" />
+															<Input
+																{...field}
+																placeholder={t(
+																	"services.swarmSettings.forms.network.driverOptionValuePlaceholder",
+																)}
+															/>
 														</FormControl>
 														<FormMessage />
 													</FormItem>
@@ -245,7 +276,7 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 													);
 												}}
 											>
-												Remove
+												{t("button.remove")}
 											</Button>
 										</div>
 									))}
@@ -263,7 +294,7 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 											]);
 										}}
 									>
-										Add driver option
+										{t("services.swarmSettings.forms.network.addDriverOption")}
 									</Button>
 								</div>
 								<Button
@@ -272,7 +303,7 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 									size="sm"
 									onClick={() => remove(index)}
 								>
-									Remove Network
+									{t("services.swarmSettings.forms.network.removeNetwork")}
 								</Button>
 							</div>
 						))}
@@ -288,7 +319,7 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 								})
 							}
 						>
-							Add Network
+							{t("services.swarmSettings.forms.network.addNetwork")}
 						</Button>
 					</div>
 				</div>
@@ -301,10 +332,10 @@ export const NetworkForm = ({ id, type }: NetworkFormProps) => {
 							form.reset({ networks: [] });
 						}}
 					>
-						Clear
+						{t("button.reset")}
 					</Button>
 					<Button type="submit" isLoading={isLoading}>
-						Save Networks
+						{t("services.swarmSettings.forms.network.save")}
 					</Button>
 				</div>
 			</form>

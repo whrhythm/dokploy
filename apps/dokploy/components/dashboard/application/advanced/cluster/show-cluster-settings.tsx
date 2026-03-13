@@ -32,6 +32,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { AddSwarmSettings } from "./modify-swarm-settings";
 
@@ -40,14 +41,16 @@ interface Props {
 	type: "postgres" | "mariadb" | "mongo" | "mysql" | "redis" | "application";
 }
 
-const AddRedirectchema = z.object({
-	replicas: z.number().min(1, "Replicas must be at least 1"),
-	registryId: z.string().optional(),
-});
+const createClusterSchema = (t: (key: string) => string) =>
+	z.object({
+		replicas: z.number().min(1, t("services.cluster.validation.replicas")),
+		registryId: z.string().optional(),
+	});
 
-type AddCommand = z.infer<typeof AddRedirectchema>;
+type AddCommand = z.infer<ReturnType<typeof createClusterSchema>>;
 
 export const ShowClusterSettings = ({ id, type }: Props) => {
+	const { t } = useTranslation();
 	const queryMap = {
 		postgres: () =>
 			api.postgres.one.useQuery({ postgresId: id }, { enabled: !!id }),
@@ -86,7 +89,7 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 				: {}),
 			replicas: data?.replicas || 1,
 		},
-		resolver: zodResolver(AddRedirectchema),
+		resolver: zodResolver(createClusterSchema(t)),
 	});
 
 	useEffect(() => {
@@ -121,11 +124,11 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 			replicas: data?.replicas,
 		})
 			.then(async () => {
-				toast.success("Command Updated");
+				toast.success(t("services.cluster.toast.updated"));
 				await refetch();
 			})
 			.catch(() => {
-				toast.error("Error updating the command");
+				toast.error(t("services.cluster.toast.updateError"));
 			});
 	};
 
@@ -133,17 +136,16 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row justify-between">
 				<div>
-					<CardTitle className="text-xl">Cluster Settings</CardTitle>
-					<CardDescription>
-						Modify swarm settings for the service.
-					</CardDescription>
+					<CardTitle className="text-xl">
+						{t("services.cluster.title")}
+					</CardTitle>
+					<CardDescription>{t("services.cluster.description")}</CardDescription>
 				</div>
 				<AddSwarmSettings id={id} type={type} />
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
 				<AlertBlock type="info">
-					Please remember to click Redeploy after modify the cluster settings to
-					apply the changes.
+					{t("services.cluster.redeployHint")}
 				</AlertBlock>
 				<Form {...form}>
 					<form
@@ -156,10 +158,10 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 								name="replicas"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Replicas</FormLabel>
+										<FormLabel>{t("services.cluster.replicas")}</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="1"
+												placeholder={t("services.cluster.replicasPlaceholder")}
 												{...field}
 												onChange={(e) => {
 													const value = e.target.value;
@@ -183,15 +185,14 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 										<div className="flex flex-col items-center gap-3">
 											<Server className="size-8 text-muted-foreground" />
 											<span className="text-base text-muted-foreground">
-												To use a cluster feature, you need to configure at least
-												a registry first. Please, go to{" "}
+												{t("services.cluster.registryEmptyPrefix")}{" "}
 												<Link
 													href="/dashboard/settings/cluster"
 													className="text-foreground"
 												>
-													Settings
+													{t("settings.cluster")}
 												</Link>{" "}
-												to do so.
+												{t("services.cluster.registryEmptySuffix")}
 											</span>
 										</div>
 									</div>
@@ -202,13 +203,19 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 											name="registryId"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Select a registry</FormLabel>
+													<FormLabel>
+														{t("services.cluster.selectRegistry")}
+													</FormLabel>
 													<Select
 														onValueChange={field.onChange}
 														defaultValue={field.value}
 													>
 														<SelectTrigger>
-															<SelectValue placeholder="Select a registry" />
+															<SelectValue
+																placeholder={t(
+																	"services.cluster.selectRegistryPlaceholder",
+																)}
+															/>
 														</SelectTrigger>
 														<SelectContent>
 															<SelectGroup>
@@ -220,9 +227,13 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 																		{registry.registryName}
 																	</SelectItem>
 																))}
-																<SelectItem value={"none"}>None</SelectItem>
+																<SelectItem value={"none"}>
+																	{t("services.cluster.none")}
+																</SelectItem>
 																<SelectLabel>
-																	Registries ({registries?.length})
+																	{t("services.cluster.registries", {
+																		count: registries?.length,
+																	})}
 																</SelectLabel>
 															</SelectGroup>
 														</SelectContent>
@@ -237,7 +248,7 @@ export const ShowClusterSettings = ({ id, type }: Props) => {
 
 						<div className="flex justify-end">
 							<Button isLoading={isPending} type="submit" className="w-fit">
-								Save
+								{t("button.save")}
 							</Button>
 						</div>
 					</form>

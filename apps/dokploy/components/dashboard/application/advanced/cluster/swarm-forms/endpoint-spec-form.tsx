@@ -20,6 +20,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 export const endpointSpecFormSchema = z.object({
@@ -32,6 +33,7 @@ interface EndpointSpecFormProps {
 }
 
 export const EndpointSpecForm = ({ id, type }: EndpointSpecFormProps) => {
+	const { t } = useTranslation();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const queryMap = {
@@ -97,10 +99,14 @@ export const EndpointSpecForm = ({ id, type }: EndpointSpecFormProps) => {
 				endpointSpecSwarm: hasAnyValue ? formData : null,
 			});
 
-			toast.success("Endpoint spec updated successfully");
+			toast.success(
+				t("services.swarmSettings.forms.endpointSpec.toast.updated"),
+			);
 			refetch();
 		} catch {
-			toast.error("Error updating endpoint spec");
+			toast.error(
+				t("services.swarmSettings.forms.endpointSpec.toast.updateError"),
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -114,17 +120,29 @@ export const EndpointSpecForm = ({ id, type }: EndpointSpecFormProps) => {
 					name="Mode"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Mode</FormLabel>
-							<FormDescription>Endpoint mode (vip or dnsrr)</FormDescription>
+							<FormLabel>
+								{t("services.swarmSettings.forms.endpointSpec.modeLabel")}
+							</FormLabel>
+							<FormDescription>
+								{t("services.swarmSettings.forms.endpointSpec.modeDescription")}
+							</FormDescription>
 							<Select onValueChange={field.onChange} value={field.value}>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Select endpoint mode" />
+										<SelectValue
+											placeholder={t(
+												"services.swarmSettings.forms.endpointSpec.modePlaceholder",
+											)}
+										/>
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									<SelectItem value="vip">VIP (Virtual IP)</SelectItem>
-									<SelectItem value="dnsrr">DNS Round Robin</SelectItem>
+									<SelectItem value="vip">
+										{t("services.swarmSettings.forms.endpointSpec.mode.vip")}
+									</SelectItem>
+									<SelectItem value="dnsrr">
+										{t("services.swarmSettings.forms.endpointSpec.mode.dnsrr")}
+									</SelectItem>
 								</SelectContent>
 							</Select>
 							<FormMessage />
@@ -142,10 +160,10 @@ export const EndpointSpecForm = ({ id, type }: EndpointSpecFormProps) => {
 							});
 						}}
 					>
-						Clear
+						{t("button.reset")}
 					</Button>
 					<Button type="submit" isLoading={isLoading}>
-						Save Endpoint Spec
+						{t("services.swarmSettings.forms.endpointSpec.save")}
 					</Button>
 				</div>
 			</form>

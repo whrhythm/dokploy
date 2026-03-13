@@ -30,6 +30,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -40,6 +41,7 @@ export function DataTable<TData, TValue>({
 	columns,
 	data,
 }: DataTableProps<TData, TValue>) {
+	const { t } = useTranslation();
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		[],
@@ -76,7 +78,7 @@ export function DataTable<TData, TValue>({
 			<div className="flex flex-col gap-4  </div>w-full overflow-auto">
 				<div className="flex items-center gap-2 max-sm:flex-wrap">
 					<Input
-						placeholder="Filter by name..."
+						placeholder={t("swarm.table.filterByName")}
 						value={(table.getColumn("Name")?.getFilterValue() as string) ?? ""}
 						onChange={(event) =>
 							table.getColumn("Name")?.setFilterValue(event.target.value)
@@ -86,7 +88,8 @@ export function DataTable<TData, TValue>({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="outline" className="sm:ml-auto max-sm:w-full">
-								Columns <ChevronDown className="ml-2 h-4 w-4" />
+								{t("swarm.table.columns")}{" "}
+								<ChevronDown className="ml-2 h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
@@ -152,7 +155,7 @@ export function DataTable<TData, TValue>({
 									colSpan={columns.length}
 									className="h-24 text-center"
 								>
-									No results.
+									{t("swarm.table.noResults")}
 									{/* {isPending ? (
                     <div className="w-full flex-col gap-2 flex items-center justify-center h-[55vh]">
                       <span className="text-muted-foreground text-lg font-medium">
@@ -177,7 +180,7 @@ export function DataTable<TData, TValue>({
 								onClick={() => table.previousPage()}
 								disabled={!table.getCanPreviousPage()}
 							>
-								Previous
+								{t("swarm.table.previous")}
 							</Button>
 							<Button
 								variant="outline"
@@ -185,7 +188,7 @@ export function DataTable<TData, TValue>({
 								onClick={() => table.nextPage()}
 								disabled={!table.getCanNextPage()}
 							>
-								Next
+								{t("swarm.table.next")}
 							</Button>
 						</div>
 					</div>

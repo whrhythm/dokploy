@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface Props {
 	folderPath: string;
@@ -28,6 +29,7 @@ export const CreateFileDialog = ({
 	onOpenChange,
 	alwaysVisible = false,
 }: Props) => {
+	const { t } = useTranslation();
 	const [filename, setFilename] = useState("");
 	const [content, setContent] = useState("");
 
@@ -47,7 +49,7 @@ export const CreateFileDialog = ({
 					size="icon"
 					type="button"
 					className={`h-6 w-6 ${alwaysVisible ? "" : "opacity-0 group-hover:opacity-100"}`}
-					title="Create file"
+					title={t("services.patches.createFile.title")}
 				>
 					<FilePlus className="h-3 w-3" />
 				</Button>
@@ -60,23 +62,31 @@ export const CreateFileDialog = ({
 					}}
 				>
 					<DialogHeader>
-						<DialogTitle>Create file</DialogTitle>
+						<DialogTitle>{t("services.patches.createFile.title")}</DialogTitle>
 						<DialogDescription>
-							{folderPath ? `New file in ${folderPath}/` : "New file in root"}
+							{folderPath
+								? t("services.patches.createFile.newFileInFolder", {
+										value: `${folderPath}/`,
+									})
+								: t("services.patches.createFile.newFileInRoot")}
 						</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4 py-4">
 						<div className="space-y-2">
-							<Label htmlFor="filename">Filename</Label>
+							<Label htmlFor="filename">
+								{t("services.patches.createFile.filename")}
+							</Label>
 							<Input
 								id="filename"
-								placeholder="e.g. .env.example"
+								placeholder={t(
+									"services.patches.createFile.filenamePlaceholder",
+								)}
 								value={filename}
 								onChange={(e) => setFilename(e.target.value)}
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label>Content</Label>
+							<Label>{t("services.patches.createFile.content")}</Label>
 							<div className="h-[200px] rounded-md border">
 								<CodeEditor
 									value={content}
@@ -91,12 +101,12 @@ export const CreateFileDialog = ({
 					<DialogFooter>
 						<DialogClose asChild>
 							<Button variant="outline" type="button">
-								Cancel
+								{t("button.cancel")}
 							</Button>
 						</DialogClose>
 						<DialogClose asChild>
 							<Button type="submit" disabled={!filename.trim()}>
-								Create
+								{t("button.create")}
 							</Button>
 						</DialogClose>
 					</DialogFooter>

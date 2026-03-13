@@ -1,8 +1,19 @@
-import { Head, Html, Main, NextScript } from "next/document";
+import NextDocument, {
+	type DocumentContext,
+	type DocumentInitialProps,
+	Head,
+	Html,
+	Main,
+	NextScript,
+} from "next/document";
 
-export default function Document() {
+type DokployDocumentProps = DocumentInitialProps & {
+	locale?: string;
+};
+
+export default function Document({ locale }: DokployDocumentProps) {
 	return (
-		<Html lang="en" className="font-sans">
+		<Html lang={locale ?? "zh-Hans"} className="font-sans">
 			<Head>
 				<link rel="icon" href="/icon.svg" />
 			</Head>
@@ -13,3 +24,14 @@ export default function Document() {
 		</Html>
 	);
 }
+
+Document.getInitialProps = async (
+	ctx: DocumentContext,
+): Promise<DokployDocumentProps> => {
+	const initialProps = await NextDocument.getInitialProps(ctx);
+
+	return {
+		...initialProps,
+		locale: ctx.locale,
+	};
+};

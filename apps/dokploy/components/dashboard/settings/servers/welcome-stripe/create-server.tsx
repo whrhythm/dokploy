@@ -27,30 +27,33 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const Schema = z.object({
-	name: z.string().min(1, {
-		message: "Name is required",
-	}),
-	description: z.string().optional(),
-	ipAddress: z.string().min(1, {
-		message: "IP Address is required",
-	}),
-	port: z.number().optional(),
-	username: z.string().optional(),
-	sshKeyId: z.string().min(1, {
-		message: "SSH Key is required",
-	}),
-});
+const createServerSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("servers.form.validation.nameRequired"),
+		}),
+		description: z.string().optional(),
+		ipAddress: z.string().min(1, {
+			message: t("servers.form.validation.ipRequired"),
+		}),
+		port: z.number().optional(),
+		username: z.string().optional(),
+		sshKeyId: z.string().min(1, {
+			message: t("servers.form.validation.sshKeyRequired"),
+		}),
+	});
 
-type Schema = z.infer<typeof Schema>;
+type Schema = z.infer<ReturnType<typeof createServerSchema>>;
 
 interface Props {
 	stepper: any;
 }
 
 export const CreateServer = ({ stepper }: Props) => {
+	const { t } = useTranslation();
 	const { data: sshKeys } = api.sshKey.all.useQuery();
 	const [isOpen, _setIsOpen] = useState(false);
 	const { data: canCreateMoreServers, refetch } =
@@ -62,26 +65,26 @@ export const CreateServer = ({ stepper }: Props) => {
 
 	const form = useForm<Schema>({
 		defaultValues: {
-			description: "Dokploy Cloud Server",
-			name: "My First Server",
+			description: t("welcomeStripe.createServer.defaultDescription"),
+			name: t("welcomeStripe.createServer.defaultName"),
 			ipAddress: "",
 			port: 22,
 			username: "root",
 			sshKeyId: cloudSSHKey?.sshKeyId || "",
 		},
-		resolver: zodResolver(Schema),
+		resolver: zodResolver(createServerSchema(t)),
 	});
 
 	useEffect(() => {
 		form.reset({
-			description: "Dokploy Cloud Server",
-			name: "My First Server",
+			description: t("welcomeStripe.createServer.defaultDescription"),
+			name: t("welcomeStripe.createServer.defaultName"),
 			ipAddress: "",
 			port: 22,
 			username: "root",
 			sshKeyId: cloudSSHKey?.sshKeyId || "",
 		});
-	}, [form, form.reset, form.formState.isSubmitSuccessful, sshKeys]);
+	}, [form, form.reset, form.formState.isSubmitSuccessful, sshKeys, t]);
 
 	useEffect(() => {
 		refetch();
@@ -98,11 +101,11 @@ export const CreateServer = ({ stepper }: Props) => {
 			serverType: "deploy",
 		})
 			.then(async (_data) => {
-				toast.success("Server Created");
+				toast.success(t("servers.form.successCreate"));
 				stepper.next();
 			})
 			.catch(() => {
-				toast.error("Error creating a server");
+				toast.error(t("servers.form.errorCreate"));
 			});
 	};
 	return (
@@ -110,9 +113,9 @@ export const CreateServer = ({ stepper }: Props) => {
 			<div className="flex flex-col gap-2 pt-5 px-4">
 				{!canCreateMoreServers && (
 					<AlertBlock type="warning" className="mt-2">
-						You cannot create more servers,{" "}
+						{t("servers.form.upgradeRequired")}{" "}
 						<Link href="/dashboard/settings/billing" className="text-primary">
-							Please upgrade your plan
+							{t("servers.form.upgradeAction")}
 						</Link>
 					</AlertBlock>
 				)}
@@ -131,9 +134,12 @@ export const CreateServer = ({ stepper }: Props) => {
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>{t("servers.form.nameLabel")}</FormLabel>
 										<FormControl>
-											<Input placeholder="Hostinger Server" {...field} />
+											<Input
+												placeholder={t("servers.form.namePlaceholder")}
+												{...field}
+											/>
 										</FormControl>
 
 										<FormMessage />
@@ -146,10 +152,10 @@ export const CreateServer = ({ stepper }: Props) => {
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description</FormLabel>
+									<FormLabel>{t("servers.form.descriptionLabel")}</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="This server is for databases..."
+											placeholder={t("servers.form.descriptionPlaceholder")}
 											className="resize-none"
 											{...field}
 										/>
@@ -164,16 +170,15 @@ export const CreateServer = ({ stepper }: Props) => {
 							name="sshKeyId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Select a SSH Key</FormLabel>
+									<FormLabel>{t("servers.form.sshKeyLabel")}</FormLabel>
 									{!cloudSSHKey && (
 										<AlertBlock>
-											Looks like you didn't have the SSH Key yet, you can create
-											one{" "}
+											{t("welcomeStripe.createServer.missingSshKey")}{" "}
 											<Link
 												href="/dashboard/settings/ssh-keys"
 												className="text-primary"
 											>
-												here
+												{t("welcomeStripe.createServer.missingSshKeyLink")}
 											</Link>
 										</AlertBlock>
 									)}
@@ -183,7 +188,9 @@ export const CreateServer = ({ stepper }: Props) => {
 										defaultValue={field.value}
 									>
 										<SelectTrigger>
-											<SelectValue placeholder="Select a SSH Key" />
+											<SelectValue
+												placeholder={t("servers.form.sshKeyPlaceholder")}
+											/>
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
@@ -196,7 +203,9 @@ export const CreateServer = ({ stepper }: Props) => {
 													</SelectItem>
 												))}
 												<SelectLabel>
-													Registries ({sshKeys?.length})
+													{t("welcomeStripe.createServer.sshKeysLabel", {
+														count: sshKeys?.length ?? 0,
+													})}
 												</SelectLabel>
 											</SelectGroup>
 										</SelectContent>
@@ -211,9 +220,14 @@ export const CreateServer = ({ stepper }: Props) => {
 								name="ipAddress"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>IP Address</FormLabel>
+										<FormLabel>{t("servers.form.ipAddressLabel")}</FormLabel>
 										<FormControl>
-											<Input placeholder="192.168.1.100" {...field} />
+											<Input
+												placeholder={t(
+													"welcomeStripe.createServer.ipPlaceholder",
+												)}
+												{...field}
+											/>
 										</FormControl>
 
 										<FormMessage />
@@ -225,10 +239,10 @@ export const CreateServer = ({ stepper }: Props) => {
 								name="port"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Port</FormLabel>
+										<FormLabel>{t("servers.form.portLabel")}</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="22"
+												placeholder={t("servers.form.portDefault")}
 												{...field}
 												onChange={(e) => {
 													const value = e.target.value;
@@ -255,9 +269,12 @@ export const CreateServer = ({ stepper }: Props) => {
 							name="username"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Username</FormLabel>
+									<FormLabel>{t("servers.form.usernameLabel")}</FormLabel>
 									<FormControl>
-										<Input placeholder="root" {...field} />
+										<Input
+											placeholder={t("servers.form.usernameDefault")}
+											{...field}
+										/>
 									</FormControl>
 
 									<FormMessage />
@@ -273,7 +290,7 @@ export const CreateServer = ({ stepper }: Props) => {
 							form="hook-form-add-server"
 							type="submit"
 						>
-							Create
+							{t("welcomeStripe.createServer.submit")}
 						</Button>
 					</DialogFooter>
 				</Form>

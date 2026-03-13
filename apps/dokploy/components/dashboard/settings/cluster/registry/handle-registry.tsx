@@ -1,6 +1,6 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { AlertTriangle, PenBoxIcon, PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -36,48 +36,48 @@ import {
 import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
-const AddRegistrySchema = z.object({
-	registryName: z.string().min(1, {
-		message: "镜像仓库名称不能为空",
-	}),
-	username: z.string().min(1, {
-		message: "用户名不能为空",
-	}),
-	password: z.string(),
-	registryUrl: z
-		.string()
-		.optional()
-		.refine(
-			(val) => {
-				// If empty or undefined, skip validation (field is optional)
-				if (!val || val.trim().length === 0) {
-					return true;
-				}
-				// Validate that it's a valid hostname (no protocol, no path, optional port)
-				// Valid formats: example.com, registry.example.com, [::1], example.com:5000
-				// Invalid: https://example.com, example.com/path
-				const trimmed = val.trim();
-				// Check for protocol or path - these are not allowed
-				if (/^https?:\/\//i.test(trimmed) || trimmed.includes("/")) {
-					return false;
-				}
-				// Basic hostname validation: allow alphanumeric, dots, hyphens, underscores, and IPv6 in brackets
-				// Allow optional port at the end
-				const hostnameRegex =
-					/^(?:\[[^\]]+\]|[a-zA-Z0-9](?:[a-zA-Z0-9._-]{0,253}[a-zA-Z0-9])?)(?::\d+)?$/;
-				return hostnameRegex.test(trimmed);
-			},
-			{
-				message:
-					"镜像仓库地址无效。请输入主机名（如 example.com 或 registry.example.com），不要包含协议（https://）或路径。",
-			},
-		),
-	imagePrefix: z.string(),
-	serverId: z.string().optional(),
-	isEditing: z.boolean().optional(),
-});
+const createRegistrySchema = (t: (key: string) => string) =>
+	z.object({
+		registryName: z.string().min(1, {
+			message: t("registry.validation.nameRequired"),
+		}),
+		username: z.string().min(1, {
+			message: t("registry.validation.usernameRequired"),
+		}),
+		password: z.string(),
+		registryUrl: z
+			.string()
+			.optional()
+			.refine(
+				(val) => {
+					// If empty or undefined, skip validation (field is optional)
+					if (!val || val.trim().length === 0) {
+						return true;
+					}
+					// Validate that it's a valid hostname (no protocol, no path, optional port)
+					// Valid formats: example.com, registry.example.com, [::1], example.com:5000
+					// Invalid: https://example.com, example.com/path
+					const trimmed = val.trim();
+					// Check for protocol or path - these are not allowed
+					if (/^https?:\/\//i.test(trimmed) || trimmed.includes("/")) {
+						return false;
+					}
+					// Basic hostname validation: allow alphanumeric, dots, hyphens, underscores, and IPv6 in brackets
+					// Allow optional port at the end
+					const hostnameRegex =
+						/^(?:\[[^\]]+\]|[a-zA-Z0-9](?:[a-zA-Z0-9._-]{0,253}[a-zA-Z0-9])?)(?::\d+)?$/;
+					return hostnameRegex.test(trimmed);
+				},
+				{
+					message: t("registry.validation.urlInvalid"),
+				},
+			),
+		imagePrefix: z.string(),
+		serverId: z.string().optional(),
+		isEditing: z.boolean().optional(),
+	});
 
-type AddRegistry = z.infer<typeof AddRegistrySchema>;
+type AddRegistry = z.infer<ReturnType<typeof createRegistrySchema>>;
 
 interface Props {
 	registryId?: string;
@@ -117,6 +117,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 		error: testRegistryByIdError,
 		isError: testRegistryByIdIsError,
 	} = api.registry.testRegistryById.useMutation();
+	const registrySchema = useMemo(() => createRegistrySchema(t), [t]);
 	const form = useForm<AddRegistry>({
 		defaultValues: {
 			username: "",
@@ -128,7 +129,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 			isEditing: !!registryId,
 		},
 		resolver: zodResolver(
-			AddRegistrySchema.refine(
+			registrySchema.refine(
 				(data) => {
 					// When creating a new registry, password is required
 					if (
@@ -140,7 +141,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 					return true;
 				},
 				{
-					message: "密码不能为空",
+					message: t("registry.validation.passwordRequired"),
 					path: ["password"],
 				},
 			),
@@ -495,7 +496,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 										}
 
 										// When creating or editing with new password, validate and test with provided credentials
-										const validationResult = AddRegistrySchema.safeParse({
+										const validationResult = registrySchema.safeParse({
 											username,
 											password,
 											registryUrl,

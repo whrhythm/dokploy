@@ -141,10 +141,7 @@ export const ProjectEnvironment = ({ projectId, children }: Props) => {
 													lineWrapping
 													language="properties"
 													wrapperClassName="h-[35rem] font-mono"
-													placeholder={`NODE_ENV=production
-PORT=3000
-                                                            
-                                                    `}
+													placeholder={t("project.envEditorPlaceholder")}
 													{...field}
 												/>
 											</FormControl>

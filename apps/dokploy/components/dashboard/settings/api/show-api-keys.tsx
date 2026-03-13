@@ -12,10 +12,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { AddApiKey } from "./add-api-key";
 
 export const ShowApiKeys = () => {
+	const { t } = useTranslation();
 	const { data, refetch } = api.user.get.useQuery();
 	const { mutateAsync: deleteApiKey, isPending: isLoadingDelete } =
 		api.user.deleteApiKey.useMutation();
@@ -28,22 +30,22 @@ export const ShowApiKeys = () => {
 						<div>
 							<CardTitle className="text-xl flex items-center gap-2">
 								<KeyIcon className="size-5" />
-								API/CLI Keys
+								{t("apiKeys.title")}
 							</CardTitle>
-							<CardDescription>
-								Generate and manage API keys to access the API/CLI
-							</CardDescription>
+							<CardDescription>{t("apiKeys.description")}</CardDescription>
 						</div>
 						<div className="flex flex-row gap-2 max-sm:flex-wrap items-end">
 							<span className="text-sm font-medium text-muted-foreground">
-								Swagger API:
+								{t("apiKeys.swagger.label")}
 							</span>
 							<Link
 								href="/swagger"
 								target="_blank"
 								className="flex flex-row gap-2 items-center"
 							>
-								<span className="text-sm font-medium">View</span>
+								<span className="text-sm font-medium">
+									{t("apiKeys.swagger.view")}
+								</span>
 								<ExternalLinkIcon className="size-4" />
 							</Link>
 						</div>
@@ -62,9 +64,11 @@ export const ShowApiKeys = () => {
 												<div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
 													<span className="flex items-center gap-1">
 														<Clock className="size-3.5" />
-														Created{" "}
-														{formatDistanceToNow(new Date(apiKey.createdAt))}{" "}
-														ago
+														{t("apiKeys.createdAgo", {
+															value: formatDistanceToNow(
+																new Date(apiKey.createdAt),
+															),
+														})}
 													</span>
 													{apiKey.prefix && (
 														<Badge
@@ -81,17 +85,18 @@ export const ShowApiKeys = () => {
 															className="flex items-center gap-1"
 														>
 															<Clock className="size-3.5" />
-															Expires in{" "}
-															{formatDistanceToNow(
-																new Date(apiKey.expiresAt),
-															)}{" "}
+															{t("apiKeys.expiresIn", {
+																value: formatDistanceToNow(
+																	new Date(apiKey.expiresAt),
+																),
+															})}
 														</Badge>
 													)}
 												</div>
 											</div>
 											<DialogAction
-												title="Delete API Key"
-												description="Are you sure you want to delete this API key? This action cannot be undone."
+												title={t("apiKeys.Modal.delete.title")}
+												description={t("apiKeys.Modal.delete.description")}
 												type="destructive"
 												onClick={async () => {
 													try {
@@ -99,12 +104,12 @@ export const ShowApiKeys = () => {
 															apiKeyId: apiKey.id,
 														});
 														await refetch();
-														toast.success("API key deleted successfully");
+														toast.success(t("apiKeys.toast.deleteSuccess"));
 													} catch (error) {
 														toast.error(
 															error instanceof Error
 																? error.message
-																: "Error deleting API key",
+																: t("apiKeys.toast.deleteError"),
 														);
 													}
 												}}
@@ -124,7 +129,7 @@ export const ShowApiKeys = () => {
 								<div className="flex flex-col items-center gap-3 py-6">
 									<KeyIcon className="size-8 text-muted-foreground" />
 									<span className="text-base text-muted-foreground">
-										No API keys found
+										{t("apiKeys.empty")}
 									</span>
 								</div>
 							)}

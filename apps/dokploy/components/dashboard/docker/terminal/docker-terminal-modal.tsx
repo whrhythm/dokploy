@@ -11,6 +11,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/hooks/use-translation";
 
 const Terminal = dynamic(
 	() => import("./docker-terminal").then((e) => e.DockerTerminal),
@@ -30,6 +31,7 @@ export const DockerTerminalModal = ({
 	containerId,
 	serverId,
 }: Props) => {
+	const { t } = useTranslation();
 	const [mainDialogOpen, setMainDialogOpen] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
@@ -64,9 +66,9 @@ export const DockerTerminalModal = ({
 				onEscapeKeyDown={(event) => event.preventDefault()}
 			>
 				<DialogHeader>
-					<DialogTitle>Docker Terminal</DialogTitle>
+					<DialogTitle>{t("docker.Modal.terminal.title")}</DialogTitle>
 					<DialogDescription>
-						Easy way to access to docker container
+						{t("docker.Modal.terminal.description")}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -78,18 +80,16 @@ export const DockerTerminalModal = ({
 				<Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
 					<DialogContent onEscapeKeyDown={(event) => event.preventDefault()}>
 						<DialogHeader>
-							<DialogTitle>
-								Are you sure you want to close the terminal?
-							</DialogTitle>
+							<DialogTitle>{t("docker.Modal.terminalExit.title")}</DialogTitle>
 							<DialogDescription>
-								By clicking the confirm button, the terminal will be closed.
+								{t("docker.Modal.terminalExit.description")}
 							</DialogDescription>
 						</DialogHeader>
 						<DialogFooter>
 							<Button variant="outline" onClick={handleCancel}>
-								Cancel
+								{t("button.cancel")}
 							</Button>
-							<Button onClick={handleConfirm}>Confirm</Button>
+							<Button onClick={handleConfirm}>{t("button.confirm")}</Button>
 						</DialogFooter>
 					</DialogContent>
 				</Dialog>

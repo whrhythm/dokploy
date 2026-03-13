@@ -40,83 +40,82 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 export type CacheType = "fetch" | "cache";
 
-export const domain = z
-	.object({
-		host: z
-			.string()
-			.min(1, { message: "Add a hostname" })
-			.refine((val) => val === val.trim(), {
-				message: "Domain name cannot have leading or trailing spaces",
-			})
-			.transform((val) => val.trim()),
-		path: z.string().min(1).optional(),
-		internalPath: z.string().optional(),
-		stripPath: z.boolean().optional(),
-		port: z
-			.number()
-			.min(1, { message: "Port must be at least 1" })
-			.max(65535, { message: "Port must be 65535 or below" })
-			.optional(),
-		https: z.boolean().optional(),
-		certificateType: z.enum(["letsencrypt", "none", "custom"]).optional(),
-		customCertResolver: z.string().optional(),
-		serviceName: z.string().optional(),
-		domainType: z.enum(["application", "compose", "preview"]).optional(),
-	})
-	.superRefine((input, ctx) => {
-		if (input.https && !input.certificateType) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["certificateType"],
-				message: "Required",
-			});
-		}
+const createDomainSchema = (t: (key: string) => string) =>
+	z
+		.object({
+			host: z
+				.string()
+				.min(1, { message: t("services.domains.validation.hostRequired") })
+				.refine((val) => val === val.trim(), {
+					message: t("services.domains.validation.hostNoSurroundingSpaces"),
+				})
+				.transform((val) => val.trim()),
+			path: z.string().min(1).optional(),
+			internalPath: z.string().optional(),
+			stripPath: z.boolean().optional(),
+			port: z
+				.number()
+				.min(1, { message: t("services.domains.validation.portMin") })
+				.max(65535, { message: t("services.domains.validation.portMax") })
+				.optional(),
+			https: z.boolean().optional(),
+			certificateType: z.enum(["letsencrypt", "none", "custom"]).optional(),
+			customCertResolver: z.string().optional(),
+			serviceName: z.string().optional(),
+			domainType: z.enum(["application", "compose", "preview"]).optional(),
+		})
+		.superRefine((input, ctx) => {
+			if (input.https && !input.certificateType) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["certificateType"],
+					message: t("services.domains.validation.required"),
+				});
+			}
 
-		if (input.certificateType === "custom" && !input.customCertResolver) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["customCertResolver"],
-				message: "Required",
-			});
-		}
+			if (input.certificateType === "custom" && !input.customCertResolver) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["customCertResolver"],
+					message: t("services.domains.validation.required"),
+				});
+			}
 
-		if (input.domainType === "compose" && !input.serviceName) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["serviceName"],
-				message: "Required",
-			});
-		}
+			if (input.domainType === "compose" && !input.serviceName) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["serviceName"],
+					message: t("services.domains.validation.required"),
+				});
+			}
 
-		// Validate stripPath requires a valid path
-		if (input.stripPath && (!input.path || input.path === "/")) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["stripPath"],
-				message:
-					"Strip path can only be enabled when a path other than '/' is specified",
-			});
-		}
+			if (input.stripPath && (!input.path || input.path === "/")) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["stripPath"],
+					message: t("services.domains.validation.stripPathRequiresPath"),
+				});
+			}
 
-		// Validate internalPath starts with /
-		if (
-			input.internalPath &&
-			input.internalPath !== "/" &&
-			!input.internalPath.startsWith("/")
-		) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["internalPath"],
-				message: "Internal path must start with '/'",
-			});
-		}
-	});
+			if (
+				input.internalPath &&
+				input.internalPath !== "/" &&
+				!input.internalPath.startsWith("/")
+			) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ["internalPath"],
+					message: t("services.domains.validation.internalPathStartSlash"),
+				});
+			}
+		});
 
-type Domain = z.infer<typeof domain>;
+type Domain = z.infer<ReturnType<typeof createDomainSchema>>;
 
 interface Props {
 	id: string;
@@ -126,6 +125,8 @@ interface Props {
 }
 
 export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
+	const { t } = useTranslation();
+	const domainSchema = createDomainSchema(t);
 	const [isOpen, setIsOpen] = useState(false);
 	const [cacheType, setCacheType] = useState<CacheType>("cache");
 	const [isManualInput, setIsManualInput] = useState(false);
@@ -189,7 +190,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 	);
 
 	const form = useForm<Domain>({
-		resolver: zodResolver(domain),
+		resolver: zodResolver(domainSchema),
 		defaultValues: {
 			host: "",
 			path: undefined,
@@ -250,12 +251,16 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 	}, [certificateType, form]);
 
 	const dictionary = {
-		success: domainId ? "Domain Updated" : "Domain Created",
-		error: domainId ? "Error updating the domain" : "Error creating the domain",
-		submit: domainId ? "Update" : "Create",
+		success: domainId
+			? t("services.domains.toast.updated")
+			: t("services.domains.toast.created"),
+		error: domainId
+			? t("services.domains.toast.updateError")
+			: t("services.domains.toast.createError"),
+		submit: domainId ? t("button.update") : t("button.create"),
 		dialogDescription: domainId
-			? "In this section you can edit a domain"
-			: "In this section you can add domains",
+			? t("services.domains.modal.editDescription")
+			: t("services.domains.modal.addDescription"),
 	};
 
 	const onSubmit = async (data: Domain) => {
@@ -302,15 +307,14 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Domain</DialogTitle>
+					<DialogTitle>{t("form.domain")}</DialogTitle>
 					<DialogDescription>{dictionary.dialogDescription}</DialogDescription>
 				</DialogHeader>
 				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
 
 				{type === "compose" && (
 					<AlertBlock type="info" className="mb-4">
-						Whenever you make changes to domains, remember to redeploy your
-						compose to apply the changes.
+						{t("services.domains.composeRedeployHint")}
 					</AlertBlock>
 				)}
 
@@ -338,12 +342,16 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 												name="serviceName"
 												render={({ field }) => (
 													<FormItem className="w-full">
-														<FormLabel>Service Name</FormLabel>
+														<FormLabel>
+															{t("services.domains.serviceName")}
+														</FormLabel>
 														<div className="flex gap-2">
 															{isManualInput ? (
 																<FormControl>
 																	<Input
-																		placeholder="Enter service name manually"
+																		placeholder={t(
+																			"services.domains.serviceNameManualPlaceholder",
+																		)}
 																		{...field}
 																		className="w-full"
 																	/>
@@ -355,7 +363,11 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																>
 																	<FormControl>
 																		<SelectTrigger>
-																			<SelectValue placeholder="Select a service name" />
+																			<SelectValue
+																				placeholder={t(
+																					"services.domains.serviceNamePlaceholder",
+																				)}
+																			/>
 																		</SelectTrigger>
 																	</FormControl>
 
@@ -369,7 +381,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																			</SelectItem>
 																		))}
 																		<SelectItem value="none" disabled>
-																			Empty
+																			{t("select.none")}
 																		</SelectItem>
 																	</SelectContent>
 																</Select>
@@ -400,8 +412,9 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																				className="max-w-[10rem]"
 																			>
 																				<p>
-																					Fetch: Will clone the repository and
-																					load the services
+																					{t(
+																						"services.domains.serviceLoad.fetchHelp",
+																					)}
 																				</p>
 																			</TooltipContent>
 																		</Tooltip>
@@ -430,10 +443,9 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																				className="max-w-[10rem]"
 																			>
 																				<p>
-																					Cache: If you previously deployed this
-																					compose, it will read the services
-																					from the last deployment/fetch from
-																					the repository
+																					{t(
+																						"services.domains.serviceLoad.cacheHelp",
+																					)}
 																				</p>
 																			</TooltipContent>
 																		</Tooltip>
@@ -457,7 +469,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																				<RefreshCw className="size-4 text-muted-foreground" />
 																			) : (
 																				<span className="text-xs text-muted-foreground">
-																					Manual
+																					{t("services.domains.manual")}
 																				</span>
 																			)}
 																		</Button>
@@ -469,8 +481,12 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																	>
 																		<p>
 																			{isManualInput
-																				? "Switch to service selection"
-																				: "Enter service name manually"}
+																				? t(
+																						"services.domains.switchToServiceSelection",
+																					)
+																				: t(
+																						"services.domains.serviceNameManualPlaceholder",
+																					)}
 																		</p>
 																	</TooltipContent>
 																</Tooltip>
@@ -492,29 +508,31 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 											{!canGenerateTraefikMeDomains &&
 												field.value.includes("traefik.me") && (
 													<AlertBlock type="warning">
-														You need to set an IP address in your{" "}
+														{t("services.domains.traefikMissingIpPrefix")}{" "}
 														<Link
 															href="/dashboard/settings/server"
 															className="text-primary"
 														>
 															{application?.serverId
-																? "Remote Servers -> Server -> Edit Server -> Update IP Address"
-																: "Web Server -> Server -> Update Server IP"}
+																? t("services.domains.traefikMissingIpRemote")
+																: t("services.domains.traefikMissingIpLocal")}
 														</Link>{" "}
-														to make your traefik.me domain work.
+														{t("services.domains.traefikMissingIpSuffix")}
 													</AlertBlock>
 												)}
 											{isTraefikMeDomain && (
 												<AlertBlock type="info">
-													<strong>Note:</strong> traefik.me is a public HTTP
-													service and does not support SSL/HTTPS. HTTPS and
-													certificate options will not have any effect.
+													<strong>{t("services.domains.note")}:</strong>{" "}
+													{t("services.domains.traefikNotice")}
 												</AlertBlock>
 											)}
-											<FormLabel>Host</FormLabel>
+											<FormLabel>{t("form.host")}</FormLabel>
 											<div className="flex gap-2">
 												<FormControl>
-													<Input placeholder="api.dokploy.com" {...field} />
+													<Input
+														placeholder={t("services.domains.hostPlaceholder")}
+														{...field}
+													/>
 												</FormControl>
 												<TooltipProvider delayDuration={0}>
 													<Tooltip>
@@ -544,7 +562,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 															sideOffset={5}
 															className="max-w-[10rem]"
 														>
-															<p>Generate traefik.me domain</p>
+															<p>{t("services.domains.generateTraefik")}</p>
 														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>
@@ -561,7 +579,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Path</FormLabel>
+												<FormLabel>{t("form.path")}</FormLabel>
 												<FormControl>
 													<Input placeholder={"/"} {...field} />
 												</FormControl>
@@ -577,10 +595,11 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Internal Path</FormLabel>
+												<FormLabel>
+													{t("services.domains.internalPath")}
+												</FormLabel>
 												<FormDescription>
-													The path where your application expects to receive
-													requests internally (defaults to "/")
+													{t("services.domains.internalPathHelp")}
 												</FormDescription>
 												<FormControl>
 													<Input placeholder={"/"} {...field} />
@@ -597,10 +616,9 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 									render={({ field }) => (
 										<FormItem className="flex flex-row items-center justify-between p-3 border rounded-lg shadow-sm">
 											<div className="space-y-0.5">
-												<FormLabel>Strip Path</FormLabel>
+												<FormLabel>{t("services.domains.stripPath")}</FormLabel>
 												<FormDescription>
-													Remove the external path from the request before
-													forwarding to the application
+													{t("services.domains.stripPathHelp")}
 												</FormDescription>
 												<FormMessage />
 											</div>
@@ -620,11 +638,11 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 									render={({ field }) => {
 										return (
 											<FormItem>
-												<FormLabel>Container Port</FormLabel>
+												<FormLabel>
+													{t("services.domains.containerPort")}
+												</FormLabel>
 												<FormDescription>
-													The port where your application is running inside the
-													container (e.g., 3000 for Node.js, 80 for Nginx, 8080
-													for Java)
+													{t("services.domains.containerPortHelp")}
 												</FormDescription>
 												<FormControl>
 													<NumberInput placeholder={"3000"} {...field} />
@@ -641,9 +659,9 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 									render={({ field }) => (
 										<FormItem className="flex flex-row items-center justify-between p-3 mt-4 border rounded-lg shadow-sm">
 											<div className="space-y-0.5">
-												<FormLabel>HTTPS</FormLabel>
+												<FormLabel>{t("domain.https")}</FormLabel>
 												<FormDescription>
-													Automatically provision SSL Certificate.
+													{t("services.domains.httpsHelp")}
 												</FormDescription>
 												<FormMessage />
 											</div>
@@ -665,7 +683,9 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 											render={({ field }) => {
 												return (
 													<FormItem>
-														<FormLabel>Certificate Provider</FormLabel>
+														<FormLabel>
+															{t("services.domains.certificateProvider")}
+														</FormLabel>
 														<Select
 															onValueChange={(value) => {
 																field.onChange(value);
@@ -680,15 +700,23 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Select a certificate provider" />
+																	<SelectValue
+																		placeholder={t(
+																			"services.domains.certificateProviderPlaceholder",
+																		)}
+																	/>
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value={"none"}>None</SelectItem>
-																<SelectItem value={"letsencrypt"}>
-																	Let's Encrypt
+																<SelectItem value={"none"}>
+																	{t("select.none")}
 																</SelectItem>
-																<SelectItem value={"custom"}>Custom</SelectItem>
+																<SelectItem value={"letsencrypt"}>
+																	{t("services.domains.letsEncrypt")}
+																</SelectItem>
+																<SelectItem value={"custom"}>
+																	{t("services.domains.custom")}
+																</SelectItem>
 															</SelectContent>
 														</Select>
 														<FormMessage />
@@ -704,11 +732,17 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 												render={({ field }) => {
 													return (
 														<FormItem>
-															<FormLabel>Custom Certificate Resolver</FormLabel>
+															<FormLabel>
+																{t(
+																	"services.domains.customCertificateResolver",
+																)}
+															</FormLabel>
 															<FormControl>
 																<Input
 																	className="w-full"
-																	placeholder="Enter your custom certificate resolver"
+																	placeholder={t(
+																		"services.domains.customCertificateResolverPlaceholder",
+																	)}
 																	{...field}
 																	value={field.value || ""}
 																	onChange={(e) => {

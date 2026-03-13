@@ -11,6 +11,7 @@ import React, { useEffect, useRef } from "react";
 import { AlertBlock } from "@/components/shared/alert-block";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { LineCountFilter } from "./line-count-filter";
 import { SinceLogsFilter, type TimeFilter } from "./since-logs-filter";
@@ -52,6 +53,7 @@ export const DockerLogsId: React.FC<Props> = ({
 	serverId,
 	runType,
 }) => {
+	const { t } = useTranslation();
 	const { data } = api.docker.getConfig.useQuery(
 		{
 			containerId,
@@ -227,7 +229,7 @@ export const DockerLogsId: React.FC<Props> = ({
 		const logContent = filteredLogs
 			.map(
 				({ timestamp, message }: { timestamp: Date | null; message: string }) =>
-					`${timestamp?.toISOString() || "No timestamp"} ${message}`,
+					`${timestamp?.toISOString() || t("docker.logs.noTimestamp")} ${message}`,
 			)
 			.join("\n");
 
@@ -257,7 +259,7 @@ export const DockerLogsId: React.FC<Props> = ({
 					message: string;
 				}) =>
 					showTimestamp
-						? `${timestamp?.toISOString() || "No timestamp"} ${message}`
+						? `${timestamp?.toISOString() || t("docker.logs.noTimestamp")} ${message}`
 						: message,
 			)
 			.join("\n");
@@ -324,13 +326,13 @@ export const DockerLogsId: React.FC<Props> = ({
 							<StatusLogsFilter
 								value={typeFilter}
 								setValue={setTypeFilter}
-								title="Log type"
+								title={t("docker.logs.type")}
 								options={priorities}
 							/>
 
 							<Input
 								type="search"
-								placeholder="Search logs..."
+								placeholder={t("docker.logs.searchPlaceholder")}
 								value={search}
 								onChange={handleSearch}
 								className="inline-flex h-9 text-sm placeholder-gray-400 w-full sm:w-auto"
@@ -343,14 +345,18 @@ export const DockerLogsId: React.FC<Props> = ({
 								size="sm"
 								className="h-9"
 								onClick={handlePauseResume}
-								title={isPaused ? "Resume logs" : "Pause logs"}
+								title={
+									isPaused
+										? t("docker.logs.resumeTitle")
+										: t("docker.logs.pauseTitle")
+								}
 							>
 								{isPaused ? (
 									<Play className="mr-2 h-4 w-4" />
 								) : (
 									<Pause className="mr-2 h-4 w-4" />
 								)}
-								{isPaused ? "Resume" : "Pause"}
+								{isPaused ? t("docker.logs.resume") : t("docker.logs.pause")}
 							</Button>
 							<Button
 								variant="outline"
@@ -358,14 +364,14 @@ export const DockerLogsId: React.FC<Props> = ({
 								className="h-9"
 								onClick={handleCopy}
 								disabled={filteredLogs.length === 0}
-								title="Copy logs to clipboard"
+								title={t("docker.logs.copyTitle")}
 							>
 								{copied ? (
 									<Check className="mr-2 h-4 w-4" />
 								) : (
 									<Copy className="mr-2 h-4 w-4" />
 								)}
-								Copy
+								{t("docker.logs.copy")}
 							</Button>
 							<Button
 								variant="outline"
@@ -375,7 +381,7 @@ export const DockerLogsId: React.FC<Props> = ({
 								disabled={filteredLogs.length === 0 || !data?.Name}
 							>
 								<DownloadIcon className="mr-2 h-4 w-4" />
-								Download logs
+								{t("docker.logs.download")}
 							</Button>
 						</div>
 					</div>
@@ -384,10 +390,12 @@ export const DockerLogsId: React.FC<Props> = ({
 							<div className="flex items-center gap-2">
 								<Pause className="h-4 w-4" />
 								<span>
-									Logs paused
+									{t("docker.logs.paused")}
 									{messageBuffer.length > 0 && (
 										<span className="ml-1 font-medium">
-											({messageBuffer.length} messages buffered)
+											{t("docker.logs.buffered", {
+												value: messageBuffer.length,
+											})}
 										</span>
 									)}
 								</span>
@@ -414,7 +422,7 @@ export const DockerLogsId: React.FC<Props> = ({
 							</div>
 						) : (
 							<div className="flex justify-center items-center h-full text-muted-foreground">
-								No logs found
+								{t("docker.logs.empty")}
 							</div>
 						)}
 					</div>

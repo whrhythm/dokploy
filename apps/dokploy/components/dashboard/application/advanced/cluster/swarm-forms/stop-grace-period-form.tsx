@@ -12,6 +12,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 
 const hasStopGracePeriodSwarm = (
@@ -27,6 +28,7 @@ interface StopGracePeriodFormProps {
 }
 
 export const StopGracePeriodForm = ({ id, type }: StopGracePeriodFormProps) => {
+	const { t } = useTranslation();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const queryMap = {
@@ -91,10 +93,14 @@ export const StopGracePeriodForm = ({ id, type }: StopGracePeriodFormProps) => {
 				stopGracePeriodSwarm: formData.value,
 			});
 
-			toast.success("Stop grace period updated successfully");
+			toast.success(
+				t("services.swarmSettings.forms.stopGracePeriod.toast.updated"),
+			);
 			refetch();
 		} catch {
-			toast.error("Error updating stop grace period");
+			toast.error(
+				t("services.swarmSettings.forms.stopGracePeriod.toast.updateError"),
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -108,16 +114,20 @@ export const StopGracePeriodForm = ({ id, type }: StopGracePeriodFormProps) => {
 					name="value"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Stop Grace Period (nanoseconds)</FormLabel>
+							<FormLabel>
+								{t("services.swarmSettings.forms.stopGracePeriod.label")}
+							</FormLabel>
 							<FormDescription>
-								Time to wait before forcefully killing the container
+								{t("services.swarmSettings.forms.stopGracePeriod.description")}
 								<br />
-								Examples: 30000000000 (30s), 120000000000 (2m)
+								{t("services.swarmSettings.forms.stopGracePeriod.examples")}
 							</FormDescription>
 							<FormControl>
 								<Input
 									type="number"
-									placeholder="30000000000"
+									placeholder={t(
+										"services.swarmSettings.forms.stopGracePeriod.placeholder",
+									)}
 									{...field}
 									value={
 										field?.value !== null && field?.value !== undefined
@@ -146,10 +156,10 @@ export const StopGracePeriodForm = ({ id, type }: StopGracePeriodFormProps) => {
 							});
 						}}
 					>
-						Clear
+						{t("button.reset")}
 					</Button>
 					<Button type="submit" isLoading={isLoading}>
-						Save Stop Grace Period
+						{t("services.swarmSettings.forms.stopGracePeriod.save")}
 					</Button>
 				</div>
 			</form>

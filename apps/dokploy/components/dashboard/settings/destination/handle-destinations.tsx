@@ -33,28 +33,39 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import { S3_PROVIDERS } from "./constants";
 
-const addDestination = z.object({
-	name: z.string().min(1, "Name is required"),
-	provider: z.string().min(1, "Provider is required"),
-	accessKeyId: z.string().min(1, "Access Key Id is required"),
-	secretAccessKey: z.string().min(1, "Secret Access Key is required"),
-	bucket: z.string().min(1, "Bucket is required"),
-	region: z.string(),
-	endpoint: z.string().min(1, "Endpoint is required"),
-	serverId: z.string().optional(),
-});
+const createDestinationSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, t("s3Destinations.validation.nameRequired")),
+		provider: z
+			.string()
+			.min(1, t("s3Destinations.validation.providerRequired")),
+		accessKeyId: z
+			.string()
+			.min(1, t("s3Destinations.validation.accessKeyRequired")),
+		secretAccessKey: z
+			.string()
+			.min(1, t("s3Destinations.validation.secretKeyRequired")),
+		bucket: z.string().min(1, t("s3Destinations.validation.bucketRequired")),
+		region: z.string(),
+		endpoint: z
+			.string()
+			.min(1, t("s3Destinations.validation.endpointRequired")),
+		serverId: z.string().optional(),
+	});
 
-type AddDestination = z.infer<typeof addDestination>;
+type AddDestination = z.infer<ReturnType<typeof createDestinationSchema>>;
 
 interface Props {
 	destinationId?: string;
 }
 
 export const HandleDestinations = ({ destinationId }: Props) => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const utils = api.useUtils();
 	const { data: servers } = api.server.withSSHKey.useQuery();
@@ -90,7 +101,7 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 			secretAccessKey: "",
 			endpoint: "",
 		},
-		resolver: zodResolver(addDestination),
+		resolver: zodResolver(createDestinationSchema(t)),
 	});
 	useEffect(() => {
 		if (destination) {
@@ -120,7 +131,11 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 			destinationId: destinationId || "",
 		})
 			.then(async () => {
-				toast.success(`Destination ${destinationId ? "Updated" : "Created"}`);
+				toast.success(
+					destinationId
+						? t("s3Destinations.updated")
+						: t("s3Destinations.created"),
+				);
 				await utils.destination.all.invalidate();
 				if (destinationId) {
 					await utils.destination.one.invalidate({ destinationId });
@@ -129,7 +144,9 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 			})
 			.catch(() => {
 				toast.error(
-					`Error ${destinationId ? "Updating" : "Creating"} the Destination`,
+					destinationId
+						? t("s3Destinations.updateError")
+						: t("s3Destinations.createError"),
 				);
 			});
 	};
@@ -150,14 +167,14 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 				.filter(Boolean)
 				.join("\n");
 
-			toast.error("Please fill all required fields", {
+			toast.error(t("s3Destinations.validation.fillRequired"), {
 				description: errorFields,
 			});
 			return;
 		}
 
 		if (isCloud && !serverId) {
-			toast.error("Please select a server");
+			toast.error(t("s3Destinations.validation.selectServer"));
 			return;
 		}
 
@@ -181,11 +198,14 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 			serverId,
 		})
 			.then(() => {
-				toast.success("Connection Success");
+				toast.success(t("s3Destinations.testSuccess"));
 			})
 			.catch((e) => {
-				toast.error("Error connecting to provider", {
-					description: `${e.message}\n\nTry manually: rclone ls ${connectionString}`,
+				toast.error(t("s3Destinations.testError"), {
+					description: t("s3Destinations.testErrorDetail", {
+						value: e.message,
+						command: `rclone ls ${connectionString}`,
+					}),
 				});
 			});
 	};
@@ -204,19 +224,19 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 				) : (
 					<Button className="cursor-pointer space-x-3">
 						<PlusIcon className="h-4 w-4" />
-						Add Destination
+						{t("s3Destinations.addButton")}
 					</Button>
 				)}
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>
-						{destinationId ? "Update" : "Add"} Destination
+						{destinationId
+							? t("s3Destinations.Modal.form.title.update")
+							: t("s3Destinations.Modal.form.title.add")}
 					</DialogTitle>
 					<DialogDescription>
-						In this section, you can configure and add new destinations for your
-						backups. Please ensure that you provide the correct information to
-						guarantee secure and efficient storage.
+						{t("s3Destinations.Modal.form.description")}
 					</DialogDescription>
 				</DialogHeader>
 				{(isError || isErrorConnection) && (
@@ -237,9 +257,12 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							render={({ field }) => {
 								return (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>{t("s3Destinations.form.name")}</FormLabel>
 										<FormControl>
-											<Input placeholder={"S3 Bucket"} {...field} />
+											<Input
+												placeholder={t("s3Destinations.form.namePlaceholder")}
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -252,7 +275,7 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							render={({ field }) => {
 								return (
 									<FormItem>
-										<FormLabel>Provider</FormLabel>
+										<FormLabel>{t("s3Destinations.form.provider")}</FormLabel>
 										<FormControl>
 											<Select
 												onValueChange={field.onChange}
@@ -261,7 +284,11 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 											>
 												<FormControl>
 													<SelectTrigger>
-														<SelectValue placeholder="Select a S3 Provider" />
+														<SelectValue
+															placeholder={t(
+																"s3Destinations.form.providerPlaceholder",
+															)}
+														/>
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
@@ -288,9 +315,16 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							render={({ field }) => {
 								return (
 									<FormItem>
-										<FormLabel>Access Key Id</FormLabel>
+										<FormLabel>
+											{t("s3Destinations.form.accessKeyId")}
+										</FormLabel>
 										<FormControl>
-											<Input placeholder={"xcas41dasde"} {...field} />
+											<Input
+												placeholder={t(
+													"s3Destinations.form.accessKeyIdPlaceholder",
+												)}
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -303,10 +337,17 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							render={({ field }) => (
 								<FormItem>
 									<div className="space-y-0.5">
-										<FormLabel>Secret Access Key</FormLabel>
+										<FormLabel>
+											{t("s3Destinations.form.secretAccessKey")}
+										</FormLabel>
 									</div>
 									<FormControl>
-										<Input placeholder={"asd123asdasw"} {...field} />
+										<Input
+											placeholder={t(
+												"s3Destinations.form.secretAccessKeyPlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -318,10 +359,13 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							render={({ field }) => (
 								<FormItem>
 									<div className="space-y-0.5">
-										<FormLabel>Bucket</FormLabel>
+										<FormLabel>{t("s3Destinations.form.bucket")}</FormLabel>
 									</div>
 									<FormControl>
-										<Input placeholder={"dokploy-bucket"} {...field} />
+										<Input
+											placeholder={t("s3Destinations.form.bucketPlaceholder")}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -333,10 +377,13 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							render={({ field }) => (
 								<FormItem>
 									<div className="space-y-0.5">
-										<FormLabel>Region</FormLabel>
+										<FormLabel>{t("s3Destinations.form.region")}</FormLabel>
 									</div>
 									<FormControl>
-										<Input placeholder={"us-east-1"} {...field} />
+										<Input
+											placeholder={t("s3Destinations.form.regionPlaceholder")}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -347,10 +394,10 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							name="endpoint"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Endpoint</FormLabel>
+									<FormLabel>{t("s3Destinations.form.endpoint")}</FormLabel>
 									<FormControl>
 										<Input
-											placeholder={"https://us.bucket.aws/s3"}
+											placeholder={t("s3Destinations.form.endpointPlaceholder")}
 											{...field}
 										/>
 									</FormControl>
@@ -369,26 +416,33 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 						{isCloud ? (
 							<div className="flex flex-col gap-4 border p-2 rounded-lg">
 								<span className="text-sm text-muted-foreground">
-									Select a server to test the destination. If you don't have a
-									server choose the default one.
+									{t("s3Destinations.Modal.test.help")}
 								</span>
 								<FormField
 									control={form.control}
 									name="serverId"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Server (Optional)</FormLabel>
+											<FormLabel>
+												{t("s3Destinations.form.serverOptional")}
+											</FormLabel>
 											<FormControl>
 												<Select
 													onValueChange={field.onChange}
 													defaultValue={field.value}
 												>
 													<SelectTrigger className="w-full">
-														<SelectValue placeholder="Select a server" />
+														<SelectValue
+															placeholder={t(
+																"s3Destinations.form.serverPlaceholder",
+															)}
+														/>
 													</SelectTrigger>
 													<SelectContent>
 														<SelectGroup>
-															<SelectLabel>Servers</SelectLabel>
+															<SelectLabel>
+																{t("s3Destinations.form.servers")}
+															</SelectLabel>
 															{servers?.map((server) => (
 																<SelectItem
 																	key={server.serverId}
@@ -397,7 +451,9 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 																	{server.name}
 																</SelectItem>
 															))}
-															<SelectItem value={"none"}>None</SelectItem>
+															<SelectItem value={"none"}>
+																{t("common.none")}
+															</SelectItem>
 														</SelectGroup>
 													</SelectContent>
 												</Select>
@@ -415,7 +471,7 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 										await handleTestConnection(form.getValues("serverId"));
 									}}
 								>
-									Test Connection
+									{t("s3Destinations.Modal.test.button")}
 								</Button>
 							</div>
 						) : (
@@ -427,7 +483,7 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 									await handleTestConnection();
 								}}
 							>
-								Test connection
+								{t("s3Destinations.Modal.test.button")}
 							</Button>
 						)}
 
@@ -436,7 +492,7 @@ export const HandleDestinations = ({ destinationId }: Props) => {
 							form="hook-form-destination-add"
 							type="submit"
 						>
-							{destinationId ? "Update" : "Create"}
+							{destinationId ? t("button.update") : t("button.create")}
 						</Button>
 					</DialogFooter>
 				</Form>

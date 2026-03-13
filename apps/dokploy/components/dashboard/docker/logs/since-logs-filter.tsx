@@ -14,33 +14,34 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 export type TimeFilter = "all" | "1h" | "6h" | "24h" | "168h" | "720h";
 
-const timeRanges: Array<{ label: string; value: TimeFilter }> = [
+const timeRanges: Array<{ key: string; value: TimeFilter }> = [
 	{
-		label: "All time",
+		key: "docker.logs.time.all",
 		value: "all",
 	},
 	{
-		label: "Last hour",
+		key: "docker.logs.time.lastHour",
 		value: "1h",
 	},
 	{
-		label: "Last 6 hours",
+		key: "docker.logs.time.last6Hours",
 		value: "6h",
 	},
 	{
-		label: "Last 24 hours",
+		key: "docker.logs.time.last24Hours",
 		value: "24h",
 	},
 	{
-		label: "Last 7 days",
+		key: "docker.logs.time.last7Days",
 		value: "168h",
 	},
 	{
-		label: "Last 30 days",
+		key: "docker.logs.time.last30Days",
 		value: "720h",
 	},
 ] as const;
@@ -58,11 +59,13 @@ export function SinceLogsFilter({
 	onValueChange,
 	showTimestamp,
 	onTimestampChange,
-	title = "Time range",
+	title,
 }: SinceLogsFilterProps) {
-	const selectedLabel =
-		timeRanges.find((range) => range.value === value)?.label ??
-		"Select time range";
+	const { t } = useTranslation();
+	const resolvedTitle = title ?? t("docker.logs.timeRange");
+	const selectedLabelKey =
+		timeRanges.find((range) => range.value === value)?.key ??
+		"docker.logs.time.select";
 
 	return (
 		<Popover>
@@ -72,11 +75,11 @@ export function SinceLogsFilter({
 					size="sm"
 					className="h-9 bg-input text-sm placeholder-gray-400 w-full sm:w-auto"
 				>
-					{title}
+					{resolvedTitle}
 					<Separator orientation="vertical" className="mx-2 h-4" />
 					<div className="space-x-1 flex">
 						<Badge variant="blank" className="rounded-sm px-1 font-normal">
-							{selectedLabel}
+							{t(selectedLabelKey)}
 						</Badge>
 					</div>
 				</Button>
@@ -106,7 +109,7 @@ export function SinceLogsFilter({
 										>
 											<CheckIcon className={cn("h-4 w-4")} />
 										</div>
-										<span className="text-sm">{range.label}</span>
+										<span className="text-sm">{t(range.key)}</span>
 									</CommandItem>
 								);
 							})}
@@ -115,7 +118,7 @@ export function SinceLogsFilter({
 				</Command>
 				<Separator className="my-2" />
 				<div className="p-2 flex items-center justify-between">
-					<span className="text-sm">Show timestamps</span>
+					<span className="text-sm">{t("docker.logs.showTimestamps")}</span>
 					<Switch checked={showTimestamp} onCheckedChange={onTimestampChange} />
 				</div>
 			</PopoverContent>

@@ -30,6 +30,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { ShowModalLogs } from "../../settings/web-server/show-modal-logs";
 import { ShowDeploymentsModal } from "../deployments/show-deployments-modal";
@@ -41,6 +42,7 @@ interface Props {
 }
 
 export const ShowPreviewDeployments = ({ applicationId }: Props) => {
+	const { t } = useTranslation();
 	const { data } = api.application.one.useQuery({ applicationId });
 
 	const { mutateAsync: deletePreviewDeployment, isPending } =
@@ -67,7 +69,7 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 		})
 			.then(() => {
 				refetchPreviewDeployments();
-				toast.success("Preview deployment deleted");
+				toast.success(t("services.previewDeployments.toast.deleted"));
 			})
 			.catch((error) => {
 				toast.error(error.message);
@@ -78,8 +80,12 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 		<Card className="bg-background">
 			<CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
 				<div className="flex flex-col gap-2">
-					<CardTitle className="text-xl">Preview Deployments</CardTitle>
-					<CardDescription>See all the preview deployments</CardDescription>
+					<CardTitle className="text-xl">
+						{t("services.previewDeployments.title")}
+					</CardTitle>
+					<CardDescription>
+						{t("services.previewDeployments.description")}
+					</CardDescription>
 				</div>
 				{data?.isPreviewDeploymentsActive && (
 					<ShowPreviewSettings applicationId={applicationId} />
@@ -89,24 +95,20 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 				{data?.isPreviewDeploymentsActive ? (
 					<>
 						<div className="flex flex-col gap-2 text-sm">
-							<span>
-								Preview deployments are a way to test your application before it
-								is deployed to production. It will create a new deployment for
-								each pull request you create.
-							</span>
+							<span>{t("services.previewDeployments.intro")}</span>
 						</div>
 						{isLoadingPreviewDeployments ? (
 							<div className="flex w-full flex-row items-center justify-center gap-3 min-h-[35vh]">
 								<Loader2 className="size-5 text-muted-foreground animate-spin" />
 								<span className="text-base text-muted-foreground">
-									Loading preview deployments...
+									{t("services.previewDeployments.loading")}
 								</span>
 							</div>
 						) : !previewDeployments?.length ? (
 							<div className="flex w-full flex-col items-center justify-center gap-3 min-h-[35vh]">
 								<RocketIcon className="size-8 text-muted-foreground" />
 								<span className="text-base text-muted-foreground">
-									No preview deployments found
+									{t("services.previewDeployments.empty")}
 								</span>
 							</div>
 						) : (
@@ -174,7 +176,9 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 															}
 														>
 															<GithubIcon className="size-4" />
-															Pull Request
+															{t(
+																"services.previewDeployments.actions.pullRequest",
+															)}
 														</Button>
 														<ShowModalLogs
 															appName={deployment.appName}
@@ -186,7 +190,7 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 																className="gap-2"
 															>
 																<FileText className="size-4" />
-																Logs
+																{t("services.application.tabs.logs")}
 															</Button>
 														</ShowModalLogs>
 
@@ -201,13 +205,17 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 																className="gap-2"
 															>
 																<RocketIcon className="size-4" />
-																Deployments
+																{t("services.application.tabs.deployments")}
 															</Button>
 														</ShowDeploymentsModal>
 
 														<DialogAction
-															title="Rebuild Preview Deployment"
-															description="Are you sure you want to rebuild this preview deployment?"
+															title={t(
+																"services.previewDeployments.actions.rebuildTitle",
+															)}
+															description={t(
+																"services.previewDeployments.actions.rebuildDescription",
+															)}
 															type="default"
 															onClick={async () => {
 																await redeployPreviewDeployment({
@@ -216,13 +224,17 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 																})
 																	.then(() => {
 																		toast.success(
-																			"Preview deployment rebuild started",
+																			t(
+																				"services.previewDeployments.toast.rebuildStarted",
+																			),
 																		);
 																		refetchPreviewDeployments();
 																	})
 																	.catch(() => {
 																		toast.error(
-																			"Error rebuilding preview deployment",
+																			t(
+																				"services.previewDeployments.toast.rebuildError",
+																			),
 																		);
 																	});
 															}}
@@ -238,7 +250,7 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 																		<TooltipTrigger asChild>
 																			<div className="flex items-center gap-2">
 																				<Hammer className="size-4" />
-																				Rebuild
+																				{t("button.rebuild")}
 																			</div>
 																		</TooltipTrigger>
 																		<TooltipPrimitive.Portal>
@@ -247,8 +259,9 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 																				className="z-[60]"
 																			>
 																				<p>
-																					Rebuild the preview deployment without
-																					downloading new code
+																					{t(
+																						"services.previewDeployments.actions.rebuildHint",
+																					)}
 																				</p>
 																			</TooltipContent>
 																		</TooltipPrimitive.Portal>
@@ -270,8 +283,12 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 															</Button>
 														</AddPreviewDomain>
 														<DialogAction
-															title="Delete Preview"
-															description="Are you sure you want to delete this preview?"
+															title={t(
+																"services.previewDeployments.actions.deleteTitle",
+															)}
+															description={t(
+																"services.previewDeployments.actions.deleteDescription",
+															)}
 															onClick={() =>
 																handleDeletePreviewDeployment(
 																	deployment.previewDeploymentId,
@@ -300,8 +317,7 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 					<div className="flex w-full flex-col items-center justify-center gap-3 pt-10">
 						<RocketIcon className="size-8 text-muted-foreground" />
 						<span className="text-base text-muted-foreground">
-							Preview deployments are disabled for this application, please
-							enable it
+							{t("services.previewDeployments.disabled")}
 						</span>
 						<ShowPreviewSettings applicationId={applicationId} />
 					</div>

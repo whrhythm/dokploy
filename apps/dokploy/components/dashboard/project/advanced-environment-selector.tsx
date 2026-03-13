@@ -98,14 +98,16 @@ export const AdvancedEnvironmentSelector = ({
 				description: description.trim() || undefined,
 			});
 
-			toast.success("Environment created successfully");
+			toast.success(t("environment.toast.created"));
 			utils.environment.byProjectId.invalidate({ projectId });
 			setIsCreateDialogOpen(false);
 			setName("");
 			setDescription("");
 		} catch (error) {
 			toast.error(
-				`Failed to create environment: ${error instanceof Error ? error.message : error}`,
+				t("environment.toast.createError", {
+					error: error instanceof Error ? error.message : t("error.unknown"),
+				}),
 			);
 		}
 	};
@@ -120,7 +122,7 @@ export const AdvancedEnvironmentSelector = ({
 				description: description.trim() || undefined,
 			});
 
-			toast.success("Environment updated successfully");
+			toast.success(t("environment.toast.updated"));
 			utils.environment.byProjectId.invalidate({ projectId });
 			setIsEditDialogOpen(false);
 			setSelectedEnvironment(null);
@@ -128,7 +130,9 @@ export const AdvancedEnvironmentSelector = ({
 			setDescription("");
 		} catch (error) {
 			toast.error(
-				`Failed to update environment: ${error instanceof Error ? error.message : error}`,
+				t("environment.toast.updateError", {
+					error: error instanceof Error ? error.message : t("error.unknown"),
+				}),
 			);
 		}
 	};
@@ -141,7 +145,7 @@ export const AdvancedEnvironmentSelector = ({
 				environmentId: selectedEnvironment.environmentId,
 			});
 
-			toast.success("Environment deleted successfully");
+			toast.success(t("environment.toast.deleted"));
 			utils.environment.byProjectId.invalidate({ projectId });
 			setIsDeleteDialogOpen(false);
 			setSelectedEnvironment(null);
@@ -161,7 +165,7 @@ export const AdvancedEnvironmentSelector = ({
 				}
 			}
 		} catch (error) {
-			toast.error("Failed to delete environment");
+			toast.error(t("environment.toast.deleteError"));
 		}
 	};
 
@@ -169,11 +173,11 @@ export const AdvancedEnvironmentSelector = ({
 		try {
 			const result = await duplicateEnvironment.mutateAsync({
 				environmentId: environment.environmentId,
-				name: `${environment.name}-copy`,
+				name: `${environment.name}${t("environment.copySuffix")}`,
 				description: environment.description || undefined,
 			});
 
-			toast.success("Environment duplicated successfully");
+			toast.success(t("environment.toast.duplicated"));
 			utils.project.one.invalidate({ projectId });
 
 			// Navigate to the new duplicated environment
@@ -181,7 +185,7 @@ export const AdvancedEnvironmentSelector = ({
 				`/dashboard/project/${projectId}/environment/${result.environmentId}`,
 			);
 		} catch (error) {
-			toast.error("Failed to duplicate environment");
+			toast.error(t("environment.toast.duplicateError"));
 		}
 	};
 
@@ -208,13 +212,15 @@ export const AdvancedEnvironmentSelector = ({
 					<Button variant="ghost" className="h-auto p-2 font-normal">
 						<div className="flex items-center gap-1">
 							<span className="text-muted-foreground">/</span>
-							<span>{currentEnv?.name || "Select Environment"}</span>
+							<span>
+								{currentEnv?.name || t("environment.selectEnvironment")}
+							</span>
 							<ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-[300px]" align="start">
-					<DropdownMenuLabel>Environments</DropdownMenuLabel>
+					<DropdownMenuLabel>{t("environment.environments")}</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 
 					{environments?.map((environment) => {
@@ -426,7 +432,7 @@ export const AdvancedEnvironmentSelector = ({
 								setSelectedEnvironment(null);
 							}}
 						>
-							Cancel
+							{t("button.cancel")}
 						</Button>
 						<Button
 							variant="destructive"
@@ -437,7 +443,9 @@ export const AdvancedEnvironmentSelector = ({
 								!selectedEnvironment
 							}
 						>
-							{deleteEnvironment.isPending ? "Deleting..." : "Delete"}
+							{deleteEnvironment.isPending
+								? t("environment.deleting")
+								: t("button.delete")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

@@ -11,6 +11,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from "@/hooks/use-translation";
 import { AddManager } from "./manager/add-manager";
 import { AddWorker } from "./workers/add-worker";
 
@@ -19,26 +20,26 @@ interface Props {
 }
 
 export const AddNode = ({ serverId }: Props) => {
+	const { t } = useTranslation();
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
 				<Button className="w-full cursor-pointer space-x-3">
 					<PlusIcon className="h-4 w-4" />
-					Add Node
+					{t("cluster.Modal.addNode.trigger")}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-4xl">
 				<DialogHeader>
-					<DialogTitle>Add Node</DialogTitle>
+					<DialogTitle>{t("cluster.Modal.addNode.title")}</DialogTitle>
 					<DialogDescription className="flex flex-col gap-2">
-						Follow the steps to add a new node to your cluster, before you start
-						using this feature, you need to understand how docker swarm works.{" "}
+						{t("cluster.Modal.addNode.description")}{" "}
 						<Link
 							href="https://docs.docker.com/engine/swarm/"
 							target="_blank"
 							className="text-primary flex flex-row gap-2 items-center"
 						>
-							Docker Swarm
+							{t("cluster.Modal.addNode.link.swarm")}
 							<ExternalLink className="h-4 w-4" />
 						</Link>
 						<Link
@@ -46,20 +47,23 @@ export const AddNode = ({ serverId }: Props) => {
 							target="_blank"
 							className="text-primary flex flex-row gap-2 items-center"
 						>
-							Architecture
+							{t("cluster.Modal.addNode.link.architecture")}
 							<ExternalLink className="h-4 w-4" />
 						</Link>
 						<AlertBlock type="warning">
-							Make sure you use the same architecture as the node you are
-							adding.
+							{t("cluster.Modal.addNode.warning")}
 						</AlertBlock>
 					</DialogDescription>
 				</DialogHeader>
 				<div className="flex flex-col gap-2">
 					<Tabs defaultValue="worker">
 						<TabsList>
-							<TabsTrigger value="worker">Worker</TabsTrigger>
-							<TabsTrigger value="manager">Manager</TabsTrigger>
+							<TabsTrigger value="worker">
+								{t("cluster.Modal.addNode.tabs.worker")}
+							</TabsTrigger>
+							<TabsTrigger value="manager">
+								{t("cluster.Modal.addNode.tabs.manager")}
+							</TabsTrigger>
 						</TabsList>
 						<TabsContent value="worker" className="pt-4 overflow-hidden">
 							<AddWorker serverId={serverId} />

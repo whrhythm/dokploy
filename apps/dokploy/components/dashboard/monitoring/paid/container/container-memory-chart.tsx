@@ -13,6 +13,7 @@ import {
 	ChartLegendContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/hooks/use-translation";
 import { formatTimestamp } from "@/lib/utils";
 
 interface ContainerMetric {
@@ -30,13 +31,6 @@ interface Props {
 	data: ContainerMetric[];
 }
 
-const chartConfig = {
-	memory: {
-		label: "Memory",
-		color: "hsl(var(--chart-2))",
-	},
-} satisfies ChartConfig;
-
 const formatMemoryValue = (value: number) => {
 	return value.toLocaleString("en-US", {
 		minimumFractionDigits: 1,
@@ -45,6 +39,14 @@ const formatMemoryValue = (value: number) => {
 };
 
 export const ContainerMemoryChart = ({ data }: Props) => {
+	const { t } = useTranslation();
+	const chartConfig = {
+		memory: {
+			label: t("services.monitoring.chart.memory"),
+			color: "hsl(var(--chart-2))",
+		},
+	} satisfies ChartConfig;
+
 	const formattedData = data.map((metric) => ({
 		timestamp: metric.timestamp,
 		memory: metric.Memory.percentage,
@@ -60,8 +62,12 @@ export const ContainerMemoryChart = ({ data }: Props) => {
 	return (
 		<Card className="bg-transparent">
 			<CardHeader className="border-b py-5">
-				<CardTitle>Memory</CardTitle>
-				<CardDescription>Memory Usage: {latestData.usage}</CardDescription>
+				<CardTitle>{t("services.monitoring.chart.memory")}</CardTitle>
+				<CardDescription>
+					{t("services.monitoring.chart.memoryUsageValue", {
+						value: latestData.usage,
+					})}
+				</CardDescription>
 			</CardHeader>
 			<CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
 				<ChartContainer
@@ -103,7 +109,7 @@ export const ContainerMemoryChart = ({ data }: Props) => {
 											<div className="grid grid-cols-2 gap-2">
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Time
+														{t("services.monitoring.chart.time")}
 													</span>
 													<span className="font-bold">
 														{formatTimestamp(label)}
@@ -111,13 +117,13 @@ export const ContainerMemoryChart = ({ data }: Props) => {
 												</div>
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Memory
+														{t("services.monitoring.chart.memory")}
 													</span>
 													<span className="font-bold">{data.memory}%</span>
 												</div>
 												<div className="flex flex-col col-span-2">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Usage
+														{t("services.monitoring.chart.usage")}
 													</span>
 													<span className="font-bold">{data.usage}</span>
 												</div>
@@ -129,7 +135,7 @@ export const ContainerMemoryChart = ({ data }: Props) => {
 							}}
 						/>
 						<Area
-							name="Memory"
+							name={t("services.monitoring.chart.memory")}
 							dataKey="memory"
 							type="monotone"
 							fill="url(#fillMemory)"

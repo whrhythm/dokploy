@@ -23,6 +23,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { ShowDeploymentsModal } from "../deployments/show-deployments-modal";
 import { HandleVolumeBackups } from "./handle-volume-backups";
@@ -39,6 +40,7 @@ export const ShowVolumeBackups = ({
 	type = "application",
 	serverId,
 }: Props) => {
+	const { t } = useTranslation();
 	const [runningBackups, setRunningBackups] = useState<Set<string>>(new Set());
 	const {
 		data: volumeBackups,
@@ -63,10 +65,10 @@ export const ShowVolumeBackups = ({
 		setRunningBackups((prev) => new Set(prev).add(volumeBackupId));
 		try {
 			await runManually({ volumeBackupId });
-			toast.success("Volume backup run successfully");
+			toast.success(t("services.volumeBackups.toast.runSuccess"));
 			await refetchVolumeBackups();
 		} catch {
-			toast.error("Error running volume backup");
+			toast.error(t("services.volumeBackups.toast.runError"));
 		} finally {
 			setRunningBackups((prev) => {
 				const newSet = new Set(prev);
@@ -82,11 +84,10 @@ export const ShowVolumeBackups = ({
 				<div className="flex justify-between items-center flex-wrap gap-2">
 					<div className="flex flex-col gap-2">
 						<CardTitle className="text-xl font-bold flex items-center gap-2">
-							Volume Backups
+							{t("services.volumeBackups.title")}
 						</CardTitle>
 						<CardDescription>
-							Schedule volume backups to run automatically at specified
-							intervals
+							{t("services.volumeBackups.description")}
 						</CardDescription>
 					</div>
 					<div className="flex items-center gap-2 flex-wrap">
@@ -110,7 +111,7 @@ export const ShowVolumeBackups = ({
 					<div className="flex gap-4 w-full items-center justify-center text-center mx-auto min-h-[45vh]">
 						<Loader2 className="size-4 text-muted-foreground/70 transition-colors animate-spin self-center" />
 						<span className="text-sm text-muted-foreground/70">
-							Loading volume backups...
+							{t("services.volumeBackups.loading")}
 						</span>
 					</div>
 				) : volumeBackups && volumeBackups.length > 0 ? (
@@ -144,7 +145,9 @@ export const ShowVolumeBackups = ({
 													}
 													className="text-[10px] px-1 py-0"
 												>
-													{volumeBackup.enabled ? "Enabled" : "Disabled"}
+													{volumeBackup.enabled
+														? t("status.active")
+														: t("status.inactive")}
 												</Badge>
 											</div>
 											<div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -152,7 +155,8 @@ export const ShowVolumeBackups = ({
 													variant="outline"
 													className="font-mono text-[10px] bg-transparent"
 												>
-													Cron: {volumeBackup.cronExpression}
+													{t("services.volumeBackups.cron")}:{" "}
+													{volumeBackup.cronExpression}
 												</Badge>
 											</div>
 										</div>
@@ -189,7 +193,7 @@ export const ShowVolumeBackups = ({
 													</Button>
 												</TooltipTrigger>
 												<TooltipContent>
-													Run Manual Volume Backup
+													{t("services.volumeBackups.runManual")}
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
@@ -199,8 +203,10 @@ export const ShowVolumeBackups = ({
 											volumeBackupType={type}
 										/>
 										<DialogAction
-											title="Delete Volume Backup"
-											description="Are you sure you want to delete this volume backup?"
+											title={t("services.volumeBackups.delete.title")}
+											description={t(
+												"services.volumeBackups.delete.description",
+											)}
 											type="destructive"
 											onClick={async () => {
 												await deleteVolumeBackup({
@@ -211,10 +217,14 @@ export const ShowVolumeBackups = ({
 															id,
 															volumeBackupType: type,
 														});
-														toast.success("Volume backup deleted successfully");
+														toast.success(
+															t("services.volumeBackups.toast.deleted"),
+														);
 													})
 													.catch(() => {
-														toast.error("Error deleting volume backup");
+														toast.error(
+															t("services.volumeBackups.toast.deleteError"),
+														);
 													});
 											}}
 										>
@@ -236,10 +246,10 @@ export const ShowVolumeBackups = ({
 					<div className="flex flex-col gap-2 items-center justify-center py-12 rounded-lg">
 						<DatabaseBackup className="size-8 mb-4 text-muted-foreground" />
 						<p className="text-lg font-medium text-muted-foreground">
-							No volume backups
+							{t("services.volumeBackups.emptyTitle")}
 						</p>
 						<p className="text-sm text-muted-foreground mt-1">
-							Create your first volume backup to automate your workflows
+							{t("services.volumeBackups.emptyDescription")}
 						</p>
 						<div className="flex items-center gap-2">
 							<HandleVolumeBackups id={id} volumeBackupType={type} />

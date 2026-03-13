@@ -46,29 +46,38 @@ function formatTs(ts?: number): string {
 	return d.toLocaleString();
 }
 
-function getJobLabel(row: QueueRow): string {
-	const d = row.data as {
-		applicationType?: string;
-		applicationId?: string;
-		composeId?: string;
-		previewDeploymentId?: string;
-		titleLog?: string;
-		type?: string;
-	};
-	if (!d) return String(row.id);
-	const type = d.applicationType ?? "job";
-	const title = d.titleLog ?? "";
-	if (title) return title;
-	if (d.applicationId) return `Application ${d.applicationId.slice(0, 8)}…`;
-	if (d.composeId) return `Compose ${d.composeId.slice(0, 8)}…`;
-	if (d.previewDeploymentId)
-		return `Preview ${d.previewDeploymentId.slice(0, 8)}…`;
-	return `${type} ${String(row.id)}`;
-}
-
 export function ShowQueueTable(props: { embedded?: boolean }) {
 	const { t } = useTranslation();
 	const { embedded: _embedded = false } = props;
+
+	const getJobLabel = (row: QueueRow): string => {
+		const d = row.data as {
+			applicationType?: string;
+			applicationId?: string;
+			composeId?: string;
+			previewDeploymentId?: string;
+			titleLog?: string;
+			type?: string;
+		};
+		if (!d) return String(row.id);
+		const type = d.applicationType ?? "job";
+		const title = d.titleLog ?? "";
+		if (title) return title;
+		if (d.applicationId) {
+			return `${t("deployment.jobType.application")} ${d.applicationId.slice(0, 8)}…`;
+		}
+		if (d.composeId) {
+			return `${t("deployment.jobType.compose")} ${d.composeId.slice(0, 8)}…`;
+		}
+		if (d.previewDeploymentId) {
+			return `${t("deployment.jobType.preview")} ${d.previewDeploymentId.slice(0, 8)}…`;
+		}
+		const translatedType = t(`deployment.jobType.${type}`);
+		const jobType =
+			translatedType === `deployment.jobType.${type}` ? type : translatedType;
+		return `${jobType} ${String(row.id)}`;
+	};
+
 	const { data: queueList, isLoading } = api.deployment.queueList.useQuery(
 		undefined,
 		{ refetchInterval: 3000 },
@@ -101,14 +110,14 @@ export function ShowQueueTable(props: { embedded?: boolean }) {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>{t("form.id") || "Job ID"}</TableHead>
-								<TableHead>{t("form.label") || "Label"}</TableHead>
+								<TableHead>{t("form.id")}</TableHead>
+								<TableHead>{t("form.label")}</TableHead>
 								<TableHead>{t("form.type")}</TableHead>
 								<TableHead>{t("form.status")}</TableHead>
-								<TableHead>Added</TableHead>
-								<TableHead>Processed</TableHead>
-								<TableHead>Finished</TableHead>
-								<TableHead>Error</TableHead>
+								<TableHead>{t("deployment.table.added")}</TableHead>
+								<TableHead>{t("deployment.table.processed")}</TableHead>
+								<TableHead>{t("deployment.table.finished")}</TableHead>
+								<TableHead>{t("deployment.table.error")}</TableHead>
 								<TableHead className="w-[100px]">{t("form.actions")}</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -130,7 +139,15 @@ export function ShowQueueTable(props: { embedded?: boolean }) {
 											<TableCell>{appType ?? row.name ?? "—"}</TableCell>
 											<TableCell>
 												<Badge variant={stateVariants[row.state] ?? "outline"}>
-													{row.state}
+													{(() => {
+														const translated = t(
+															`deployment.queueState.${row.state}`,
+														);
+														return translated ===
+															`deployment.queueState.${row.state}`
+															? row.state
+															: translated;
+													})()}
 												</Badge>
 											</TableCell>
 											<TableCell className="text-muted-foreground text-xs">

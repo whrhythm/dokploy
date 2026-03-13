@@ -27,10 +27,10 @@ export const UpdateWebServer = () => {
 		try {
 			const response = await fetch("/api/health");
 			if (!response.ok) {
-				throw new Error(t("webServerUpdate.healthCheckFailed"));
+				throw new Error(t("webServer.Modal.update.healthCheckFailed"));
 			}
 
-			toast.success(t("webServerUpdate.updatedReload"));
+			toast.success(t("webServer.Modal.update.toast.updatedReload"));
 
 			setTimeout(() => {
 				// Allow seeing the toast before reloading
@@ -56,7 +56,7 @@ export const UpdateWebServer = () => {
 		} catch (error) {
 			setUpdating(false);
 			console.error("Error updating server:", error);
-			toast.error(t("webServerUpdate.updateError"));
+			toast.error(t("webServer.Modal.update.toast.updateError"));
 		}
 	};
 
@@ -73,24 +73,24 @@ export const UpdateWebServer = () => {
 						<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
 						<span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
 					</span>
-					{t("webServerUpdate.updateServer")}
+					{t("webServer.Modal.update.action.updateServer")}
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
 						{updating
-							? t("webServerUpdate.updatingTitle")
-							: t("webServerUpdate.confirmTitle")}
+							? t("webServer.Modal.update.confirm.updatingTitle")
+							: t("webServer.Modal.update.confirm.title")}
 					</AlertDialogTitle>
 					<AlertDialogDescription>
 						{updating ? (
 							<span className="flex items-center gap-1">
 								<Loader2 className="animate-spin" />
-								{t("webServerUpdate.updatingDesc")}
+								{t("webServer.Modal.update.confirm.updatingDesc")}
 							</span>
 						) : (
-							<>{t("webServerUpdate.confirmDesc")}</>
+							<>{t("webServer.Modal.update.confirm.description")}</>
 						)}
 					</AlertDialogDescription>
 				</AlertDialogHeader>

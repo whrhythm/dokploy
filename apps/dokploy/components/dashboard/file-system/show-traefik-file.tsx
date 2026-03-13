@@ -18,6 +18,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { validateAndFormatYAML } from "../application/advanced/traefik/update-traefik-config";
 
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export const ShowTraefikFile = ({ path, serverId }: Props) => {
+	const { t } = useTranslation();
 	const {
 		data,
 		refetch,
@@ -70,11 +72,14 @@ export const ShowTraefikFile = ({ path, serverId }: Props) => {
 
 	const onSubmit = async (data: UpdateServerMiddlewareConfig) => {
 		if (!skipYamlValidation) {
-			const { valid, error } = validateAndFormatYAML(data.traefikConfig);
+			const { valid, error } = validateAndFormatYAML(
+				data.traefikConfig,
+				t("traefikFile.yamlUnexpectedError"),
+			);
 			if (!valid) {
 				form.setError("traefikConfig", {
 					type: "manual",
-					message: error || "Invalid YAML",
+					message: error || t("traefikFile.invalidYaml"),
 				});
 				return;
 			}
@@ -86,11 +91,11 @@ export const ShowTraefikFile = ({ path, serverId }: Props) => {
 			serverId,
 		})
 			.then(async () => {
-				toast.success("Traefik config Updated");
+				toast.success(t("traefikFile.updated"));
 				refetch();
 			})
 			.catch(() => {
-				toast.error("Error updating the Traefik config");
+				toast.error(t("traefikFile.updateError"));
 			});
 	};
 
@@ -106,7 +111,7 @@ export const ShowTraefikFile = ({ path, serverId }: Props) => {
 						{isLoadingFile ? (
 							<div className="w-full flex-col gap-2 flex items-center justify-center h-[55vh]">
 								<span className="text-muted-foreground text-lg font-medium">
-									Loading...
+									{t("loading")}
 								</span>
 								<Loader2 className="animate-spin size-8 text-muted-foreground" />
 							</div>
@@ -116,7 +121,7 @@ export const ShowTraefikFile = ({ path, serverId }: Props) => {
 								name="traefikConfig"
 								render={({ field }) => (
 									<FormItem className="relative">
-										<FormLabel>Traefik config</FormLabel>
+										<FormLabel>{t("traefikFile.label")}</FormLabel>
 										<FormDescription className="break-all">
 											{path}
 										</FormDescription>
@@ -124,16 +129,7 @@ export const ShowTraefikFile = ({ path, serverId }: Props) => {
 											<CodeEditor
 												lineWrapping
 												wrapperClassName="h-[35rem] font-mono"
-												placeholder={`http:
-routers:
-    router-name:
-        rule: Host('domain.com')
-        service: container-name
-        entryPoints:
-            - web
-        tls: false
-        middlewares: []
-                                                    `}
+												placeholder={t("traefikFile.placeholder")}
 												{...field}
 											/>
 										</FormControl>
@@ -150,7 +146,9 @@ routers:
 													setCanEdit(!canEdit);
 												}}
 											>
-												{canEdit ? "Unlock" : "Lock"}
+												{canEdit
+													? t("traefikFile.unlock")
+													: t("traefikFile.lock")}
 											</Button>
 										</div>
 									</FormItem>
@@ -171,14 +169,13 @@ routers:
 								htmlFor="skip-yaml-validation"
 								className="text-sm font-normal cursor-pointer"
 							>
-								Skip YAML validation (for Go templating)
+								{t("traefikFile.skipValidation")}
 							</Label>
 						</div>
 						<p className="text-sm text-muted-foreground -mt-2">
-							Traefik supports Go templating in dynamic configs (e.g.{" "}
-							<code className="text-xs">{"{{range}}"}</code>). Configs using
-							templates will fail standard YAML validation. Check this to save
-							without validation.
+							{t("traefikFile.skipValidationHelp", {
+								template: "{{range}}",
+							})}
 						</p>
 						<div className="flex justify-end">
 							<Button
@@ -186,7 +183,7 @@ routers:
 								disabled={canEdit || isLoadingFile}
 								type="submit"
 							>
-								Update
+								{t("button.update")}
 							</Button>
 						</div>
 					</div>

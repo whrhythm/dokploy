@@ -38,24 +38,33 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 
-const Schema = z.object({
-	name: z.string().min(1, { message: "Name is required" }),
-	apiUrl: z.string().url({ message: "Please enter a valid URL" }),
-	apiKey: z.string(),
-	model: z.string().min(1, { message: "Model is required" }),
-	isEnabled: z.boolean(),
-});
+const createSchema = (t: (key: string) => string) =>
+	z.object({
+		name: z.string().min(1, {
+			message: t("pages.Modal.aiSettings.validation.nameRequired"),
+		}),
+		apiUrl: z
+			.string()
+			.url({ message: t("pages.Modal.aiSettings.validation.apiUrlInvalid") }),
+		apiKey: z.string(),
+		model: z.string().min(1, {
+			message: t("pages.Modal.aiSettings.validation.modelRequired"),
+		}),
+		isEnabled: z.boolean(),
+	});
 
-type Schema = z.infer<typeof Schema>;
+type Schema = z.infer<ReturnType<typeof createSchema>>;
 
 interface Props {
 	aiId?: string;
 }
 
 export const HandleAi = ({ aiId }: Props) => {
+	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [open, setOpen] = useState(false);
 	const [modelPopoverOpen, setModelPopoverOpen] = useState(false);
@@ -73,7 +82,7 @@ export const HandleAi = ({ aiId }: Props) => {
 		: api.ai.create.useMutation();
 
 	const form = useForm<Schema>({
-		resolver: zodResolver(Schema),
+		resolver: zodResolver(createSchema(t)),
 		defaultValues: {
 			name: "",
 			apiUrl: "",
@@ -123,12 +132,13 @@ export const HandleAi = ({ aiId }: Props) => {
 			});
 
 			utils.ai.getAll.invalidate();
-			toast.success("AI settings saved successfully");
+			toast.success(t("settings.ai.toast.saved"));
 			refetch();
 			setOpen(false);
 		} catch (error) {
-			toast.error("Failed to save AI settings", {
-				description: error instanceof Error ? error.message : "Unknown error",
+			toast.error(t("settings.ai.toast.saveError"), {
+				description:
+					error instanceof Error ? error.message : t("error.unknown"),
 			});
 		}
 	};
@@ -156,15 +166,19 @@ export const HandleAi = ({ aiId }: Props) => {
 				) : (
 					<Button className="cursor-pointer space-x-3">
 						<PlusIcon className="h-4 w-4" />
-						Add AI
+						{t("settings.ai.actions.add")}
 					</Button>
 				)}
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-lg">
 				<DialogHeader>
-					<DialogTitle>{aiId ? "Edit AI" : "Add AI"}</DialogTitle>
+					<DialogTitle>
+						{aiId
+							? t("pages.Modal.aiSettings.titleEdit")
+							: t("pages.Modal.aiSettings.titleAdd")}
+					</DialogTitle>
 					<DialogDescription>
-						Configure your AI provider settings
+						{t("pages.Modal.aiSettings.description")}
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -177,12 +191,17 @@ export const HandleAi = ({ aiId }: Props) => {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Name</FormLabel>
+									<FormLabel>{t("pages.Modal.aiSettings.form.name")}</FormLabel>
 									<FormControl>
-										<Input placeholder="My OpenAI Config" {...field} />
+										<Input
+											placeholder={t(
+												"pages.Modal.aiSettings.form.namePlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormDescription>
-										A name to identify this configuration
+										{t("pages.Modal.aiSettings.form.nameHelp")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -194,10 +213,14 @@ export const HandleAi = ({ aiId }: Props) => {
 							name="apiUrl"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>API URL</FormLabel>
+									<FormLabel>
+										{t("pages.Modal.aiSettings.form.apiUrl")}
+									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="https://api.openai.com/v1"
+											placeholder={t(
+												"pages.Modal.aiSettings.form.apiUrlPlaceholder",
+											)}
 											{...field}
 											onChange={(e) => {
 												field.onChange(e);
@@ -209,7 +232,7 @@ export const HandleAi = ({ aiId }: Props) => {
 										/>
 									</FormControl>
 									<FormDescription>
-										The base URL for your AI provider's API
+										{t("pages.Modal.aiSettings.form.apiUrlHelp")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -222,11 +245,15 @@ export const HandleAi = ({ aiId }: Props) => {
 								name="apiKey"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>API Key</FormLabel>
+										<FormLabel>
+											{t("pages.Modal.aiSettings.form.apiKey")}
+										</FormLabel>
 										<FormControl>
 											<Input
 												type="password"
-												placeholder="sk-..."
+												placeholder={t(
+													"pages.Modal.aiSettings.form.apiKeyPlaceholder",
+												)}
 												autoComplete="one-time-code"
 												{...field}
 												onChange={(e) => {
@@ -239,7 +266,7 @@ export const HandleAi = ({ aiId }: Props) => {
 											/>
 										</FormControl>
 										<FormDescription>
-											Your API key for authentication
+											{t("pages.Modal.aiSettings.form.apiKeyHelp")}
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -249,13 +276,13 @@ export const HandleAi = ({ aiId }: Props) => {
 
 						{isLoadingServerModels && (
 							<span className="text-sm text-muted-foreground">
-								Loading models...
+								{t("pages.Modal.aiSettings.models.loading")}
 							</span>
 						)}
 
 						{!isLoadingServerModels && !models?.length && (
 							<span className="text-sm text-muted-foreground">
-								No models available
+								{t("pages.Modal.aiSettings.models.none")}
 							</span>
 						)}
 
@@ -281,7 +308,9 @@ export const HandleAi = ({ aiId }: Props) => {
 
 									return (
 										<FormItem>
-											<FormLabel>Model</FormLabel>
+											<FormLabel>
+												{t("pages.Modal.aiSettings.form.model")}
+											</FormLabel>
 											<Popover
 												open={modelPopoverOpen}
 												onOpenChange={setModelPopoverOpen}
@@ -297,7 +326,9 @@ export const HandleAi = ({ aiId }: Props) => {
 														>
 															{field.value
 																? (selectedModel?.id ?? field.value)
-																: "Select a model"}
+																: t(
+																		"pages.Modal.aiSettings.form.modelPlaceholder",
+																	)}
 															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 														</Button>
 													</FormControl>
@@ -305,12 +336,16 @@ export const HandleAi = ({ aiId }: Props) => {
 												<PopoverContent className="w-[400px] p-0" align="start">
 													<Command>
 														<CommandInput
-															placeholder="Search models..."
+															placeholder={t(
+																"pages.Modal.aiSettings.models.searchPlaceholder",
+															)}
 															value={modelSearch}
 															onValueChange={setModelSearch}
 														/>
 														<CommandList>
-															<CommandEmpty>No models found.</CommandEmpty>
+															<CommandEmpty>
+																{t("pages.Modal.aiSettings.models.noneFound")}
+															</CommandEmpty>
 															{displayModels.map((model) => {
 																const isSelected = field.value === model.id;
 																return (
@@ -340,7 +375,7 @@ export const HandleAi = ({ aiId }: Props) => {
 												</PopoverContent>
 											</Popover>
 											<FormDescription>
-												Select an AI model to use
+												{t("pages.Modal.aiSettings.form.modelHelp")}
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -356,10 +391,10 @@ export const HandleAi = ({ aiId }: Props) => {
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 									<div className="space-y-0.5">
 										<FormLabel className="text-base">
-											Enable AI Features
+											{t("pages.Modal.aiSettings.form.enableLabel")}
 										</FormLabel>
 										<FormDescription>
-											Turn on/off AI functionality
+											{t("pages.Modal.aiSettings.form.enableHelp")}
 										</FormDescription>
 									</div>
 									<FormControl>
@@ -374,7 +409,7 @@ export const HandleAi = ({ aiId }: Props) => {
 
 						<div className="flex justify-end  gap-2 pt-4">
 							<Button type="submit" isLoading={isPending}>
-								{aiId ? "Update" : "Create"}
+								{aiId ? t("button.update") : t("button.create")}
 							</Button>
 						</div>
 					</form>

@@ -10,15 +10,10 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
-const lineCountOptions = [
-	{ label: "100 lines", value: 100 },
-	{ label: "300 lines", value: 300 },
-	{ label: "500 lines", value: 500 },
-	{ label: "1000 lines", value: 1000 },
-	{ label: "5000 lines", value: 5000 },
-] as const;
+const lineCountOptions = [100, 300, 500, 1000, 5000] as const;
 
 interface LineCountFilterProps {
 	value: number;
@@ -29,15 +24,15 @@ interface LineCountFilterProps {
 export function LineCountFilter({
 	value,
 	onValueChange,
-	title = "Limit to",
+	title,
 }: LineCountFilterProps) {
+	const { t } = useTranslation();
+	const resolvedTitle = title ?? t("docker.logs.limitTo");
 	const [open, setOpen] = React.useState(false);
 	const [inputValue, setInputValue] = React.useState("");
 	const pendingValueRef = useRef<number | null>(null);
 
-	const isPresetValue = lineCountOptions.some(
-		(option) => option.value === value,
-	);
+	const isPresetValue = lineCountOptions.some((option) => option === value);
 
 	const debouncedValueChange = useCallback(
 		debounce((numValue: number) => {
@@ -61,17 +56,18 @@ export function LineCountFilter({
 	};
 
 	const handleSelect = (selectedValue: string) => {
-		const preset = lineCountOptions.find((opt) => opt.label === selectedValue);
+		const numericValue = Number.parseInt(selectedValue.replace(/[^0-9]/g, ""));
+		const preset = lineCountOptions.find((opt) => opt === numericValue);
 		if (preset) {
-			if (preset.value !== value) {
-				onValueChange(preset.value);
+			if (preset !== value) {
+				onValueChange(preset);
 			}
 			setInputValue("");
 			setOpen(false);
 			return;
 		}
 
-		const numValue = Number.parseInt(selectedValue);
+		const numValue = Number.parseInt(selectedValue.replace(/[^0-9]/g, ""));
 		if (
 			!Number.isNaN(numValue) &&
 			numValue > 0 &&
@@ -90,9 +86,7 @@ export function LineCountFilter({
 		};
 	}, [debouncedValueChange]);
 
-	const displayValue = isPresetValue
-		? lineCountOptions.find((option) => option.value === value)?.label
-		: `${value} lines`;
+	const displayValue = t("docker.logs.lines", { value });
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -102,7 +96,7 @@ export function LineCountFilter({
 					size="sm"
 					className="h-9 bg-input text-sm placeholder-gray-400 w-full sm:w-auto"
 				>
-					{title}
+					{resolvedTitle}
 					<Separator orientation="vertical" className="mx-2 h-4" />
 					<div className="space-x-1 flex">
 						<Badge variant="blank" className="rounded-sm px-1 font-normal">
@@ -116,7 +110,7 @@ export function LineCountFilter({
 					<div className="flex items-center border-b px-3">
 						<Hash className="mr-2 h-4 w-4 shrink-0 opacity-50" />
 						<CommandPrimitive.Input
-							placeholder="Number of lines"
+							placeholder={t("docker.logs.lineCountPlaceholder")}
 							value={inputValue}
 							onValueChange={handleInputChange}
 							className="flex h-9 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
@@ -141,11 +135,11 @@ export function LineCountFilter({
 					<CommandPrimitive.List className="max-h-[300px] overflow-y-auto overflow-x-hidden">
 						<CommandPrimitive.Group className="px-2 py-1.5">
 							{lineCountOptions.map((option) => {
-								const isSelected = value === option.value;
+								const isSelected = value === option;
 								return (
 									<CommandPrimitive.Item
-										key={option.value}
-										onSelect={() => handleSelect(option.label)}
+										key={option}
+										onSelect={() => handleSelect(option.toString())}
 										className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 aria-selected:bg-accent aria-selected:text-accent-foreground"
 									>
 										<div
@@ -158,7 +152,7 @@ export function LineCountFilter({
 										>
 											<CheckIcon className={cn("h-4 w-4")} />
 										</div>
-										<span>{option.label}</span>
+										<span>{t("docker.logs.lines", { value: option })}</span>
 									</CommandPrimitive.Item>
 								);
 							})}

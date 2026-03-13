@@ -37,6 +37,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 import { ShowNodesModal } from "../cluster/nodes/show-nodes-modal";
 import { TerminalModal } from "../web-server/terminal-modal";
@@ -51,6 +52,7 @@ import { ShowTraefikFileSystemModal } from "./show-traefik-file-system-modal";
 import { WelcomeSuscription } from "./welcome-stripe/welcome-suscription";
 
 export const ShowServers = () => {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const query = router.query;
 	const { data, refetch, isPending } = api.server.all.useQuery();
@@ -68,11 +70,9 @@ export const ShowServers = () => {
 					<CardHeader className="">
 						<CardTitle className="text-xl flex flex-row gap-2">
 							<ServerIcon className="size-6 text-muted-foreground self-center" />
-							Servers
+							{t("servers.title")}
 						</CardTitle>
-						<CardDescription>
-							Add servers to deploy your applications remotely.
-						</CardDescription>
+						<CardDescription>{t("servers.description")}</CardDescription>
 
 						{isCloud && (
 							<span
@@ -81,14 +81,14 @@ export const ShowServers = () => {
 									router.push("/dashboard/settings/servers?success=true");
 								}}
 							>
-								Reset Onboarding
+								{t("servers.resetOnboarding")}
 							</span>
 						)}
 					</CardHeader>
 					<CardContent className="space-y-2 py-8 border-t">
 						{isPending ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[25vh]">
-								<span>Loading...</span>
+								<span>{t("servers.loading")}</span>
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
@@ -97,12 +97,12 @@ export const ShowServers = () => {
 									<div className="flex flex-col items-center gap-3 min-h-[25vh] justify-center">
 										<KeyIcon className="size-8" />
 										<span className="text-base text-muted-foreground">
-											No SSH Keys found. Add a SSH Key to start adding servers.{" "}
+											{t("servers.emptySSHKeys")}{" "}
 											<Link
 												href="/dashboard/settings/ssh-keys"
 												className="text-primary"
 											>
-												Add SSH Key
+												{t("servers.addSSHKey")}
 											</Link>
 										</span>
 									</div>
@@ -112,8 +112,7 @@ export const ShowServers = () => {
 											<div className="flex flex-col items-center gap-3  min-h-[25vh] justify-center">
 												<ServerIcon className="size-8 self-center text-muted-foreground" />
 												<span className="text-base text-muted-foreground">
-													Start adding servers to deploy your applications
-													remotely.
+													{t("servers.emptyState")}
 												</span>
 												<HandleServers />
 											</div>
@@ -147,14 +146,14 @@ export const ShowServers = () => {
 																							className="h-8 w-8 p-0"
 																						>
 																							<span className="sr-only">
-																								More options
+																								{t("servers.moreOptions")}
 																							</span>
 																							<MoreHorizontal className="h-4 w-4" />
 																						</Button>
 																					</DropdownMenuTrigger>
 																					<DropdownMenuContent align="end">
 																						<DropdownMenuLabel>
-																							Advanced
+																							{t("servers.advanced")}
 																						</DropdownMenuLabel>
 																						<ShowTraefikFileSystemModal
 																							serverId={server.serverId}
@@ -200,7 +199,9 @@ export const ShowServers = () => {
 																										variant="destructive"
 																										className="cursor-help"
 																									>
-																										{server.serverStatus}
+																										{t(
+																											"servers.deactivatedStatus",
+																										)}
 																									</Badge>
 																								</span>
 																							</TooltipTrigger>
@@ -209,11 +210,7 @@ export const ShowServers = () => {
 																								side="bottom"
 																							>
 																								<p className="text-sm">
-																									This server is deactivated due
-																									to lack of payment. Please pay
-																									your invoice to reactivate it.
-																									If you think this is an error,
-																									please contact support.
+																									{t("servers.inactiveReason")}
 																								</p>
 																							</TooltipContent>
 																						</Tooltip>
@@ -236,13 +233,13 @@ export const ShowServers = () => {
 																	<div className="flex items-center gap-2 text-sm">
 																		<Network className="size-4 text-muted-foreground" />
 																		<span className="text-muted-foreground">
-																			IP:
+																			{t("servers.ip")}:
 																		</span>
 																		<Badge variant="outline">
 																			{server.ipAddress}
 																		</Badge>
 																		<span className="text-muted-foreground">
-																			Port:
+																			{t("servers.port")}:
 																		</span>
 																		<span className="font-medium">
 																			{server.port}
@@ -251,7 +248,7 @@ export const ShowServers = () => {
 																	<div className="flex items-center gap-2 text-sm">
 																		<User className="size-4 text-muted-foreground" />
 																		<span className="text-muted-foreground">
-																			User:
+																			{t("servers.user")}:
 																		</span>
 																		<span className="font-medium">
 																			{server.username}
@@ -260,16 +257,18 @@ export const ShowServers = () => {
 																	<div className="flex items-center gap-2 text-sm">
 																		<Key className="size-4 text-muted-foreground" />
 																		<span className="text-muted-foreground">
-																			SSH Key:
+																			{t("servers.sshKey")}:
 																		</span>
 																		<span className="font-medium">
-																			{server.sshKeyId ? "Yes" : "No"}
+																			{server.sshKeyId
+																				? t("common.yes")
+																				: t("common.no")}
 																		</span>
 																	</div>
 																	<div className="flex items-center gap-2 text-sm pt-2 border-t">
 																		<Clock className="size-4 text-muted-foreground" />
 																		<span className="text-xs text-muted-foreground">
-																			Created{" "}
+																			{t("servers.created")}{" "}
 																			{format(
 																				new Date(server.createdAt),
 																				"PPp",
@@ -293,12 +292,12 @@ export const ShowServers = () => {
 																					>
 																						<div className="space-y-1">
 																							<p className="font-semibold">
-																								Setup Server
+																								{t("servers.setupServer")}
 																							</p>
 																							<p className="text-xs text-muted-foreground">
-																								Configure and initialize your
-																								server with Docker, Traefik, and
-																								other essential services
+																								{t(
+																									"servers.setupServerDescription",
+																								)}
 																							</p>
 																						</div>
 																					</TooltipContent>
@@ -325,7 +324,7 @@ export const ShowServers = () => {
 																							</div>
 																						</TooltipTrigger>
 																						<TooltipContent>
-																							<p>Terminal</p>
+																							<p>{t("servers.terminal")}</p>
 																						</TooltipContent>
 																					</Tooltip>
 																				)}
@@ -340,7 +339,7 @@ export const ShowServers = () => {
 																						</div>
 																					</TooltipTrigger>
 																					<TooltipContent>
-																						<p>Edit Server</p>
+																						<p>{t("servers.editServer")}</p>
 																					</TooltipContent>
 																				</Tooltip>
 
@@ -355,7 +354,9 @@ export const ShowServers = () => {
 																							</div>
 																						</TooltipTrigger>
 																						<TooltipContent>
-																							<p>Web Server Actions</p>
+																							<p>
+																								{t("servers.webServerActions")}
+																							</p>
 																						</TooltipContent>
 																					</Tooltip>
 																				)}
@@ -369,22 +370,25 @@ export const ShowServers = () => {
 																								disabled={!canDelete}
 																								title={
 																									canDelete
-																										? "Delete Server"
-																										: "Server has active services"
+																										? t("servers.deleteServer")
+																										: t(
+																												"servers.deleteServerError",
+																											)
 																								}
 																								description={
 																									canDelete ? (
-																										"This will delete the server and all associated data"
+																										t(
+																											"servers.deleteServerConfirm",
+																										)
 																									) : (
 																										<div className="flex flex-col gap-2">
-																											You can not delete this
-																											server because it has
-																											active services.
+																											{t(
+																												"servers.deleteServerError",
+																											)}
 																											<AlertBlock type="warning">
-																												You have active services
-																												associated with this
-																												server, please delete
-																												them first.
+																												{t(
+																													"servers.deleteServerWarning",
+																												)}
 																											</AlertBlock>
 																										</div>
 																									)
@@ -396,7 +400,7 @@ export const ShowServers = () => {
 																										.then(() => {
 																											refetch();
 																											toast.success(
-																												`Server ${server.name} deleted successfully`,
+																												`${server.name} ${t("status.deleted")}`,
 																											);
 																										})
 																										.catch((err) => {
@@ -417,8 +421,10 @@ export const ShowServers = () => {
 																					<TooltipContent>
 																						<p>
 																							{canDelete
-																								? "Delete Server"
-																								: "Cannot delete - has active services"}
+																								? t("servers.deleteServer")
+																								: t(
+																										"servers.deleteCannotDelete",
+																									)}
 																						</p>
 																					</TooltipContent>
 																				</Tooltip>

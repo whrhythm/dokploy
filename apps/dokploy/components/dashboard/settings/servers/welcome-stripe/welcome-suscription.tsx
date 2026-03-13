@@ -25,6 +25,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "@/hooks/use-translation";
 import { CreateServer } from "./create-server";
 import { CreateSSHKey } from "./create-ssh-key";
 import { Setup } from "./setup";
@@ -33,25 +34,38 @@ import { Verify } from "./verify";
 export const { useStepper, steps, Scoped } = defineStepper(
 	{
 		id: "requisites",
-		title: "Requisites",
-		description: "Check your requisites",
+		title: "welcomeStripe.steps.requisites.title",
+		description: "welcomeStripe.steps.requisites.description",
 	},
 	{
 		id: "create-ssh-key",
-		title: "SSH Key",
-		description: "Create your ssh key",
+		title: "welcomeStripe.steps.sshKey.title",
+		description: "welcomeStripe.steps.sshKey.description",
 	},
 	{
 		id: "connect-server",
-		title: "Connect",
-		description: "Connect",
+		title: "welcomeStripe.steps.connect.title",
+		description: "welcomeStripe.steps.connect.description",
 	},
-	{ id: "setup", title: "Setup", description: "Setup your server" },
-	{ id: "verify", title: "Verify", description: "Verify your server" },
-	{ id: "complete", title: "Complete", description: "Checkout complete" },
+	{
+		id: "setup",
+		title: "welcomeStripe.steps.setup.title",
+		description: "welcomeStripe.steps.setup.description",
+	},
+	{
+		id: "verify",
+		title: "welcomeStripe.steps.verify.title",
+		description: "welcomeStripe.steps.verify.description",
+	},
+	{
+		id: "complete",
+		title: "welcomeStripe.steps.complete.title",
+		description: "welcomeStripe.steps.complete.description",
+	},
 );
 
 export const WelcomeSuscription = () => {
+	const { t } = useTranslation();
 	const [showConfetti, setShowConfetti] = useState(false);
 	const stepper = useStepper();
 	const [isOpen, setIsOpen] = useState(true);
@@ -68,7 +82,7 @@ export const WelcomeSuscription = () => {
 	return (
 		<Dialog open={isOpen}>
 			<DialogContent className="sm:max-w-7xl min-h-[75vh]">
-				{showConfetti ?? "Flaso"}
+				{showConfetti ?? false}
 				<div className="flex justify-center items-center w-full">
 					{showConfetti && (
 						<ConfettiExplosion
@@ -85,26 +99,32 @@ export const WelcomeSuscription = () => {
 
 				<DialogHeader>
 					<DialogTitle className="text-2xl text-center">
-						Welcome To Dokploy Cloud 🎉
+						{t("welcomeStripe.title")}
 					</DialogTitle>
 					<DialogDescription className="text-center max-w-xl mx-auto">
-						Thank you for choosing Dokploy Cloud! 🚀 We're excited to have you
-						onboard. Before you dive in, you'll need to configure your remote
-						server to unlock all the features we offer.
+						{t("welcomeStripe.description")}
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid gap-4">
 					<div className="flex justify-between">
-						<h2 className="text-lg font-semibold">Steps</h2>
+						<h2 className="text-lg font-semibold">
+							{t("welcomeStripe.steps")}
+						</h2>
 						<div className="flex items-center gap-2">
 							<span className="text-sm text-muted-foreground">
-								Step {stepper.current.index + 1} of {steps.length}
+								{t("welcomeStripe.stepCounter", {
+									current: stepper.current.index + 1,
+									total: steps.length,
+								})}
 							</span>
 							<div />
 						</div>
 					</div>
 					<Scoped>
-						<nav aria-label="Checkout Steps" className="group my-4">
+						<nav
+							aria-label={t("welcomeStripe.checkoutStepsAria")}
+							className="group my-4"
+						>
 							<ol
 								className="flex items-center justify-between gap-2"
 								aria-orientation="horizontal"
@@ -129,7 +149,9 @@ export const WelcomeSuscription = () => {
 											>
 												{index + 1}
 											</Button>
-											<span className="text-sm font-medium">{step.title}</span>
+											<span className="text-sm font-medium">
+												{t(step.title)}
+											</span>
 										</li>
 										{index < array.length - 1 && (
 											<Separator
@@ -148,12 +170,11 @@ export const WelcomeSuscription = () => {
 							requisites: () => (
 								<div className="flex flex-col gap-2 border p-4 rounded-lg">
 									<span className="text-primary text-base font-bold">
-										Before getting started, please follow the steps below to
-										ensure the best experience:
+										{t("welcomeStripe.requisites.intro")}
 									</span>
 									<div>
 										<p className="text-primary text-sm font-medium">
-											Supported Distributions:
+											{t("welcomeStripe.requisites.supportedDistributions")}
 										</p>
 										<ul className="list-inside list-disc pl-4 text-sm text-muted-foreground  mt-4">
 											<li>Ubuntu 24.04 LTS</li>
@@ -171,9 +192,7 @@ export const WelcomeSuscription = () => {
 									</div>
 									<div>
 										<p className="text-primary text-sm font-medium">
-											You will need to purchase or rent a Virtual Private Server
-											(VPS) to proceed, we recommend to use one of these
-											providers since has been heavily tested.
+											{t("welcomeStripe.requisites.vpsNotice")}
 										</p>
 										<ul className="list-inside list-disc pl-4 text-sm text-muted-foreground mt-4">
 											<li>
@@ -181,7 +200,7 @@ export const WelcomeSuscription = () => {
 													href="https://www.hostinger.com/vps-hosting?REFERRALCODE=1SIUMAURICI97"
 													className="text-link underline"
 												>
-													Hostinger - Get 20% Discount
+													{t("servers.providers.hostinger")}
 												</a>
 											</li>
 											<li>
@@ -189,7 +208,7 @@ export const WelcomeSuscription = () => {
 													href=" https://app.americancloud.com/register?ref=dokploy"
 													className="text-link underline"
 												>
-													American Cloud - Get $20 Credits
+													{t("servers.providers.americancloud")}
 												</a>
 											</li>
 											<li>
@@ -197,7 +216,7 @@ export const WelcomeSuscription = () => {
 													href="https://m.do.co/c/db24efd43f35"
 													className="text-link underline"
 												>
-													DigitalOcean - Get $200 Credits
+													{t("servers.providers.digitalocean")}
 												</a>
 											</li>
 											<li>
@@ -205,7 +224,7 @@ export const WelcomeSuscription = () => {
 													href="https://hetzner.cloud/?ref=vou4fhxJ1W2D"
 													className="text-link underline"
 												>
-													Hetzner - Get €20 Credits
+													{t("servers.providers.hetzner")}
 												</a>
 											</li>
 											<li>
@@ -213,7 +232,7 @@ export const WelcomeSuscription = () => {
 													href="https://www.vultr.com/?ref=9679828"
 													className="text-link underline"
 												>
-													Vultr
+													{t("servers.providers.vultr")}
 												</a>
 											</li>
 											<li>
@@ -221,13 +240,12 @@ export const WelcomeSuscription = () => {
 													href="https://www.linode.com/es/pricing/#compute-shared"
 													className="text-link underline"
 												>
-													Linode
+													{t("servers.providers.linode")}
 												</a>
 											</li>
 										</ul>
 										<AlertBlock className="mt-4 px-4">
-											You are free to use whatever provider, but we recommend to
-											use one of the above, to avoid issues.
+											{t("servers.form.vpsNote")}
 										</AlertBlock>
 									</div>
 								</div>
@@ -239,70 +257,80 @@ export const WelcomeSuscription = () => {
 							complete: () => {
 								const features = [
 									{
-										title: "Scalable Deployments",
-										description:
-											"Deploy and scale your applications effortlessly to handle any workload.",
+										title: t("welcomeStripe.complete.features.scalable.title"),
+										description: t(
+											"welcomeStripe.complete.features.scalable.description",
+										),
 										icon: <Database className="text-primary" />,
 									},
 									{
-										title: "Automated Backups",
-										description: "Protect your data with automatic backups",
+										title: t("welcomeStripe.complete.features.backups.title"),
+										description: t(
+											"welcomeStripe.complete.features.backups.description",
+										),
 										icon: <Database className="text-primary" />,
 									},
 									{
-										title: "Open Source Templates",
-										description:
-											"Big list of common open source templates in one-click",
+										title: t("welcomeStripe.complete.features.templates.title"),
+										description: t(
+											"welcomeStripe.complete.features.templates.description",
+										),
 										icon: <Puzzle className="text-primary" />,
 									},
 									{
-										title: "Custom Domains",
-										description:
-											"Link your own domains to your applications for a professional presence.",
+										title: t("welcomeStripe.complete.features.domains.title"),
+										description: t(
+											"welcomeStripe.complete.features.domains.description",
+										),
 										icon: <Globe className="text-primary" />,
 									},
 									{
-										title: "CI/CD Integration",
-										description:
-											"Implement continuous integration and deployment workflows to streamline development.",
+										title: t("welcomeStripe.complete.features.cicd.title"),
+										description: t(
+											"welcomeStripe.complete.features.cicd.description",
+										),
 										icon: <GitMerge className="text-primary" />,
 									},
 									{
-										title: "Database Management",
-										description:
-											"Efficiently manage your databases with intuitive tools.",
+										title: t("welcomeStripe.complete.features.databases.title"),
+										description: t(
+											"welcomeStripe.complete.features.databases.description",
+										),
 										icon: <Database className="text-primary" />,
 									},
 									{
-										title: "Team Collaboration",
-										description:
-											"Collaborate with your team on shared projects with customizable permissions.",
+										title: t("welcomeStripe.complete.features.team.title"),
+										description: t(
+											"welcomeStripe.complete.features.team.description",
+										),
 										icon: <Users className="text-primary" />,
 									},
 									{
-										title: "Multi-language Support",
-										description:
-											"Deploy applications in multiple programming languages to suit your needs.",
+										title: t("welcomeStripe.complete.features.multilang.title"),
+										description: t(
+											"welcomeStripe.complete.features.multilang.description",
+										),
 										icon: <Code2 className="text-primary" />,
 									},
 									{
-										title: "API Access",
-										description:
-											"Integrate and manage your applications via robust and well-documented APIs.",
+										title: t("welcomeStripe.complete.features.api.title"),
+										description: t(
+											"welcomeStripe.complete.features.api.description",
+										),
 										icon: <Plug className="text-primary" />,
 									},
 								];
 								return (
 									<div className="flex flex-col gap-6">
 										<div className="flex flex-col gap-2">
-											<h2 className="text-lg font-semibold">You're All Set!</h2>
+											<h2 className="text-lg font-semibold">
+												{t("welcomeStripe.complete.title")}
+											</h2>
 											<p className="text-muted-foreground">
-												Did you know you can deploy any number of applications
-												that your server can handle?
+												{t("welcomeStripe.complete.description")}
 											</p>
 											<p className="text-muted-foreground">
-												Here are some of the things you can do with Dokploy
-												Cloud:
+												{t("welcomeStripe.complete.featuresIntro")}
 											</p>
 										</div>
 
@@ -325,16 +353,16 @@ export const WelcomeSuscription = () => {
 
 										<div className="flex flex-col gap-2 mt-4">
 											<span className="text-base text-primary">
-												Need Help? We are here to help you.
+												{t("welcomeStripe.complete.helpTitle")}
 											</span>
 											<span className="text-sm text-muted-foreground">
-												Join to our Discord server and we will help you.
+												{t("welcomeStripe.complete.helpDescription")}
 											</span>
 											<div className="flex flex-row gap-4">
 												<Button className="rounded-full bg-[#5965F2] hover:bg-[#4A55E0] w-fit">
 													<Link
 														href="https://discord.gg/2tBnJ3jDJc"
-														aria-label="Dokploy on GitHub"
+														aria-label={t("welcomeStripe.complete.discordAria")}
 														target="_blank"
 														className="flex flex-row items-center gap-2 text-white"
 													>
@@ -346,18 +374,18 @@ export const WelcomeSuscription = () => {
 														>
 															<path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
 														</svg>
-														Join Discord
+														{t("welcomeStripe.complete.discord")}
 													</Link>
 												</Button>
 												<Button className="rounded-full  w-fit">
 													<Link
 														href="https://github.com/Dokploy/dokploy"
-														aria-label="Dokploy on GitHub"
+														aria-label={t("welcomeStripe.complete.githubAria")}
 														target="_blank"
 														className="flex flex-row items-center gap-2 "
 													>
 														<GithubIcon />
-														Github
+														{t("welcomeStripe.complete.github")}
 													</Link>
 												</Button>
 
@@ -367,12 +395,12 @@ export const WelcomeSuscription = () => {
 												>
 													<Link
 														href="https://docs.dokploy.com/docs/core"
-														aria-label="Dokploy Docs"
+														aria-label={t("welcomeStripe.complete.docsAria")}
 														target="_blank"
 														className="flex flex-row items-center gap-2 "
 													>
 														<BookIcon size={16} />
-														Docs
+														{t("welcomeStripe.complete.docs")}
 													</Link>
 												</Button>
 											</div>
@@ -393,7 +421,7 @@ export const WelcomeSuscription = () => {
 									push("/dashboard/settings/servers");
 								}}
 							>
-								Skip for now
+								{t("welcomeStripe.skip")}
 							</Button>
 						)}
 
@@ -403,7 +431,7 @@ export const WelcomeSuscription = () => {
 								disabled={stepper.isFirst}
 								variant="secondary"
 							>
-								Back
+								{t("button.back")}
 							</Button>
 							<Button
 								onClick={() => {
@@ -415,7 +443,7 @@ export const WelcomeSuscription = () => {
 									}
 								}}
 							>
-								{stepper.isLast ? "Complete" : "Next"}
+								{stepper.isLast ? t("button.finish") : t("button.next")}
 							</Button>
 						</div>
 					</div>

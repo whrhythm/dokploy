@@ -1,7 +1,7 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { CheckIcon, ChevronsUpDown, Plus, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -45,35 +45,47 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { Repository } from "@/utils/gitea-utils";
 
-const GiteaProviderSchema = z.object({
-	composePath: z.string().min(1),
-	repository: z
-		.object({
-			repo: z.string().min(1, "Repo is required"),
-			owner: z.string().min(1, "Owner is required"),
-		})
-		.required(),
-	branch: z.string().min(1, "Branch is required"),
-	giteaId: z.string().min(1, "Gitea Provider is required"),
-	watchPaths: z.array(z.string()).optional(),
-	enableSubmodules: z.boolean().default(false),
-});
+const createGiteaProviderSchema = (t: (key: string) => string) =>
+	z.object({
+		composePath: z.string().min(1),
+		repository: z
+			.object({
+				repo: z
+					.string()
+					.min(1, t("services.compose.provider.validation.repoRequired")),
+				owner: z
+					.string()
+					.min(1, t("services.compose.provider.validation.ownerRequired")),
+			})
+			.required(),
+		branch: z
+			.string()
+			.min(1, t("services.compose.provider.validation.branchRequired")),
+		giteaId: z
+			.string()
+			.min(1, t("services.compose.provider.validation.providerRequired")),
+		watchPaths: z.array(z.string()).optional(),
+		enableSubmodules: z.boolean().default(false),
+	});
 
-type GiteaProvider = z.infer<typeof GiteaProviderSchema>;
+type GiteaProvider = z.infer<ReturnType<typeof createGiteaProviderSchema>>;
 
 interface Props {
 	composeId: string;
 }
 
 export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
+	const { t } = useTranslation();
 	const { data: giteaProviders } = api.gitea.giteaProviders.useQuery();
 	const { data, refetch } = api.compose.one.useQuery({ composeId });
 	const { mutateAsync, isPending: isSavingGiteaProvider } =
 		api.compose.update.useMutation();
+	const watchPathInputRef = useRef<HTMLInputElement>(null);
 
 	const form = useForm({
 		defaultValues: {
@@ -87,7 +99,7 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 			watchPaths: [],
 			enableSubmodules: false,
 		},
-		resolver: zodResolver(GiteaProviderSchema),
+		resolver: zodResolver(createGiteaProviderSchema(t)),
 	});
 
 	const repository = form.watch("repository");
@@ -158,11 +170,11 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 			enableSubmodules: data.enableSubmodules,
 		} as any)
 			.then(async () => {
-				toast.success("Service Provider Saved");
+				toast.success(t("services.compose.provider.toast.saved"));
 				await refetch();
 			})
 			.catch(() => {
-				toast.error("Error saving the Gitea provider");
+				toast.error(t("services.compose.provider.toast.saveError"));
 			});
 	};
 
@@ -181,7 +193,9 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 							name="giteaId"
 							render={({ field }) => (
 								<FormItem className="md:col-span-2 flex flex-col">
-									<FormLabel>Gitea Account</FormLabel>
+									<FormLabel>
+										{t("services.compose.provider.account.gitea")}
+									</FormLabel>
 									<Select
 										onValueChange={(value) => {
 											field.onChange(value);
@@ -196,7 +210,11 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 									>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select a Gitea Account" />
+												<SelectValue
+													placeholder={t(
+														"services.compose.provider.accountPlaceholder.gitea",
+													)}
+												/>
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -221,7 +239,9 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="md:col-span-2 flex flex-col">
 									<div className="flex items-center justify-between">
-										<FormLabel>Repository</FormLabel>
+										<FormLabel>
+											{t("services.compose.provider.repository")}
+										</FormLabel>
 										{field.value.owner && field.value.repo && (
 											<Link
 												href={`${giteaUrl}/${field.value.owner}/${field.value.repo}`}
@@ -230,7 +250,9 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 												className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
 											>
 												<GiteaIcon className="h-4 w-4" />
-												<span>View Repository</span>
+												<span>
+													{t("services.compose.provider.viewRepository")}
+												</span>
 											</Link>
 										)}
 									</div>
@@ -245,12 +267,17 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 													)}
 												>
 													{!field.value.owner
-														? "Select repository"
+														? t("services.compose.provider.selectRepository")
 														: isLoadingRepositories
-															? "Loading...."
+															? t(
+																	"services.compose.provider.loadingRepositories",
+																)
 															: (repositories?.find(
 																	(repo) => repo.name === field.value.repo,
-																)?.name ?? "Select repository")}
+																)?.name ??
+																t(
+																	"services.compose.provider.selectRepository",
+																))}
 													<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 												</Button>
 											</FormControl>
@@ -258,19 +285,25 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 										<PopoverContent className="p-0" align="start">
 											<Command>
 												<CommandInput
-													placeholder="Search repository..."
+													placeholder={t(
+														"services.compose.provider.searchRepository",
+													)}
 													className="h-9"
 												/>
 												{!giteaId ? (
 													<span className="py-6 text-center text-sm text-muted-foreground">
-														Select a Gitea account first
+														{t("services.compose.provider.selectAccountFirst", {
+															value: t("services.compose.provider.tabs.gitea"),
+														})}
 													</span>
 												) : isLoadingRepositories ? (
 													<span className="py-6 text-center text-sm">
-														Loading Repositories....
+														{t("services.compose.provider.loadingRepositories")}
 													</span>
 												) : null}
-												<CommandEmpty>No repositories found.</CommandEmpty>
+												<CommandEmpty>
+													{t("services.compose.provider.noRepositories")}
+												</CommandEmpty>
 												<ScrollArea className="h-96">
 													<CommandGroup>
 														{repositories?.map((repo) => (
@@ -308,7 +341,9 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 									</Popover>
 									{form.formState.errors.repository && (
 										<p className={cn("text-sm font-medium text-destructive")}>
-											Repository is required
+											{t(
+												"services.compose.provider.validation.repositoryRequired",
+											)}
 										</p>
 									)}
 								</FormItem>
@@ -320,7 +355,7 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 							name="branch"
 							render={({ field }) => (
 								<FormItem className="block w-full">
-									<FormLabel>Branch</FormLabel>
+									<FormLabel>{t("form.branch")}</FormLabel>
 									<Popover>
 										<PopoverTrigger asChild>
 											<FormControl>
@@ -332,12 +367,12 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 													)}
 												>
 													{status === "pending" && fetchStatus === "fetching"
-														? "Loading...."
+														? t("services.compose.provider.loadingBranches")
 														: field.value
 															? branches?.find(
 																	(branch) => branch.name === field.value,
 																)?.name
-															: "Select branch"}
+															: t("services.compose.provider.selectBranch")}
 													<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 												</Button>
 											</FormControl>
@@ -345,10 +380,14 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 										<PopoverContent className="p-0" align="start">
 											<Command>
 												<CommandInput
-													placeholder="Search branches..."
+													placeholder={t(
+														"services.compose.provider.searchBranch",
+													)}
 													className="h-9"
 												/>
-												<CommandEmpty>No branches found.</CommandEmpty>
+												<CommandEmpty>
+													{t("services.compose.provider.noBranches")}
+												</CommandEmpty>
 												<ScrollArea className="h-96">
 													<CommandGroup>
 														{branches?.map((branch) => (
@@ -379,7 +418,7 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 									</Popover>
 									{form.formState.errors.branch && (
 										<p className={cn("text-sm font-medium text-destructive")}>
-											Branch is required
+											{t("services.compose.provider.validation.branchRequired")}
 										</p>
 									)}
 								</FormItem>
@@ -391,9 +430,16 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 							name="composePath"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Compose Path</FormLabel>
+									<FormLabel>
+										{t("services.compose.provider.composePath")}
+									</FormLabel>
 									<FormControl>
-										<Input placeholder="docker-compose.yml" {...field} />
+										<Input
+											placeholder={t(
+												"services.compose.provider.composePathPlaceholder",
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -406,7 +452,9 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 							render={({ field }) => (
 								<FormItem className="md:col-span-2">
 									<div className="flex items-center gap-2">
-										<FormLabel>Watch Paths</FormLabel>
+										<FormLabel>
+											{t("services.compose.provider.watchPaths")}
+										</FormLabel>
 										<TooltipProvider>
 											<Tooltip>
 												<TooltipTrigger>
@@ -416,8 +464,7 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 												</TooltipTrigger>
 												<TooltipContent>
 													<p>
-														Add paths to watch for changes. When files in these
-														paths change, a new deployment will be triggered.
+														{t("services.compose.provider.watchPathsHelpShort")}
 													</p>
 												</TooltipContent>
 											</Tooltip>
@@ -441,7 +488,10 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 									<FormControl>
 										<div className="flex gap-2">
 											<Input
-												placeholder="Enter a path to watch (e.g., src/**, dist/*.js)"
+												placeholder={t(
+													"services.compose.provider.watchPathPlaceholder",
+												)}
+												ref={watchPathInputRef}
 												onKeyDown={(e) => {
 													if (e.key === "Enter") {
 														e.preventDefault();
@@ -460,13 +510,12 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 												variant="outline"
 												size="icon"
 												onClick={() => {
-													const input = document.querySelector(
-														'input[placeholder*="Enter a path"]',
-													) as HTMLInputElement;
-													const path = input.value.trim();
+													const path = watchPathInputRef.current?.value.trim();
 													if (path) {
 														field.onChange([...(field.value || []), path]);
-														input.value = "";
+														if (watchPathInputRef.current) {
+															watchPathInputRef.current.value = "";
+														}
 													}
 												}}
 											>
@@ -489,7 +538,9 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 											onCheckedChange={field.onChange}
 										/>
 									</FormControl>
-									<FormLabel className="!mt-0">Enable Submodules</FormLabel>
+									<FormLabel className="!mt-0">
+										{t("services.compose.provider.enableSubmodules")}
+									</FormLabel>
 								</FormItem>
 							)}
 						/>
@@ -497,7 +548,7 @@ export const SaveGiteaProviderCompose = ({ composeId }: Props) => {
 
 					<div className="flex justify-end">
 						<Button type="submit" isLoading={isSavingGiteaProvider}>
-							Save
+							{t("button.save")}
 						</Button>
 					</div>
 				</form>

@@ -20,6 +20,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "@/hooks/use-translation";
 import { api } from "@/utils/api";
 export const DockerLogs = dynamic(
 	() =>
@@ -53,6 +54,7 @@ interface Props {
 }
 
 export const ShowDockerLogs = ({ appName, serverId }: Props) => {
+	const { t } = useTranslation();
 	const [containerId, setContainerId] = useState<string | undefined>();
 	const [option, setOption] = useState<"swarm" | "native">("native");
 
@@ -97,18 +99,18 @@ export const ShowDockerLogs = ({ appName, serverId }: Props) => {
 	return (
 		<Card className="bg-background">
 			<CardHeader>
-				<CardTitle className="text-xl">Logs</CardTitle>
-				<CardDescription>
-					Watch the logs of the application in real time
-				</CardDescription>
+				<CardTitle className="text-xl">{t("tabs.logs")}</CardTitle>
+				<CardDescription>{t("services.logs.description")}</CardDescription>
 			</CardHeader>
 
 			<CardContent className="flex flex-col gap-4">
 				<div className="flex flex-row justify-between items-center gap-2">
-					<Label>Select a container to view logs</Label>
+					<Label>{t("logs.selectContainer")}</Label>
 					<div className="flex flex-row gap-2 items-center">
 						<span className="text-sm text-muted-foreground">
-							{option === "native" ? "Native" : "Swarm"}
+							{option === "native"
+								? t("services.logs.mode.native")
+								: t("services.logs.mode.swarm")}
 						</span>
 						<Switch
 							checked={option === "native"}
@@ -123,11 +125,11 @@ export const ShowDockerLogs = ({ appName, serverId }: Props) => {
 					<SelectTrigger>
 						{isLoading ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground">
-								<span>Loading...</span>
+								<span>{t("services.logs.loading")}</span>
 								<Loader2 className="animate-spin size-4" />
 							</div>
 						) : (
-							<SelectValue placeholder="Select a container" />
+							<SelectValue placeholder={t("logs.selectContainerPlaceholder")} />
 						)}
 					</SelectTrigger>
 					<SelectContent>
@@ -167,14 +169,16 @@ export const ShowDockerLogs = ({ appName, serverId }: Props) => {
 								</>
 							)}
 
-							<SelectLabel>Containers ({containersLenght})</SelectLabel>
+							<SelectLabel>
+								{t("services.logs.containers", { count: containersLenght })}
+							</SelectLabel>
 						</SelectGroup>
 					</SelectContent>
 				</Select>
 				{option === "swarm" &&
 					services?.find((c) => c.containerId === containerId)?.error && (
 						<div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-							<span className="font-medium">Error: </span>
+							<span className="font-medium">{t("services.logs.error")}: </span>
 							{services?.find((c) => c.containerId === containerId)?.error}
 						</div>
 					)}
