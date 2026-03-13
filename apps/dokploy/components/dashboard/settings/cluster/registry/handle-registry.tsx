@@ -182,6 +182,20 @@ export const HandleRegistry = ({ registryId }: Props) => {
 	}, [form, form.reset, form.formState.isSubmitSuccessful, registry]);
 
 	const onSubmit = async (data: AddRegistry) => {
+		if (!data.registryName || data.registryName.trim().length === 0) {
+			form.setError("registryName", {
+				type: "manual",
+				message: t("registry.validation.nameRequired"),
+			});
+			return;
+		}
+		if (!data.username || data.username.trim().length === 0) {
+			form.setError("username", {
+				type: "manual",
+				message: t("registry.validation.usernameRequired"),
+			});
+			return;
+		}
 		const payload: any = {
 			registryName: data.registryName,
 			username: data.username,
