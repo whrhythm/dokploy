@@ -13,7 +13,7 @@ Apply this skill to any UI work inside `apps/dokploy`, including new pages, comp
 
 ## Required i18n flow
 
-1. Import and use `useTranslation` from `apps/dokploy/hooks/translation-provider.tsx`.
+1. Import and use `useTranslation` from `apps/dokploy/hooks/use-translation.tsx`.
 2. Replace any user-facing string with `t("namespace.key")`.
 3. Add new keys to:
    - `apps/dokploy/public/locales/en/common.json`
@@ -26,6 +26,30 @@ Apply this skill to any UI work inside `apps/dokploy`, including new pages, comp
 - Use dot-separated keys: `feature.section.element`.
 - Prefer existing namespaces: `dashboard.*`, `menu.*`, `button.*`, `form.*`, `error.*`, `empty.*`.
 - Avoid duplicates: check for an existing key before creating a new one.
+
+## Fast path map (to locate strings quickly)
+
+Use these high-signal directories before broad searching:
+
+- **Pages**: `apps/dokploy/pages/**` (route-level copy, headings, metaName)
+- **Settings UI**: `apps/dokploy/components/dashboard/settings/**`
+  - Registry modal: `apps/dokploy/components/dashboard/settings/cluster/registry/handle-registry.tsx`
+  - Registry list page: `apps/dokploy/components/dashboard/settings/cluster/registry/show-registry.tsx`
+- **Sidebar / org switcher**: `apps/dokploy/components/layouts/side.tsx`
+- **Auth**: `apps/dokploy/pages/index.tsx`, `apps/dokploy/pages/register.tsx`, `apps/dokploy/pages/invitation.tsx`
+- **Monitoring**: `apps/dokploy/components/dashboard/monitoring/**`, page: `apps/dokploy/pages/dashboard/monitoring.tsx`
+- **Shared UI**: `apps/dokploy/components/ui/**`, `apps/dokploy/components/shared/**`
+- **Locales**:
+  - Common: `apps/dokploy/public/locales/en/common.json`, `apps/dokploy/public/locales/zh-Hans/common.json`
+  - Settings-only: `apps/dokploy/public/locales/*/settings.json`
+
+## Quick locate strategy
+
+1. Grep for the exact visible string (or a fragment) in `apps/dokploy`.
+2. If the string is part of a dialog/modal: check for a nearby `DialogAction`, `Dialog*`, or `Handle*` component in the same feature folder.
+3. If it’s a settings route: check `apps/dokploy/pages/dashboard/settings/<route>.tsx` and its paired component under `components/dashboard/settings/**`.
+4. If it’s in the sidebar/top nav: check `components/layouts/side.tsx`.
+5. Replace string with `t(...)`, add keys to locale JSONs.
 
 ## Output format (always include)
 
@@ -45,7 +69,7 @@ Use this exact Markdown section in your response:
 **Component usage:**
 
 ```tsx
-import { useTranslation } from "@/hooks/translation-provider";
+import { useTranslation } from "@/hooks/use-translation";
 
 const { t } = useTranslation();
 
