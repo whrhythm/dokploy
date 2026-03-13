@@ -76,9 +76,10 @@ const TEMPLATE_BASE_URL_KEY = "dokploy_template_base_url";
 interface Props {
 	environmentId: string;
 	baseUrl?: string;
+	disabled?: boolean;
 }
 
-export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
+export const AddTemplate = ({ environmentId, baseUrl, disabled }: Props) => {
 	const { t } = useTranslation();
 	const [query, setQuery] = useState("");
 	const [open, setOpen] = useState(false);
@@ -147,6 +148,15 @@ export const AddTemplate = ({ environmentId, baseUrl }: Props) => {
 	// Cloud: show only if there are remote servers (no Dokploy option)
 	// Self-hosted: show only if there are remote servers (Dokploy is default, hide if no remote servers)
 	const shouldShowServerDropdown = hasServers;
+
+	if (disabled) {
+		return (
+			<DropdownMenuItem className="w-full space-x-3" disabled>
+				<PuzzleIcon className="size-4 text-muted-foreground" />
+				<span>Template</span>
+			</DropdownMenuItem>
+		);
+	}
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>

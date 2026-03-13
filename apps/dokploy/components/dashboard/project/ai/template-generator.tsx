@@ -93,9 +93,10 @@ export const { useStepper, steps, Scoped } = defineStepper(
 interface Props {
 	environmentId: string;
 	projectName?: string;
+	disabled?: boolean;
 }
 
-export const TemplateGenerator = ({ environmentId }: Props) => {
+export const TemplateGenerator = ({ environmentId, disabled }: Props) => {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const stepper = useStepper();
@@ -149,6 +150,15 @@ export const TemplateGenerator = ({ environmentId }: Props) => {
 				toast.error(t("environment.Modal.aiAssistant.toast.error"));
 			});
 	};
+
+	if (disabled) {
+		return (
+			<DropdownMenuItem className="w-full space-x-3" disabled>
+				<Bot className="size-4 text-muted-foreground" />
+				<span>AI Assistant</span>
+			</DropdownMenuItem>
+		);
+	}
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
