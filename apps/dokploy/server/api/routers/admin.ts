@@ -33,6 +33,8 @@ export const adminRouter = createTRPCRouter({
 							thresholds: {
 								cpu: input.metricsConfig.server.thresholds.cpu,
 								memory: input.metricsConfig.server.thresholds.memory,
+								gpu: input.metricsConfig.server.thresholds.gpu,
+								disk: input.metricsConfig.server.thresholds.disk,
 							},
 						},
 						containers: {

@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,7 +41,89 @@ type SystemMetrics struct {
 	TotalDisk        string  `json:"totalDisk"`
 	NetworkIn        string  `json:"networkIn"`
 	NetworkOut       string  `json:"networkOut"`
+	GPUAvailable     bool    `json:"gpuAvailable"`
+	GPUCount         int32   `json:"gpuCount"`
+	GPUUtilization   string  `json:"gpuUtilization"`
+	GPUMemoryUsedMB  string  `json:"gpuMemoryUsedMB"`
+	GPUMemoryTotalMB string  `json:"gpuMemoryTotalMB"`
 	Timestamp        string  `json:"timestamp"`
+}
+
+type NvidiaGPUMetrics struct {
+	Available     bool
+	Count         int32
+	Utilization   float64
+	MemoryUsedMB  float64
+	MemoryTotalMB float64
+}
+
+func parseNumeric(value string) float64 {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" || strings.EqualFold(trimmed, "N/A") {
+		return 0
+	}
+	parsed, err := strconv.ParseFloat(trimmed, 64)
+	if err != nil {
+		return 0
+	}
+	return parsed
+}
+
+func getNvidiaGPUMetrics() NvidiaGPUMetrics {
+	cmd := exec.Command(
+		"nvidia-smi",
+		"--query-gpu=utilization.gpu,memory.used,memory.total",
+		"--format=csv,noheader,nounits",
+	)
+	output, err := cmd.Output()
+	if err != nil {
+		return NvidiaGPUMetrics{}
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) == "" {
+		return NvidiaGPUMetrics{}
+	}
+
+	var (
+		totalUtilization float64
+		totalUsedMB      float64
+		totalMemoryMB    float64
+		validGPUCount    int
+	)
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		parts := strings.Split(line, ",")
+		if len(parts) < 3 {
+			continue
+		}
+
+		utilization := parseNumeric(parts[0])
+		memoryUsed := parseNumeric(parts[1])
+		memoryTotal := parseNumeric(parts[2])
+
+		totalUtilization += utilization
+		totalUsedMB += memoryUsed
+		totalMemoryMB += memoryTotal
+		validGPUCount++
+	}
+
+	if validGPUCount == 0 {
+		return NvidiaGPUMetrics{}
+	}
+
+	return NvidiaGPUMetrics{
+		Available:     true,
+		Count:         int32(validGPUCount),
+		Utilization:   totalUtilization / float64(validGPUCount),
+		MemoryUsedMB:  totalUsedMB,
+		MemoryTotalMB: totalMemoryMB,
+	}
 }
 
 type AlertPayload struct {
@@ -139,6 +222,9 @@ func GetServerMetrics() database.ServerMetric {
 		networkIn = float64(netInfo[0].BytesRecv) / 1024 / 1024
 		networkOut = float64(netInfo[0].BytesSent) / 1024 / 1024
 	}
+
+	gpuMetrics := getNvidiaGPUMetrics()
+
 	return database.ServerMetric{
 		Timestamp:        time.Now().UTC().Format(time.RFC3339Nano),
 		CPU:              c[0],
@@ -158,6 +244,11 @@ func GetServerMetrics() database.ServerMetric {
 		TotalDisk:        float64(diskInfo.Total) / 1024 / 1024 / 1024,
 		NetworkIn:        networkIn,
 		NetworkOut:       networkOut,
+		GPUAvailable:     gpuMetrics.Available,
+		GPUCount:         gpuMetrics.Count,
+		GPUUtilization:   gpuMetrics.Utilization,
+		GPUMemoryUsedMB:  gpuMetrics.MemoryUsedMB,
+		GPUMemoryTotalMB: gpuMetrics.MemoryTotalMB,
 	}
 }
 
@@ -180,6 +271,11 @@ func ConvertToSystemMetrics(metric database.ServerMetric) SystemMetrics {
 		TotalDisk:        fmt.Sprintf("%.2f", metric.TotalDisk),
 		NetworkIn:        fmt.Sprintf("%.2f", metric.NetworkIn),
 		NetworkOut:       fmt.Sprintf("%.2f", metric.NetworkOut),
+		GPUAvailable:     metric.GPUAvailable,
+		GPUCount:         metric.GPUCount,
+		GPUUtilization:   fmt.Sprintf("%.2f", metric.GPUUtilization),
+		GPUMemoryUsedMB:  fmt.Sprintf("%.2f", metric.GPUMemoryUsedMB),
+		GPUMemoryTotalMB: fmt.Sprintf("%.2f", metric.GPUMemoryTotalMB),
 		Timestamp:        metric.Timestamp,
 	}
 }
@@ -188,6 +284,8 @@ func CheckThresholds(metrics database.ServerMetric) error {
 	cfg := config.GetMetricsConfig()
 	cpuThreshold := float64(cfg.Server.Thresholds.CPU)
 	memThreshold := float64(cfg.Server.Thresholds.Memory)
+	gpuThreshold := float64(cfg.Server.Thresholds.GPU)
+	diskThreshold := float64(cfg.Server.Thresholds.Disk)
 	callbackURL := cfg.Server.UrlCallback
 	metricsToken := cfg.Server.Token
 
@@ -197,7 +295,7 @@ func CheckThresholds(metrics database.ServerMetric) error {
 	// log.Printf("Callback URL: %s", callbackURL)
 	// log.Printf("Metrics token: %s", metricsToken)
 
-	if cpuThreshold == 0 && memThreshold == 0 {
+	if cpuThreshold == 0 && memThreshold == 0 && gpuThreshold == 0 && diskThreshold == 0 {
 		return nil
 	}
 
@@ -228,6 +326,36 @@ func CheckThresholds(metrics database.ServerMetric) error {
 		}
 		if err := sendAlert(callbackURL, alert); err != nil {
 			return fmt.Errorf("failed to send memory alert: %v", err)
+		}
+	}
+
+	if gpuThreshold > 0 && metrics.GPUAvailable && metrics.GPUUtilization > gpuThreshold {
+		alert := AlertPayload{
+			ServerType: cfg.Server.ServerType,
+			Type:       "GPU",
+			Value:      metrics.GPUUtilization,
+			Threshold:  gpuThreshold,
+			Message:    fmt.Sprintf("GPU utilization (%.2f%%) exceeded threshold (%.2f%%)", metrics.GPUUtilization, gpuThreshold),
+			Timestamp:  metrics.Timestamp,
+			Token:      metricsToken,
+		}
+		if err := sendAlert(callbackURL, alert); err != nil {
+			return fmt.Errorf("failed to send GPU alert: %v", err)
+		}
+	}
+
+	if diskThreshold > 0 && metrics.DiskUsed > diskThreshold {
+		alert := AlertPayload{
+			ServerType: cfg.Server.ServerType,
+			Type:       "Disk",
+			Value:      metrics.DiskUsed,
+			Threshold:  diskThreshold,
+			Message:    fmt.Sprintf("Disk usage (%.2f%%) exceeded threshold (%.2f%%)", metrics.DiskUsed, diskThreshold),
+			Timestamp:  metrics.Timestamp,
+			Token:      metricsToken,
+		}
+		if err := sendAlert(callbackURL, alert); err != nil {
+			return fmt.Errorf("failed to send disk alert: %v", err)
 		}
 	}
 

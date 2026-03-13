@@ -33,6 +33,8 @@ export const webServerSettings = pgTable("webServerSettings", {
 				thresholds: {
 					cpu: number;
 					memory: number;
+					gpu: number;
+					disk: number;
 				};
 			};
 			containers: {
@@ -56,6 +58,8 @@ export const webServerSettings = pgTable("webServerSettings", {
 				thresholds: {
 					cpu: 0,
 					memory: 0,
+					gpu: 0,
+					disk: 0,
 				},
 			},
 			containers: {
@@ -111,6 +115,8 @@ export const apiUpdateWebServerSettings = createSchema.partial().extend({
 				thresholds: z.object({
 					cpu: z.number(),
 					memory: z.number(),
+					gpu: z.number(),
+					disk: z.number(),
 				}),
 			}),
 			containers: z.object({
@@ -167,6 +173,8 @@ export const apiUpdateWebServerMonitoring = z.object({
 				thresholds: z.object({
 					cpu: z.number().min(0),
 					memory: z.number().min(0),
+					gpu: z.number().min(0),
+					disk: z.number().min(0),
 				}),
 			}),
 			containers: z.object({

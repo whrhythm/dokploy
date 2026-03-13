@@ -67,14 +67,31 @@ const createMonitoringSchema = (t: (key: string) => string) =>
 					message: t("setupMonitoring.validation.cronJobRequired"),
 				}),
 			}),
-			containers: z.object({
-				refreshRate: z.number().min(2, {
-					message: t("setupMonitoring.validation.containerRefreshRate"),
-				}),
-				services: z.object({
-					include: z.array(z.string()).optional(),
-					exclude: z.array(z.string()).optional(),
-				}),
+			port: z.number().min(1, {
+				message: "Port is required",
+			}),
+			token: z.string(),
+			urlCallback: z.string(),
+			retentionDays: z.number().min(1, {
+				message: "Retention days must be at least 1",
+			}),
+			thresholds: z.object({
+				cpu: z.number().min(0),
+				memory: z.number().min(0),
+				gpu: z.number().min(0),
+				disk: z.number().min(0),
+			}),
+			cronJob: z.string().min(1, {
+				message: "Cron Job is required",
+			}),
+		}),
+		containers: z.object({
+			refreshRate: z.number().min(2, {
+				message: t("setupMonitoring.validation.containerRefreshRate"),
+			}),
+			services: z.object({
+				include: z.array(z.string()).optional(),
+				exclude: z.array(z.string()).optional(),
 			}),
 		}),
 	});
@@ -137,6 +154,8 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 					thresholds: {
 						cpu: 0,
 						memory: 0,
+						gpu: 0,
+						disk: 0,
 					},
 					cronJob: "",
 				},
@@ -166,6 +185,8 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 						thresholds: {
 							cpu: data?.metricsConfig?.server?.thresholds?.cpu,
 							memory: data?.metricsConfig?.server?.thresholds?.memory,
+							gpu: data?.metricsConfig?.server?.thresholds?.gpu ?? 0,
+							disk: data?.metricsConfig?.server?.thresholds?.disk ?? 0,
 						},
 						cronJob: data?.metricsConfig?.server?.cronJob || "0 0 * * *",
 					},
@@ -582,6 +603,40 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 										</FormControl>
 										<FormDescription>
 											{t("setupMonitoring.memoryThresholdDescription")}
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="metricsConfig.server.thresholds.gpu"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>GPU Threshold (%)</FormLabel>
+										<FormControl>
+											<NumberInput {...field} />
+										</FormControl>
+										<FormDescription>
+											Alert when NVIDIA GPU utilization exceeds this percentage
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="metricsConfig.server.thresholds.disk"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Disk Threshold (%)</FormLabel>
+										<FormControl>
+											<NumberInput {...field} />
+										</FormControl>
+										<FormDescription>
+											Alert when disk usage exceeds this percentage
 										</FormDescription>
 										<FormMessage />
 									</FormItem>

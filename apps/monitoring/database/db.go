@@ -36,11 +36,28 @@ func InitDB() (*DB, error) {
 			disk_used REAL,
 			total_disk REAL,
 			network_in REAL,
-			network_out REAL
+			network_out REAL,
+			gpu_available INTEGER DEFAULT 0,
+			gpu_count INTEGER DEFAULT 0,
+			gpu_utilization REAL DEFAULT 0,
+			gpu_memory_used_mb REAL DEFAULT 0,
+			gpu_memory_total_mb REAL DEFAULT 0
 		)
 	`)
 	if err != nil {
 		return nil, err
+	}
+
+	alterStatements := []string{
+		"ALTER TABLE server_metrics ADD COLUMN gpu_available INTEGER DEFAULT 0",
+		"ALTER TABLE server_metrics ADD COLUMN gpu_count INTEGER DEFAULT 0",
+		"ALTER TABLE server_metrics ADD COLUMN gpu_utilization REAL DEFAULT 0",
+		"ALTER TABLE server_metrics ADD COLUMN gpu_memory_used_mb REAL DEFAULT 0",
+		"ALTER TABLE server_metrics ADD COLUMN gpu_memory_total_mb REAL DEFAULT 0",
+	}
+
+	for _, stmt := range alterStatements {
+		_, _ = db.Exec(stmt)
 	}
 
 	return &DB{db}, nil

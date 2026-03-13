@@ -14,6 +14,7 @@ import {
 	getWebServerSettings,
 	IS_CLOUD,
 	removeNotificationById,
+	sendContainerHealthNotifications,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -429,12 +430,15 @@ export const notificationRouter = createTRPCRouter({
 		.input(
 			z.object({
 				ServerType: z.enum(["Dokploy", "Remote"]).default("Dokploy"),
-				Type: z.enum(["Memory", "CPU"]),
+				Type: z.enum(["Memory", "CPU", "GPU", "Disk", "ContainerHealth"]),
 				Value: z.number(),
 				Threshold: z.number(),
 				Message: z.string(),
 				Timestamp: z.string(),
 				Token: z.string(),
+				ContainerName: z.string().optional(),
+				CurrentStatus: z.string().optional(),
+				PreviousStatus: z.string().optional(),
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -476,10 +480,21 @@ export const notificationRouter = createTRPCRouter({
 					ServerName = "Remote";
 				}
 
-				await sendServerThresholdNotifications(organizationId, {
-					...input,
-					ServerName,
-				});
+				if (input.Type === "ContainerHealth") {
+					await sendContainerHealthNotifications(organizationId, {
+						Message: input.Message,
+						Timestamp: input.Timestamp,
+						ServerName,
+						ContainerName: input.ContainerName,
+						CurrentStatus: input.CurrentStatus,
+						PreviousStatus: input.PreviousStatus,
+					});
+				} else {
+					await sendServerThresholdNotifications(organizationId, {
+						...input,
+						ServerName,
+					});
+				}
 			} catch (error) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",

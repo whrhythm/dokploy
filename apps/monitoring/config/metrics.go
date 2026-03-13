@@ -19,6 +19,8 @@ type Config struct {
 		Thresholds    struct {
 			CPU    int `json:"cpu"`
 			Memory int `json:"memory"`
+			GPU    int `json:"gpu"`
+			Disk   int `json:"disk"`
 		} `json:"thresholds"`
 	} `json:"server"`
 	Containers struct {

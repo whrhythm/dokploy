@@ -521,6 +521,7 @@ export const apiSaveEnvironmentVariables = createSchema
 
 export const apiFindMonitoringStats = z.object({
 	appName: z.string().min(1),
+	gpuScope: z.enum(["host", "container"]).default("container"),
 });
 
 export const apiUpdateApplication = createSchema
