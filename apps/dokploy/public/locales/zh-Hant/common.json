@@ -42,6 +42,7 @@
 	"registry.deleteError": "刪除 Registry 時發生錯誤",
 	"registry.passwordRequired": "密碼不能為空",
 	"registry.validation.nameRequired": "Registry 名稱不能為空",
+	"registry.validation.passwordRequired": "密碼不能為空",
 	"registry.validation.usernameRequired": "使用者名稱不能為空",
 	"registry.validation.urlInvalid": "Registry 位址無效。請輸入主機名稱（如 example.com 或 registry.example.com），不要包含協定（https://）或路徑。"
 }

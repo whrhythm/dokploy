@@ -3162,6 +3162,7 @@
 	"registry.deleteError": "Error deleting registry",
 	"registry.passwordRequired": "Password is required",
 	"registry.validation.nameRequired": "Registry name is required",
+	"registry.validation.passwordRequired": "Password is required",
 	"registry.validation.usernameRequired": "Username is required",
 	"registry.validation.urlInvalid": "Invalid registry URL. Enter a hostname (e.g. example.com or registry.example.com) without protocol or path.",
 	"settings.certificates": "Certificates",

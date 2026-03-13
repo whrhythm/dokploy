@@ -3475,6 +3475,7 @@
 	"registry.deleteError": "删除镜像仓库时出错",
 	"registry.passwordRequired": "密码不能为空",
 	"registry.validation.nameRequired": "镜像仓库名称不能为空",
+	"registry.validation.passwordRequired": "密码不能为空",
 	"registry.validation.usernameRequired": "用户名不能为空",
 	"registry.validation.urlInvalid": "镜像仓库地址无效。请输入主机名（如 example.com 或 registry.example.com），不要包含协议（https://）或路径。",
 	"settings.certificates": "证书",
