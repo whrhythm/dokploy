@@ -984,10 +984,11 @@ const EnvironmentPage = (
 													projectName={projectData?.name}
 													environmentId={environmentId}
 												/>
-												<AddTemplate environmentId={environmentId} />
+												<AddTemplate environmentId={environmentId} disabled />
 												<AddAiAssistant
 													projectName={projectData?.name}
 													environmentId={environmentId}
+													disabled
 												/>
 											</DropdownMenuContent>
 										</DropdownMenu>

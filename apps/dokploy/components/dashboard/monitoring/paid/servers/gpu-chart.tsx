@@ -13,31 +13,34 @@ import {
 	ChartLegendContent,
 	ChartTooltip,
 } from "@/components/ui/chart";
+import { useTranslation } from "@/hooks/translation-provider";
 import { formatTimestamp } from "@/lib/utils";
 
 interface GPUChartProps {
 	data: any[];
 }
 
-const chartConfig = {
-	gpuUtilization: {
-		label: "GPU",
-		color: "hsl(var(--chart-5))",
-	},
-} satisfies ChartConfig;
-
 export function GPUChart({ data }: GPUChartProps) {
+	const { t } = useTranslation();
 	const latestData = data[data.length - 1] || {};
 	const hasGPU = !!latestData.gpuAvailable;
+	const chartConfig: ChartConfig = {
+		gpuUtilization: {
+			label: t("form.gpu"),
+			color: "hsl(var(--chart-5))",
+		},
+	};
 
 	return (
 		<Card className="bg-transparent">
 			<CardHeader className="border-b py-5">
-				<CardTitle>NVIDIA GPU</CardTitle>
+				<CardTitle>{t("monitoring.gpuTitle")}</CardTitle>
 				<CardDescription>
 					{hasGPU
-						? `GPU Usage: ${latestData.gpuUtilization}%`
-						: "NVIDIA GPU unavailable"}
+						? t("monitoring.gpuUsageValue", {
+								value: latestData.gpuUtilization,
+							})
+						: t("monitoring.gpuUnavailable")}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
@@ -80,7 +83,7 @@ export function GPUChart({ data }: GPUChartProps) {
 											<div className="grid grid-cols-2 gap-2">
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														Time
+														{t("services.monitoring.chart.time")}
 													</span>
 													<span className="font-bold">
 														{formatTimestamp(label)}
@@ -88,7 +91,7 @@ export function GPUChart({ data }: GPUChartProps) {
 												</div>
 												<div className="flex flex-col">
 													<span className="text-[0.70rem] uppercase text-muted-foreground">
-														GPU
+														{t("form.gpu")}
 													</span>
 													<span className="font-bold">
 														{chartPoint.gpuUtilization}%
@@ -102,7 +105,7 @@ export function GPUChart({ data }: GPUChartProps) {
 							}}
 						/>
 						<Area
-							name="GPU"
+							name={t("form.gpu")}
 							dataKey="gpuUtilization"
 							type="monotone"
 							fill="url(#fillGPU)"

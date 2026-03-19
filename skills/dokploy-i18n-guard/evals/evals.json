@@ -1,0 +1,23 @@
+{
+	"skill_name": "dokploy-i18n-guard",
+	"evals": [
+		{
+			"id": 1,
+			"prompt": "Add a new Projects empty state card to the dashboard page with a title, description, and primary button.",
+			"expected_output": "UI copy uses t() and new keys are added to en/zh-Hans common.json.",
+			"files": []
+		},
+		{
+			"id": 2,
+			"prompt": "Update the Delete Server confirmation dialog copy to include a warning sentence.",
+			"expected_output": "Dialog text uses t() and new keys are added to en/zh-Hans common.json.",
+			"files": []
+		},
+		{
+			"id": 3,
+			"prompt": "Create a settings page section for Language with a title, description, and save button.",
+			"expected_output": "Uses settings.json for new keys and t() in UI.",
+			"files": []
+		}
+	]
+}

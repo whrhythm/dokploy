@@ -8,6 +8,7 @@ import {
 	Tooltip,
 	YAxis,
 } from "recharts";
+import { useTranslation } from "@/hooks/use-translation";
 import type { DockerStatsJSON } from "./show-free-container-monitoring";
 
 interface Props {
@@ -15,11 +16,12 @@ interface Props {
 }
 
 export const DockerGpuChart = ({ acummulativeData }: Props) => {
+	const { t } = useTranslation();
 	const transformedData = acummulativeData
 		.filter((item) => item.value.available)
 		.map((item, index) => {
 			return {
-				name: `Point ${index + 1}`,
+				name: t("monitoring.chart.point", { index: index + 1 }),
 				time: item.time,
 				usage: item.value.utilization,
 			};
@@ -51,6 +53,7 @@ export const DockerGpuChart = ({ acummulativeData }: Props) => {
 					<Area
 						type="monotone"
 						dataKey="usage"
+						name={t("monitoring.gpuUsage")}
 						stroke="#27272A"
 						fillOpacity={1}
 						fill="url(#colorGpu)"
@@ -75,13 +78,20 @@ interface CustomTooltipProps {
 }
 
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+	const { t } = useTranslation();
+
 	if (active && payload && payload.length && payload[0]) {
+		const dateLabel = payload[0].payload.time
+			? format(new Date(payload[0].payload.time), "PPpp")
+			: "";
 		return (
 			<div className="custom-tooltip bg-background p-2 shadow-lg rounded-md text-primary border">
-				{payload[0].payload.time && (
-					<p>{`Date: ${format(new Date(payload[0].payload.time), "PPpp")}`}</p>
-				)}
-				<p>{`GPU Usage: ${payload[0].payload.usage}%`}</p>
+				{dateLabel && <p>{t("monitoring.chart.date", { value: dateLabel })}</p>}
+				<p>
+					{t("monitoring.gpuUsageValue", {
+						value: payload[0].payload.usage,
+					})}
+				</p>
 			</div>
 		);
 	}

@@ -39,8 +39,21 @@ export const getLocalServerData = () => {
 		const parsedLocalServerData = localServerData
 			? (JSON.parse(localServerData) as typeof DEFAULT_LOCAL_SERVER_DATA)
 			: DEFAULT_LOCAL_SERVER_DATA;
-
-		return parsedLocalServerData;
+		const normalized = {
+			...DEFAULT_LOCAL_SERVER_DATA,
+			...parsedLocalServerData,
+		};
+		return {
+			port:
+				typeof normalized.port === "number" && !Number.isNaN(normalized.port)
+					? normalized.port
+					: DEFAULT_LOCAL_SERVER_DATA.port,
+			username:
+				typeof normalized.username === "string" &&
+				normalized.username.length > 0
+					? normalized.username
+					: DEFAULT_LOCAL_SERVER_DATA.username,
+		};
 	} catch {
 		return DEFAULT_LOCAL_SERVER_DATA;
 	}

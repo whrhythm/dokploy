@@ -42,6 +42,19 @@
 	"registry.deleteError": "刪除 Registry 時發生錯誤",
 	"registry.passwordRequired": "密碼不能為空",
 	"registry.validation.nameRequired": "Registry 名稱不能為空",
+	"registry.validation.passwordRequired": "密碼不能為空",
 	"registry.validation.usernameRequired": "使用者名稱不能為空",
-	"registry.validation.urlInvalid": "Registry 位址無效。請輸入主機名稱（如 example.com 或 registry.example.com），不要包含協定（https://）或路徑。"
+	"registry.validation.urlInvalid": "Registry 位址無效。請輸入主機名稱（如 example.com 或 registry.example.com），不要包含協定（https://）或路徑。",
+	"profile.validation.currentPasswordIncorrect": "目前密碼不正確",
+	"profile.validation.newPasswordRequired": "新密碼不能為空",
+	"traefikEnv.title": "修改 Traefik 環境變數",
+	"traefikEnv.description": "更新 Traefik 環境變數設定",
+	"traefikEnv.envLabel": "環境變數",
+	"traefikEnv.unlock": "解鎖",
+	"traefikEnv.lock": "鎖定",
+	"traefikEnv.updated": "Traefik 環境變數已更新",
+	"traefikEnv.updateError": "更新 Traefik 環境變數時發生錯誤",
+	"localServer.connectionSettings": "連線設定",
+	"localServer.validation.portRequired": "連接埠必須大於 0",
+	"localServer.validation.usernameRequired": "使用者名稱不能為空"
 }

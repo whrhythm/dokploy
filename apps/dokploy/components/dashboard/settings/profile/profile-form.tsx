@@ -98,6 +98,25 @@ export const ProfileForm = () => {
 		resolver: zodResolver(createProfileSchema(t)),
 	});
 
+	const getProfileUpdateErrorMessage = (message?: string) => {
+		if (!message) {
+			return t("profile.updateError");
+		}
+		if (message === "Current password is incorrect") {
+			return t("profile.validation.currentPasswordIncorrect");
+		}
+		if (message === "New password is required") {
+			return t("profile.validation.newPasswordRequired");
+		}
+		if (message === "Email is required and cannot be empty") {
+			return t("profile.validation.emailRequired");
+		}
+		if (message === "Please enter a valid email address") {
+			return t("profile.validation.emailInvalid");
+		}
+		return t("profile.updateError");
+	};
+
 	useEffect(() => {
 		if (data) {
 			form.reset(
@@ -146,7 +165,11 @@ export const ProfileForm = () => {
 				lastName: values.lastName || "",
 			});
 		} catch (error) {
-			toast.error(t("profile.updateError"));
+			toast.error(
+				getProfileUpdateErrorMessage(
+					error instanceof Error ? error.message : undefined,
+				),
+			);
 		}
 	};
 
@@ -167,7 +190,11 @@ export const ProfileForm = () => {
 					</CardHeader>
 
 					<CardContent className="space-y-2 py-8 border-t">
-						{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
+						{isError && (
+							<AlertBlock type="error">
+								{getProfileUpdateErrorMessage(error?.message)}
+							</AlertBlock>
+						)}
 						{isPending ? (
 							<div className="flex flex-row gap-2 items-center justify-center text-sm text-muted-foreground min-h-[35vh]">
 								<span>{t("loading")}</span>

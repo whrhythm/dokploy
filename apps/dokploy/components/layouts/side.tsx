@@ -637,7 +637,7 @@ function SidebarLogo() {
 								sideOffset={4}
 							>
 								<DropdownMenuLabel className="text-xs text-muted-foreground shrink-0">
-									Organizations
+									{t("dashboard.organization.organizations")}
 								</DropdownMenuLabel>
 								<div className="overflow-y-auto overflow-x-hidden min-h-0 -mx-1 px-1">
 									{organizations?.map((org) => {
@@ -707,8 +707,8 @@ function SidebarLogo() {
 														}}
 														title={
 															isDefault
-																? "Default organization"
-																: "Set as default"
+																? t("dashboard.organization.defaultLabel")
+																: t("dashboard.organization.setDefault")
 														}
 													>
 														{isDefault ? (
@@ -729,8 +729,10 @@ function SidebarLogo() {
 														<>
 															<AddOrganization organizationId={org.id} />
 															<DialogAction
-																title="Delete Organization"
-																description="Are you sure you want to delete this organization?"
+																title={t("dashboard.organization.deleteTitle")}
+																description={t(
+																	"dashboard.organization.deleteDescription",
+																)}
 																type="destructive"
 																onClick={async () => {
 																	await deleteOrganization({
@@ -744,12 +746,9 @@ function SidebarLogo() {
 																				),
 																			);
 																		})
-																		.catch((error) => {
+																		.catch(() => {
 																			toast.error(
-																				error?.message ||
-																					t(
-																						"dashboard.organization.deleteError",
-																					),
+																				t("dashboard.organization.deleteError"),
 																			);
 																		});
 																}}
@@ -807,7 +806,9 @@ function SidebarLogo() {
 								side={"right"}
 								className="w-80"
 							>
-								<DropdownMenuLabel>Pending Invitations</DropdownMenuLabel>
+								<DropdownMenuLabel>
+									{t("dashboard.organization.pendingInvitations")}
+								</DropdownMenuLabel>
 								<div className="flex flex-col gap-2">
 									{invitations && invitations.length > 0 ? (
 										invitations.map((invitation) => (
@@ -820,11 +821,12 @@ function SidebarLogo() {
 														{invitation?.organization?.name}
 													</div>
 													<div className="text-xs text-muted-foreground">
-														Expires:{" "}
+														{t("dashboard.organization.expires")}:{" "}
 														{new Date(invitation.expiresAt).toLocaleString()}
 													</div>
 													<div className="text-xs text-muted-foreground">
-														Role: {invitation.role}
+														{t("dashboard.organization.role")}:{" "}
+														{invitation.role}
 													</div>
 												</DropdownMenuItem>
 												<DialogAction

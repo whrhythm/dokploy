@@ -92,8 +92,10 @@ export const Configure2FA = () => {
 			});
 
 			if (result.error) {
-				form.setError("password", { message: result.error.message });
-				toast.error(result.error.message);
+				form.setError("password", {
+					message: t("profile.2fa.error.incorrectPassword"),
+				});
+				toast.error(t("profile.2fa.error.incorrectPassword"));
 				return;
 			}
 
@@ -121,7 +123,7 @@ export const Configure2FA = () => {
 			});
 
 			if (result.error) {
-				toast.error(result.error.message);
+				toast.error(t("profile.2fa.error.regenerateFailed"));
 				return;
 			}
 
@@ -149,7 +151,7 @@ export const Configure2FA = () => {
 			});
 
 			if (result.error) {
-				toast.error(result.error.message);
+				toast.error(t("profile.2fa.error.disableFailed"));
 				return;
 			}
 

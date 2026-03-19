@@ -169,6 +169,14 @@ export const ShowPaidMonitoring = ({
 		return `${days}d ${hours}h ${minutes}m`;
 	};
 
+	const gpuMemoryUsedGB = Number.isFinite(metrics.gpuMemoryUsedMB)
+		? (metrics.gpuMemoryUsedMB / 1024).toFixed(2)
+		: "0.00";
+	const gpuMemoryTotalGB = Number.isFinite(metrics.gpuMemoryTotalMB)
+		? (metrics.gpuMemoryTotalMB / 1024).toFixed(2)
+		: "0.00";
+	const gpuSuffix = metrics.gpuCount === 1 ? "" : "s";
+
 	if (isLoading) {
 		return (
 			<div className="flex h-[400px] w-full items-center justify-center">
@@ -309,7 +317,7 @@ export const ShowPaidMonitoring = ({
 				<div className="rounded-lg border text-card-foreground shadow-sm p-6">
 					<div className="flex items-center gap-2">
 						<Activity className="h-4 w-4 text-muted-foreground" />
-						<h3 className="text-sm font-medium">NVIDIA GPU</h3>
+						<h3 className="text-sm font-medium">{t("monitoring.gpuTitle")}</h3>
 					</div>
 					{metrics.gpuAvailable ? (
 						<>
@@ -317,14 +325,17 @@ export const ShowPaidMonitoring = ({
 								{metrics.gpuUtilization}%
 							</p>
 							<p className="text-sm text-muted-foreground mt-1">
-								{(metrics.gpuMemoryUsedMB / 1024).toFixed(2)} GB /{" "}
-								{(metrics.gpuMemoryTotalMB / 1024).toFixed(2)} GB (
-								{metrics.gpuCount} GPUs)
+								{t("monitoring.gpuMemoryUsage", {
+									used: gpuMemoryUsedGB,
+									total: gpuMemoryTotalGB,
+									count: metrics.gpuCount,
+									suffix: gpuSuffix,
+								})}
 							</p>
 						</>
 					) : (
 						<p className="mt-2 text-sm text-muted-foreground">
-							NVIDIA GPU unavailable
+							{t("monitoring.gpuUnavailable")}
 						</p>
 					)}
 				</div>

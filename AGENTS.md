@@ -166,6 +166,17 @@ export function UserCard({ userId, name }: UserCardProps) {
 }
 ```
 
+## i18n Guidelines (UI)
+
+Use the project i18n system for any UI copy changes in `apps/dokploy`.
+
+- Use `useTranslation` from `apps/dokploy/hooks/translation-provider.tsx` and call `t("...")` for all UI text.
+- Do not hardcode strings in components, toasts, dialogs, or placeholders.
+- Add new keys to `apps/dokploy/public/locales/en/common.json` and `apps/dokploy/public/locales/zh-Hans/common.json`.
+- Use `settings.json` only for settings pages; otherwise default to `common.json`.
+- Prefer existing key patterns (for example `dashboard.*`, `menu.*`, `button.*`, `form.*`, `error.*`).
+- For dynamic values, use `{param}` placeholders in JSON and pass params to `t(key, { param })`.
+
 ### Database (Drizzle ORM)
 
 - Use Drizzle for all database operations

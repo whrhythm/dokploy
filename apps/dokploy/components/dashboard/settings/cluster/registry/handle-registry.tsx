@@ -1,7 +1,7 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { AlertTriangle, PenBoxIcon, PlusIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { type FieldErrors, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -174,6 +174,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 				password: "",
 				registryUrl: "",
 				imagePrefix: "",
+				registryName: "",
 				serverId: "",
 				isEditing: false,
 			});
@@ -181,6 +182,20 @@ export const HandleRegistry = ({ registryId }: Props) => {
 	}, [form, form.reset, form.formState.isSubmitSuccessful, registry]);
 
 	const onSubmit = async (data: AddRegistry) => {
+		if (!data.registryName || data.registryName.trim().length === 0) {
+			form.setError("registryName", {
+				type: "manual",
+				message: t("registry.validation.nameRequired"),
+			});
+			return;
+		}
+		if (!data.username || data.username.trim().length === 0) {
+			form.setError("username", {
+				type: "manual",
+				message: t("registry.validation.usernameRequired"),
+			});
+			return;
+		}
 		const payload: any = {
 			registryName: data.registryName,
 			username: data.username,
@@ -208,6 +223,18 @@ export const HandleRegistry = ({ registryId }: Props) => {
 					registryId ? t("registry.updateError") : t("registry.addError"),
 				);
 			});
+	};
+
+	const onSubmitError = (errors: FieldErrors<AddRegistry>) => {
+		const message =
+			errors.registryName?.message ||
+			errors.username?.message ||
+			errors.password?.message ||
+			errors.registryUrl?.message;
+
+		if (message) {
+			toast.error(String(message));
+		}
 	};
 
 	return (
@@ -252,7 +279,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 				)}
 				<Form {...form}>
 					<form
-						onSubmit={form.handleSubmit(onSubmit)}
+						onSubmit={form.handleSubmit(onSubmit, onSubmitError)}
 						className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4"
 					>
 						<div className="flex flex-col gap-4">
@@ -490,7 +517,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 										if (!registryId && (!password || password.length === 0)) {
 											form.setError("password", {
 												type: "manual",
-												message: t("registry.passwordRequired"),
+												message: t("registry.validation.passwordRequired"),
 											});
 											return;
 										}

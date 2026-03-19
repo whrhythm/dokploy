@@ -3,8 +3,11 @@ import { TemplateGenerator } from "@/components/dashboard/project/ai/template-ge
 interface Props {
 	environmentId: string;
 	projectName?: string;
+	disabled?: boolean;
 }
 
-export const AddAiAssistant = ({ environmentId }: Props) => {
-	return <TemplateGenerator environmentId={environmentId} />;
+export const AddAiAssistant = ({ environmentId, disabled }: Props) => {
+	return (
+		<TemplateGenerator environmentId={environmentId} disabled={disabled} />
+	);
 };

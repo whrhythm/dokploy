@@ -89,9 +89,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 									reloadTraefik({ serverId }),
 								);
 							} catch (error) {
-								const errorMessage =
-									(error as Error)?.message || t("traefikActions.reloadError");
-								toast.error(errorMessage);
+								toast.error(t("traefikActions.reloadError"));
 							}
 						}}
 						className="cursor-pointer"
@@ -149,9 +147,7 @@ export const ShowTraefikActions = ({ serverId }: Props) => {
 									}),
 								);
 							} catch (error) {
-								const errorMessage =
-									(error as Error)?.message || t("traefikActions.toggleError");
-								toast.error(errorMessage);
+								toast.error(t("traefikActions.toggleError"));
 							}
 						}}
 						disabled={toggleDashboardIsLoading || isHealthCheckExecuting}

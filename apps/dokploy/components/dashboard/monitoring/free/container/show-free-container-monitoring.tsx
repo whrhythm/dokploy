@@ -339,7 +339,16 @@ export const ContainerFreeMonitoring = ({
 										{`${t("monitoring.used")}: ${currentData.gpu.value.utilization}%`}
 									</span>
 									<span className="text-sm text-muted-foreground">
-										{`${(currentData.gpu.value.memoryUsedMb / 1024).toFixed(2)} GB / ${(currentData.gpu.value.memoryTotalMb / 1024).toFixed(2)} GB (${currentData.gpu.value.gpuCount})`}
+										{t("monitoring.gpuMemoryUsage", {
+											used: (currentData.gpu.value.memoryUsedMb / 1024).toFixed(
+												2,
+											),
+											total: (
+												currentData.gpu.value.memoryTotalMb / 1024
+											).toFixed(2),
+											count: currentData.gpu.value.gpuCount,
+											suffix: currentData.gpu.value.gpuCount === 1 ? "" : "s",
+										})}
 									</span>
 									<Progress
 										value={currentData.gpu.value.utilization}
