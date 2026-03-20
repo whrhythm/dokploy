@@ -16,10 +16,21 @@ Dokploy is a self-hosted PaaS solution built with:
 /home/edge/dokploy/
 ├── apps/
 │   ├── dokploy/        # Main Next.js application
-│   ├── api/            # Inngest API (serverless functions)
+│   │   ├── pages/      # Frontend pages (incl. pages/api as API spec)
+│   │   ├── components/ # Reusable UI components
+│   │   ├── public/     # Static assets
+│   │   ├── server/     # Backend entry (tRPC API)
+│   │   │   └── api/    # tRPC API routes
+│   │   └── docker/     # Container deployment configs
 │   └── schedules/      # Scheduled jobs
 ├── packages/
 │   └── server/         # Shared server library (@dokploy/server)
+│       └── src/
+│           ├── services/ # Core backend services
+│           └── db/       # Core schemas and validations
+├── apps/dokploy/drizzle/ # Migrations
+├── Dockerfile*           # Build entrypoints
+└── setup_dokploy.sh      # One-click setup script
 ```
 
 ## Build, Lint, and Test Commands
