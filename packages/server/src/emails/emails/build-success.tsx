@@ -60,12 +60,7 @@ export const BuildSuccessEmail = ({
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[
-					{ label: "Project", value: projectName },
-					{ label: "Application", value: applicationName },
-					{ label: "Environment", value: environmentName },
-					{ label: "Type", value: applicationType },
-				]}
+				details={[{ label: "Type", value: applicationType }]}
 				actor={actor}
 				triggerSource={triggerSource}
 				context={`${projectName} / ${environmentName} / ${applicationName}`}

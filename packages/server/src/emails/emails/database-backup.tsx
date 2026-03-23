@@ -63,11 +63,7 @@ export const DatabaseBackupEmail = ({
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[
-					{ label: "Project", value: projectName },
-					{ label: "Application", value: applicationName },
-					{ label: "Database Type", value: databaseType },
-				]}
+				details={[{ label: "Database Type", value: databaseType }]}
 				reason={type === "error" ? errorMessage : undefined}
 				context={`${projectName} / ${applicationName} / ${databaseType}`}
 				action={action}

@@ -35,10 +35,7 @@ export const DokployRestartEmail = ({
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[
-					{ label: "Project", value: "Dokploy" },
-					{ label: "Application", value: "Dokploy Server" },
-				]}
+				details={[]}
 				context={context}
 				action="dokploy server restarted"
 				date={date}

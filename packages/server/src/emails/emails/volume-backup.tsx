@@ -75,8 +75,6 @@ export const VolumeBackupEmail = ({
 				level={meta.level}
 				summary={summary}
 				details={[
-					{ label: "Project", value: projectName },
-					{ label: "Application", value: applicationName },
 					{ label: "Volume", value: volumeName },
 					{ label: "Service Type", value: serviceType },
 					...(backupSize ? [{ label: "Backup Size", value: backupSize }] : []),

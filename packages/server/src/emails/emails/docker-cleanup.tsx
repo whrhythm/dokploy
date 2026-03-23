@@ -41,11 +41,7 @@ export const DockerCleanupEmail = ({
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[
-					{ label: "Project", value: "Dokploy" },
-					{ label: "Application", value: "System" },
-					{ label: "Message", value: message },
-				]}
+				details={[{ label: "Message", value: message }]}
 				context={context}
 				action="docker cleanup completed"
 				date={date}
