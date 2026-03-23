@@ -88,7 +88,6 @@ export const sendBuildSuccessNotifications = async ({
 				const subject = buildNotificationEmailSubject({
 					level: "Notice",
 					eventObject: "Application",
-					name: applicationName,
 					event: "rebuild succeeded",
 				});
 

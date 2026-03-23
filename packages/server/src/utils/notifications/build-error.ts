@@ -87,7 +87,6 @@ export const sendBuildErrorNotifications = async ({
 				const subject = buildNotificationEmailSubject({
 					level: "Warning",
 					eventObject: "Application",
-					name: applicationName,
 					event: "rebuild failed",
 				});
 
