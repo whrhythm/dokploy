@@ -14,9 +14,13 @@ import {
 	getWebServerSettings,
 	IS_CLOUD,
 	removeNotificationById,
+	sendBuildErrorNotifications,
+	sendBuildSuccessNotifications,
 	sendContainerHealthNotifications,
 	sendCustomNotification,
+	sendDatabaseBackupNotifications,
 	sendDiscordNotification,
+	sendDockerCleanupNotifications,
 	sendEmailNotification,
 	sendGotifyNotification,
 	sendLarkNotification,
@@ -40,6 +44,8 @@ import {
 	updateTelegramNotification,
 } from "@dokploy/server";
 import { db } from "@dokploy/server/db";
+import { sendDokployRestartNotifications } from "@dokploy/server/utils/notifications/dokploy-restart";
+import { sendVolumeBackupNotifications } from "@dokploy/server/utils/notifications/volume-backup";
 import { TRPCError } from "@trpc/server";
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -491,7 +497,12 @@ export const notificationRouter = createTRPCRouter({
 					});
 				} else {
 					await sendServerThresholdNotifications(organizationId, {
-						...input,
+						Type: input.Type,
+						Value: input.Value,
+						Threshold: input.Threshold,
+						Message: input.Message,
+						Timestamp: input.Timestamp,
+						Token: input.Token,
 						ServerName,
 					});
 				}
@@ -499,6 +510,109 @@ export const notificationRouter = createTRPCRouter({
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message: "Error sending the notification",
+					cause: error,
+				});
+			}
+		}),
+	testActionNotification: adminProcedure
+		.input(
+			z.object({
+				action: z.enum([
+					"appDeploy",
+					"appBuildError",
+					"databaseBackup",
+					"volumeBackup",
+					"dockerCleanup",
+					"dokployRestart",
+					"serverThreshold",
+					"containerHealth",
+				]),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const organizationId = ctx.session.activeOrganizationId;
+
+			try {
+				switch (input.action) {
+					case "appDeploy":
+						await sendBuildSuccessNotifications({
+							projectName: "Dokploy",
+							applicationName: "notification-test-app",
+							applicationType: "dockerfile",
+							buildLink: "https://dokploy.com/docs",
+							organizationId,
+							domains: [],
+							environmentName: "production",
+						});
+						break;
+					case "appBuildError":
+						await sendBuildErrorNotifications({
+							projectName: "Dokploy",
+							applicationName: "notification-test-app",
+							applicationType: "dockerfile",
+							errorMessage: "This is a test build error notification.",
+							buildLink: "https://dokploy.com/docs",
+							organizationId,
+						});
+						break;
+					case "databaseBackup":
+						await sendDatabaseBackupNotifications({
+							projectName: "Dokploy",
+							applicationName: "notification-test-app",
+							databaseType: "postgres",
+							type: "success",
+							organizationId,
+							databaseName: "dokploy_test_db",
+						});
+						break;
+					case "volumeBackup":
+						await sendVolumeBackupNotifications({
+							projectName: "Dokploy",
+							applicationName: "notification-test-app",
+							volumeName: "dokploy_test_volume",
+							serviceType: "application",
+							type: "success",
+							organizationId,
+							backupSize: "128MB",
+						});
+						break;
+					case "dockerCleanup":
+						await sendDockerCleanupNotifications(
+							organizationId,
+							"This is a test docker cleanup notification.",
+						);
+						break;
+					case "dokployRestart":
+						await sendDokployRestartNotifications(organizationId);
+						break;
+					case "serverThreshold":
+						await sendServerThresholdNotifications(organizationId, {
+							Type: "CPU",
+							Value: 92,
+							Threshold: 80,
+							Message: "This is a test server threshold notification.",
+							Timestamp: new Date().toISOString(),
+							Token: "test-token",
+							ServerName: "Dokploy Test Server",
+						});
+						break;
+					case "containerHealth":
+						await sendContainerHealthNotifications(organizationId, {
+							Message: "This is a test container health notification.",
+							Timestamp: new Date().toISOString(),
+							ServerName: "Dokploy Test Server",
+							ContainerName: "notification-test-container",
+							CurrentStatus: "unhealthy",
+							PreviousStatus: "healthy",
+						});
+						break;
+				}
+
+				return true;
+			} catch (error) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `${error instanceof Error ? error.message : "Error testing action notification"}`,
 					cause: error,
 				});
 			}

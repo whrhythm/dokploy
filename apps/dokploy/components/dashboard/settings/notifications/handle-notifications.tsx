@@ -1,6 +1,7 @@
 import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import {
 	AlertTriangle,
+	FlaskConical,
 	Mail,
 	PenBoxIcon,
 	PlusIcon,
@@ -252,10 +253,26 @@ interface Props {
 	notificationId?: string;
 }
 
+type NotificationAction =
+	| "appDeploy"
+	| "appBuildError"
+	| "databaseBackup"
+	| "volumeBackup"
+	| "dockerCleanup"
+	| "dokployRestart"
+	| "serverThreshold"
+	| "containerHealth";
+
+const ENABLE_NOTIFICATION_ACTION_TEST_BUTTONS =
+	process.env.NEXT_PUBLIC_ENABLE_NOTIFICATION_ACTION_TESTS !== "false";
+
 export const HandleNotifications = ({ notificationId }: Props) => {
 	const { t } = useTranslation();
 	const utils = api.useUtils();
 	const [visible, setVisible] = useState(false);
+	const [testingAction, setTestingAction] = useState<NotificationAction | null>(
+		null,
+	);
 	const { data: isCloud } = api.settings.isCloud.useQuery();
 	const notificationSchema = useMemo(() => createNotificationSchema(t), [t]);
 	const notificationsMap = useMemo(() => getNotificationsMap(t), [t]);
@@ -292,6 +309,8 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 
 	const { mutateAsync: testPushoverConnection, isPending: isLoadingPushover } =
 		api.notification.testPushoverConnection.useMutation();
+	const { mutateAsync: testActionNotification } =
+		api.notification.testActionNotification.useMutation();
 
 	const customMutation = notificationId
 		? api.notification.updateCustom.useMutation()
@@ -802,6 +821,46 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 		}
 	};
+
+	const testAction = async (action: NotificationAction, label: string) => {
+		try {
+			setTestingAction(action);
+			await testActionNotification({ action });
+			toast.success(t("notifications.action.testSuccess", { action: label }));
+		} catch (error) {
+			toast.error(
+				t("notifications.action.testError", {
+					action: label,
+					message:
+						error instanceof Error
+							? error.message
+							: t("notifications.unknownError"),
+				}),
+			);
+		} finally {
+			setTestingAction(null);
+		}
+	};
+
+	const renderActionTestButton = (action: NotificationAction) => {
+		if (!ENABLE_NOTIFICATION_ACTION_TEST_BUTTONS) {
+			return null;
+		}
+
+		return (
+			<Button
+				type="button"
+				variant="ghost"
+				size="icon"
+				className="h-8 w-8"
+				isLoading={testingAction === action}
+				onClick={() => testAction(action, t(`notifications.action.${action}`))}
+			>
+				<FlaskConical className="h-4 w-4" />
+			</Button>
+		);
+	};
+
 	return (
 		<Dialog open={visible} onOpenChange={setVisible}>
 			<DialogTrigger className="" asChild>
@@ -1781,12 +1840,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 													{t("notifications.action.appDeployDesc")}
 												</FormDescription>
 											</div>
-											<FormControl>
-												<Switch
-													checked={field.value}
-													onCheckedChange={field.onChange}
-												/>
-											</FormControl>
+											<div className="flex items-center gap-2">
+												{renderActionTestButton("appDeploy")}
+												<FormControl>
+													<Switch
+														checked={field.value}
+														onCheckedChange={field.onChange}
+													/>
+												</FormControl>
+											</div>
 										</FormItem>
 									)}
 								/>
@@ -1803,12 +1865,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 													{t("notifications.action.appBuildErrorDesc")}
 												</FormDescription>
 											</div>
-											<FormControl>
-												<Switch
-													checked={field.value}
-													onCheckedChange={field.onChange}
-												/>
-											</FormControl>
+											<div className="flex items-center gap-2">
+												{renderActionTestButton("appBuildError")}
+												<FormControl>
+													<Switch
+														checked={field.value}
+														onCheckedChange={field.onChange}
+													/>
+												</FormControl>
+											</div>
 										</FormItem>
 									)}
 								/>
@@ -1826,12 +1891,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 													{t("notifications.action.databaseBackupDesc")}
 												</FormDescription>
 											</div>
-											<FormControl>
-												<Switch
-													checked={field.value}
-													onCheckedChange={field.onChange}
-												/>
-											</FormControl>
+											<div className="flex items-center gap-2">
+												{renderActionTestButton("databaseBackup")}
+												<FormControl>
+													<Switch
+														checked={field.value}
+														onCheckedChange={field.onChange}
+													/>
+												</FormControl>
+											</div>
 										</FormItem>
 									)}
 								/>
@@ -1849,12 +1917,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 													{t("notifications.action.volumeBackupDesc")}
 												</FormDescription>
 											</div>
-											<FormControl>
-												<Switch
-													checked={field.value}
-													onCheckedChange={field.onChange}
-												/>
-											</FormControl>
+											<div className="flex items-center gap-2">
+												{renderActionTestButton("volumeBackup")}
+												<FormControl>
+													<Switch
+														checked={field.value}
+														onCheckedChange={field.onChange}
+													/>
+												</FormControl>
+											</div>
 										</FormItem>
 									)}
 								/>
@@ -1872,12 +1943,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 													{t("notifications.action.dockerCleanupDesc")}
 												</FormDescription>
 											</div>
-											<FormControl>
-												<Switch
-													checked={field.value}
-													onCheckedChange={field.onChange}
-												/>
-											</FormControl>
+											<div className="flex items-center gap-2">
+												{renderActionTestButton("dockerCleanup")}
+												<FormControl>
+													<Switch
+														checked={field.value}
+														onCheckedChange={field.onChange}
+													/>
+												</FormControl>
+											</div>
 										</FormItem>
 									)}
 								/>
@@ -1897,12 +1971,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 															{t("notifications.action.dokployRestartDesc")}
 														</FormDescription>
 													</div>
-													<FormControl>
-														<Switch
-															checked={field.value}
-															onCheckedChange={field.onChange}
-														/>
-													</FormControl>
+													<div className="flex items-center gap-2">
+														{renderActionTestButton("dokployRestart")}
+														<FormControl>
+															<Switch
+																checked={field.value}
+																onCheckedChange={field.onChange}
+															/>
+														</FormControl>
+													</div>
 												</FormItem>
 											)}
 										/>
@@ -1919,12 +1996,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 															{t("notifications.action.containerHealthDesc")}
 														</FormDescription>
 													</div>
-													<FormControl>
-														<Switch
-															checked={field.value}
-															onCheckedChange={field.onChange}
-														/>
-													</FormControl>
+													<div className="flex items-center gap-2">
+														{renderActionTestButton("containerHealth")}
+														<FormControl>
+															<Switch
+																checked={field.value}
+																onCheckedChange={field.onChange}
+															/>
+														</FormControl>
+													</div>
 												</FormItem>
 											)}
 										/>
@@ -1945,12 +2025,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 														{t("notifications.action.serverThresholdDesc")}
 													</FormDescription>
 												</div>
-												<FormControl>
-													<Switch
-														checked={field.value}
-														onCheckedChange={field.onChange}
-													/>
-												</FormControl>
+												<div className="flex items-center gap-2">
+													{renderActionTestButton("serverThreshold")}
+													<FormControl>
+														<Switch
+															checked={field.value}
+															onCheckedChange={field.onChange}
+														/>
+													</FormControl>
+												</div>
 											</FormItem>
 										)}
 									/>
