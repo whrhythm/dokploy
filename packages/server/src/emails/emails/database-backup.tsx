@@ -1,4 +1,3 @@
-import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -25,13 +24,36 @@ export const DatabaseBackupEmail = ({
 		name: applicationName,
 		event: type === "success" ? "backup succeeded" : "backup failed",
 	};
-	const summary = buildNotificationEmailSummary(meta);
+	const summaryText =
+		type === "success"
+			? `System completed a database backup for the application ${applicationName} in project ${projectName}.`
+			: `System encountered an error while backing up the database for the application ${applicationName} in project ${projectName}, which caused the backup to fail. See Reason for details.`;
+	const summary =
+		type === "success" ? (
+			<>
+				System{" "}
+				<span style={{ color: "#059669", fontWeight: 600 }}>
+					successfully completed a database backup
+				</span>{" "}
+				for the application <strong>{applicationName}</strong> in project{" "}
+				{projectName}.
+			</>
+		) : (
+			<>
+				System{" "}
+				<span style={{ color: "#DC2626", fontWeight: 600 }}>
+					encountered an error while backing up the database
+				</span>{" "}
+				for the application <strong>{applicationName}</strong> in project{" "}
+				{projectName}, which caused the backup to fail. See Reason for details.
+			</>
+		);
 	const action =
 		type === "success" ? "database backup succeeded" : "database backup failed";
 
 	return (
 		<NotificationEmailTemplate
-			previewText={summary}
+			previewText={summaryText}
 			title={
 				<>
 					Database backup for <strong>{applicationName}</strong>

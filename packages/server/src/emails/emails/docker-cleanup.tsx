@@ -1,4 +1,3 @@
-import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -17,12 +16,22 @@ export const DockerCleanupEmail = ({
 		name: "cleanup",
 		event: "completed",
 	};
-	const summary = buildNotificationEmailSummary(meta);
+	const summaryText =
+		"System completed Docker cleanup on the server, and redundant runtime resources were released.";
+	const summary = (
+		<>
+			System{" "}
+			<span style={{ color: "#059669", fontWeight: 600 }}>
+				successfully completed Docker cleanup
+			</span>{" "}
+			on the server, and redundant runtime resources were released.
+		</>
+	);
 	const context = "Dokploy / Docker / cleanup";
 
 	return (
 		<NotificationEmailTemplate
-			previewText={summary}
+			previewText={summaryText}
 			title={
 				<>
 					Docker cleanup for <strong>Dokploy</strong>

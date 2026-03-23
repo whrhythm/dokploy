@@ -13,7 +13,7 @@ export interface NotificationEmailDetailsItem {
 
 export interface NotificationEventContentProps {
 	level: NotificationLevel;
-	summary: string;
+	summary: ReactNode;
 	details?: NotificationEmailDetailsItem[];
 	reason?: string;
 	actor?: NotificationActor;

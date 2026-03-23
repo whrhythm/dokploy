@@ -1,4 +1,3 @@
-import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -15,12 +14,22 @@ export const DokployRestartEmail = ({
 		name: "server",
 		event: "restarted",
 	};
-	const summary = buildNotificationEmailSummary(meta);
+	const summaryText =
+		"System restarted the Dokploy service, and the platform control plane is available again.";
+	const summary = (
+		<>
+			System{" "}
+			<span style={{ color: "#059669", fontWeight: 600 }}>
+				successfully restarted
+			</span>{" "}
+			the Dokploy service, and the platform control plane is available again.
+		</>
+	);
 	const context = "Dokploy / server";
 
 	return (
 		<NotificationEmailTemplate
-			previewText={summary}
+			previewText={summaryText}
 			title="Dokploy Server Restart"
 		>
 			<NotificationEventContent

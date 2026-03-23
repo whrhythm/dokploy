@@ -1,7 +1,6 @@
-import {
-	buildNotificationEmailSummary,
-	type NotificationActor,
-	type NotificationTriggerSource,
+import type {
+	NotificationActor,
+	NotificationTriggerSource,
 } from "@dokploy/server/utils/notifications/event-metadata";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
@@ -33,11 +32,23 @@ export const BuildSuccessEmail = ({
 		name: applicationName,
 		event: "rebuild succeeded",
 	};
-	const summary = buildNotificationEmailSummary(meta);
+	const actorName = actor?.email || actor?.name || actor?.id;
+	const actorText = actorName ? `Administrator ${actorName}` : "System";
+	const summaryText = `${actorText} successfully deployed the application ${applicationName} in project ${projectName} (${environmentName}).`;
+	const summary = (
+		<>
+			{actorText}{" "}
+			<span style={{ color: "#059669", fontWeight: 600 }}>
+				successfully deployed
+			</span>{" "}
+			the application <strong>{applicationName}</strong> in project{" "}
+			{projectName} ({environmentName}).
+		</>
+	);
 
 	return (
 		<NotificationEmailTemplate
-			previewText={summary}
+			previewText={summaryText}
 			title={
 				<>
 					Application <strong>#{applicationName}</strong> rebuild succeeded

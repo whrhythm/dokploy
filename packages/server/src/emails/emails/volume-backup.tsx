@@ -1,4 +1,3 @@
-import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -36,13 +35,36 @@ export const VolumeBackupEmail = ({
 		name: volumeName,
 		event: type === "success" ? "backup succeeded" : "backup failed",
 	};
-	const summary = buildNotificationEmailSummary(meta);
+	const summaryText =
+		type === "success"
+			? `System completed a volume backup for the application ${applicationName} in project ${projectName}.`
+			: `System encountered an error while backing up the volume for the application ${applicationName} in project ${projectName}, which caused the backup to fail. See Reason for details.`;
+	const summary =
+		type === "success" ? (
+			<>
+				System{" "}
+				<span style={{ color: "#059669", fontWeight: 600 }}>
+					successfully completed a volume backup
+				</span>{" "}
+				for the application <strong>{applicationName}</strong> in project{" "}
+				{projectName}.
+			</>
+		) : (
+			<>
+				System{" "}
+				<span style={{ color: "#DC2626", fontWeight: 600 }}>
+					encountered an error while backing up the volume
+				</span>{" "}
+				for the application <strong>{applicationName}</strong> in project{" "}
+				{projectName}, which caused the backup to fail. See Reason for details.
+			</>
+		);
 	const action =
 		type === "success" ? "volume backup succeeded" : "volume backup failed";
 
 	return (
 		<NotificationEmailTemplate
-			previewText={summary}
+			previewText={summaryText}
 			title={
 				<>
 					Volume backup for <strong>{applicationName}</strong>
