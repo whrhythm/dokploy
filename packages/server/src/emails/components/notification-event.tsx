@@ -86,10 +86,26 @@ export const NotificationEventContent = ({
 
 	return (
 		<>
-			<Text style={{ color: "#000000", fontSize: "14px", lineHeight: "24px" }}>
+			<Text
+				style={{
+					color: "#000000",
+					fontSize: "14px",
+					lineHeight: "24px",
+					margin: "0 0 8px 0",
+					width: "100%",
+				}}
+			>
 				Hello,
 			</Text>
-			<Text style={{ color: "#000000", fontSize: "14px", lineHeight: "24px" }}>
+			<Text
+				style={{
+					color: "#000000",
+					fontSize: "14px",
+					lineHeight: "24px",
+					margin: "0 0 12px 0",
+					width: "100%",
+				}}
+			>
 				<span style={{ color, fontWeight: 600 }}>{label}</span>
 				{" — "}
 				{summary}
@@ -102,20 +118,30 @@ export const NotificationEventContent = ({
 					backgroundColor: "#F4F4F5",
 					borderRadius: "8px",
 					padding: "12px",
+					width: "100%",
 				}}
 			>
 				<Text style={{ fontWeight: 700, margin: "0 0 10px 0" }}>Details</Text>
-				<table width="100%" cellPadding={0} cellSpacing={0} role="presentation">
+				<table
+					width="100%"
+					cellPadding={0}
+					cellSpacing={0}
+					role="presentation"
+					style={{ tableLayout: "fixed", width: "100%" }}
+				>
 					<tbody>
 						{normalizedDetails.map((detail, index) => (
 							<tr key={`${detail.label}-${index}`}>
 								<td
 									style={{
 										verticalAlign: "top",
-										width: "130px",
+										width: "112px",
 										padding: "2px 8px 2px 0",
 										color: "#4B5563",
 										fontSize: "13px",
+										wordBreak: "break-word",
+										overflowWrap: "anywhere",
+										wordWrap: "break-word",
 									}}
 								>
 									{detail.label}:
@@ -126,6 +152,10 @@ export const NotificationEventContent = ({
 										padding: "2px 0",
 										fontSize: "14px",
 										color: "#111827",
+										maxWidth: "100%",
+										wordBreak: "break-word",
+										overflowWrap: "anywhere",
+										wordWrap: "break-word",
 									}}
 								>
 									<strong>{detail.value}</strong>
@@ -145,6 +175,7 @@ export const NotificationEventContent = ({
 						borderRadius: "8px",
 						padding: "12px",
 						marginTop: "16px",
+						width: "100%",
 					}}
 				>
 					<Text style={{ fontWeight: 700, color, margin: "0 0 8px 0" }}>
@@ -155,6 +186,10 @@ export const NotificationEventContent = ({
 							fontSize: "12px",
 							lineHeight: "20px",
 							whiteSpace: "pre-wrap",
+							wordBreak: "break-word",
+							overflowWrap: "anywhere",
+							wordWrap: "break-word",
+							maxWidth: "100%",
 							margin: "0",
 						}}
 					>

@@ -39,7 +39,7 @@ export const NotificationEmailTemplate = ({
 				style={{
 					backgroundColor: "#ffffff",
 					margin: "0 auto",
-					padding: "0 8px",
+					padding: "0",
 					fontFamily:
 						'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans", sans-serif',
 				}}
@@ -63,7 +63,8 @@ export const NotificationEmailTemplate = ({
 						borderRadius: "8px",
 						margin: "40px auto",
 						padding: "20px",
-						maxWidth: "465px",
+						maxWidth: "600px",
+						width: "100%",
 					}}
 				>
 					<Section style={{ marginTop: "32px", textAlign: "center" }}>
