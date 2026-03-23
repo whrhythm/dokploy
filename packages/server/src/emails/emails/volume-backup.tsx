@@ -37,6 +37,8 @@ export const VolumeBackupEmail = ({
 		event: type === "success" ? "backup succeeded" : "backup failed",
 	};
 	const summary = buildNotificationEmailSummary(meta);
+	const action =
+		type === "success" ? "volume backup succeeded" : "volume backup failed";
 
 	return (
 		<NotificationEmailTemplate
@@ -56,9 +58,11 @@ export const VolumeBackupEmail = ({
 					{ label: "Volume", value: volumeName },
 					{ label: "Service Type", value: serviceType },
 					...(backupSize ? [{ label: "Backup Size", value: backupSize }] : []),
-					{ label: "Date", value: date },
 				]}
 				reason={type === "error" ? errorMessage : undefined}
+				context={`${projectName} / ${applicationName} / ${volumeName}`}
+				action={action}
+				date={date}
 			/>
 		</NotificationEmailTemplate>
 	);

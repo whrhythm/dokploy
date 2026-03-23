@@ -14,10 +14,13 @@ export interface NotificationEmailDetailsItem {
 export interface NotificationEventContentProps {
 	level: NotificationLevel;
 	summary: string;
-	details: NotificationEmailDetailsItem[];
+	details?: NotificationEmailDetailsItem[];
 	reason?: string;
 	actor?: NotificationActor;
 	triggerSource?: NotificationTriggerSource;
+	context: string;
+	action: string;
+	date: string;
 }
 
 const LEVEL_STYLES: Record<
@@ -28,11 +31,20 @@ const LEVEL_STYLES: Record<
 	Warning: { label: "Warning", color: "#DC2626" },
 };
 
-const formatActor = (actor: NotificationActor): string => {
-	return actor.name || actor.email || actor.id || "Unknown";
+const formatActor = (
+	actor: NotificationActor | undefined,
+	source: NotificationTriggerSource | undefined,
+): string => {
+	if (actor?.name || actor?.email || actor?.id) {
+		return actor.name || actor.email || actor.id || "System";
+	}
+	if (source === "manual") return "System";
+	return "System";
 };
 
-const formatTriggerSource = (source: NotificationTriggerSource): string => {
+const formatTriggerSource = (
+	source: NotificationTriggerSource | undefined,
+): string => {
 	switch (source) {
 		case "manual":
 			return "Manual";
@@ -52,48 +64,100 @@ export const NotificationEventContent = ({
 	reason,
 	actor,
 	triggerSource,
+	context,
+	action,
+	date,
 }: NotificationEventContentProps) => {
 	const { label, color } = LEVEL_STYLES[level];
-	const normalizedDetails: NotificationEmailDetailsItem[] = [...details];
-
-	if (actor) {
-		normalizedDetails.push({
+	const normalizedDetails: NotificationEmailDetailsItem[] = [
+		{ label: "Context", value: context },
+		{ label: "Action", value: action },
+		{ label: "Date", value: date },
+		{
 			label: "Triggered By",
-			value: formatActor(actor),
-		});
-	}
-
-	if (triggerSource) {
-		normalizedDetails.push({
+			value: formatActor(actor, triggerSource),
+		},
+		{
 			label: "Trigger Source",
 			value: formatTriggerSource(triggerSource),
-		});
-	}
+		},
+		...(details ?? []),
+	];
 
 	return (
 		<>
-			<Text className="text-black text-[14px] leading-[24px]">Hello,</Text>
-			<Text className="text-black text-[14px] leading-[24px]">
-				<span className="font-semibold" style={{ color }}>
-					{label}
-				</span>
+			<Text style={{ color: "#000000", fontSize: "14px", lineHeight: "24px" }}>
+				Hello,
+			</Text>
+			<Text style={{ color: "#000000", fontSize: "14px", lineHeight: "24px" }}>
+				<span style={{ color, fontWeight: 600 }}>{label}</span>
 				{" — "}
 				{summary}
 			</Text>
-			<Section className="flex flex-col text-black text-[14px] leading-[24px] bg-[#F4F4F5] rounded-lg p-3 gap-1">
-				<Text className="font-bold !leading-3">Details</Text>
-				{normalizedDetails.map((detail, index) => (
-					<Text key={`${detail.label}-${index}`} className="!leading-3">
-						{detail.label}: <strong>{detail.value}</strong>
-					</Text>
-				))}
+			<Section
+				style={{
+					color: "#000000",
+					fontSize: "14px",
+					lineHeight: "24px",
+					backgroundColor: "#F4F4F5",
+					borderRadius: "8px",
+					padding: "12px",
+				}}
+			>
+				<Text style={{ fontWeight: 700, margin: "0 0 10px 0" }}>Details</Text>
+				<table width="100%" cellPadding={0} cellSpacing={0} role="presentation">
+					<tbody>
+						{normalizedDetails.map((detail, index) => (
+							<tr key={`${detail.label}-${index}`}>
+								<td
+									style={{
+										verticalAlign: "top",
+										width: "130px",
+										padding: "2px 8px 2px 0",
+										color: "#4B5563",
+										fontSize: "13px",
+									}}
+								>
+									{detail.label}:
+								</td>
+								<td
+									style={{
+										verticalAlign: "top",
+										padding: "2px 0",
+										fontSize: "14px",
+										color: "#111827",
+									}}
+								>
+									<strong>{detail.value}</strong>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
 			</Section>
 			{reason ? (
-				<Section className="flex flex-col text-black text-[14px] leading-[24px] bg-[#FEF2F2] rounded-lg p-3 mt-4">
-					<Text className="font-bold !leading-3" style={{ color }}>
+				<Section
+					style={{
+						color: "#000000",
+						fontSize: "14px",
+						lineHeight: "24px",
+						backgroundColor: "#FEF2F2",
+						borderRadius: "8px",
+						padding: "12px",
+						marginTop: "16px",
+					}}
+				>
+					<Text style={{ fontWeight: 700, color, margin: "0 0 8px 0" }}>
 						Reason
 					</Text>
-					<Text className="text-[12px] leading-[20px] whitespace-pre-wrap">
+					<Text
+						style={{
+							fontSize: "12px",
+							lineHeight: "20px",
+							whiteSpace: "pre-wrap",
+							margin: "0",
+						}}
+					>
 						{reason}
 					</Text>
 				</Section>

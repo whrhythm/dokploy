@@ -320,6 +320,7 @@ export const deployCompose = async ({
 			errorMessage: error?.message || "Error building",
 			buildLink,
 			organizationId: compose.environment.project.organizationId,
+			environmentName: compose.environment.name,
 			actor,
 			triggerSource,
 		});

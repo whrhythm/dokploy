@@ -18,6 +18,7 @@ export const DockerCleanupEmail = ({
 		event: "completed",
 	};
 	const summary = buildNotificationEmailSummary(meta);
+	const context = "Dokploy / Docker / cleanup";
 
 	return (
 		<NotificationEmailTemplate
@@ -32,9 +33,13 @@ export const DockerCleanupEmail = ({
 				level={meta.level}
 				summary={summary}
 				details={[
+					{ label: "Project", value: "Dokploy" },
+					{ label: "Application", value: "System" },
 					{ label: "Message", value: message },
-					{ label: "Date", value: date },
 				]}
+				context={context}
+				action="docker cleanup completed"
+				date={date}
 			/>
 		</NotificationEmailTemplate>
 	);

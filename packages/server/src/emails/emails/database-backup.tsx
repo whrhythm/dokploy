@@ -26,6 +26,8 @@ export const DatabaseBackupEmail = ({
 		event: type === "success" ? "backup succeeded" : "backup failed",
 	};
 	const summary = buildNotificationEmailSummary(meta);
+	const action =
+		type === "success" ? "database backup succeeded" : "database backup failed";
 
 	return (
 		<NotificationEmailTemplate
@@ -43,9 +45,11 @@ export const DatabaseBackupEmail = ({
 					{ label: "Project", value: projectName },
 					{ label: "Application", value: applicationName },
 					{ label: "Database Type", value: databaseType },
-					{ label: "Date", value: date },
 				]}
 				reason={type === "error" ? errorMessage : undefined}
+				context={`${projectName} / ${applicationName} / ${databaseType}`}
+				action={action}
+				date={date}
 			/>
 		</NotificationEmailTemplate>
 	);

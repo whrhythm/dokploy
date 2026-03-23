@@ -15,6 +15,7 @@ export type TemplateProps = {
 	date: string;
 	actor?: NotificationActor;
 	triggerSource?: NotificationTriggerSource;
+	environmentName?: string;
 };
 
 export const BuildFailedEmail = ({
@@ -26,6 +27,7 @@ export const BuildFailedEmail = ({
 	date = "2023-05-01T00:00:00.000Z",
 	actor,
 	triggerSource,
+	environmentName = "production",
 }: TemplateProps) => {
 	const meta = {
 		level: "Warning" as const,
@@ -52,12 +54,15 @@ export const BuildFailedEmail = ({
 				details={[
 					{ label: "Project", value: projectName },
 					{ label: "Application", value: applicationName },
+					{ label: "Environment", value: environmentName },
 					{ label: "Type", value: applicationType },
-					{ label: "Date", value: date },
 				]}
 				reason={errorMessage}
 				actor={actor}
 				triggerSource={triggerSource}
+				context={`${projectName} / ${environmentName} / ${applicationName}`}
+				action="application rebuild failed"
+				date={date}
 			/>
 		</NotificationEmailTemplate>
 	);

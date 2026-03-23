@@ -16,6 +16,7 @@ export const DokployRestartEmail = ({
 		event: "restarted",
 	};
 	const summary = buildNotificationEmailSummary(meta);
+	const context = "Dokploy / server";
 
 	return (
 		<NotificationEmailTemplate
@@ -25,7 +26,13 @@ export const DokployRestartEmail = ({
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[{ label: "Date", value: date }]}
+				details={[
+					{ label: "Project", value: "Dokploy" },
+					{ label: "Application", value: "Dokploy Server" },
+				]}
+				context={context}
+				action="dokploy server restarted"
+				date={date}
 			/>
 		</NotificationEmailTemplate>
 	);

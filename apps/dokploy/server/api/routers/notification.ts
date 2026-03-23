@@ -559,6 +559,7 @@ export const notificationRouter = createTRPCRouter({
 							errorMessage: "This is a test build error notification.",
 							buildLink: "https://dokploy.com/docs",
 							organizationId,
+							environmentName: "production",
 							actor: {
 								id: ctx.session.userId,
 								name: ctx.user?.name ?? ctx.user?.email ?? undefined,

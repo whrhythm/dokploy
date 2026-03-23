@@ -30,6 +30,7 @@ interface Props {
 	errorMessage: string;
 	buildLink: string;
 	organizationId: string;
+	environmentName: string;
 	actor?: NotificationActor;
 	triggerSource?: NotificationTriggerSource;
 }
@@ -41,6 +42,7 @@ export const sendBuildErrorNotifications = async ({
 	errorMessage,
 	buildLink,
 	organizationId,
+	environmentName,
 	actor,
 	triggerSource,
 }: Props) => {
@@ -99,8 +101,9 @@ export const sendBuildErrorNotifications = async ({
 						date: date.toLocaleString(),
 						actor,
 						triggerSource,
+						environmentName,
 					}),
-				).catch();
+				);
 
 				if (email) {
 					await sendEmailNotification(email, subject, template);

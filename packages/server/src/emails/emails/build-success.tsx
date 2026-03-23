@@ -54,10 +54,12 @@ export const BuildSuccessEmail = ({
 					{ label: "Application", value: applicationName },
 					{ label: "Environment", value: environmentName },
 					{ label: "Type", value: applicationType },
-					{ label: "Date", value: date },
 				]}
 				actor={actor}
 				triggerSource={triggerSource}
+				context={`${projectName} / ${environmentName} / ${applicationName}`}
+				action="application rebuild succeeded"
+				date={date}
 			/>
 		</NotificationEmailTemplate>
 	);

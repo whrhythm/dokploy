@@ -271,6 +271,7 @@ export const deployApplication = async ({
 			errorMessage: error?.message || "Error building",
 			buildLink,
 			organizationId: application.environment.project.organizationId,
+			environmentName: application.environment.name,
 			actor,
 			triggerSource,
 		});

@@ -90,7 +90,7 @@ export const sendDatabaseBackupNotifications = async ({
 						errorMessage,
 						date: date.toLocaleString(),
 					}),
-				).catch();
+				);
 
 				if (email) {
 					await sendEmailNotification(email, subject, template);
