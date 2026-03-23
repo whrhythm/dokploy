@@ -5,8 +5,8 @@ import type { Domain } from "@dokploy/server/services/domain";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
-	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,

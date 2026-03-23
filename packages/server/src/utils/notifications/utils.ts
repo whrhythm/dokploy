@@ -14,20 +14,6 @@ import type {
 import nodemailer from "nodemailer";
 import { Resend } from "resend";
 
-type NotificationSubjectLevel = "Warnning" | "Notice";
-
-export const buildNotificationEmailSubject = ({
-	level,
-	eventObject,
-	name,
-	event,
-}: {
-	level: NotificationSubjectLevel;
-	eventObject: string;
-	name: string;
-	event: string;
-}) => `[Dokploy ${level}] ${eventObject}#${name} ${event}`;
-
 export const sendEmailNotification = async (
 	connection: typeof email.$inferInsert,
 	subject: string,

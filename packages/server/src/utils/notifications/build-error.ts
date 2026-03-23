@@ -4,8 +4,8 @@ import BuildFailedEmail from "@dokploy/server/emails/emails/build-failed";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
-	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -75,7 +75,7 @@ export const sendBuildErrorNotifications = async ({
 		try {
 			if (email || resend) {
 				const subject = buildNotificationEmailSubject({
-					level: "Warnning",
+					level: "Warning",
 					eventObject: "Application",
 					name: applicationName,
 					event: "rebuild failed",

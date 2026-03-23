@@ -1,4 +1,5 @@
-import { Section, Text } from "@react-email/components";
+import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
+import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
 export type TemplateProps = {
@@ -10,29 +11,31 @@ export const DockerCleanupEmail = ({
 	message = "Docker cleanup for dokploy",
 	date = "2023-05-01T00:00:00.000Z",
 }: TemplateProps) => {
-	const previewText = "Docker cleanup for dokploy";
+	const meta = {
+		level: "Notice" as const,
+		eventObject: "Docker",
+		name: "cleanup",
+		event: "completed",
+	};
+	const summary = buildNotificationEmailSummary(meta);
+
 	return (
 		<NotificationEmailTemplate
-			previewText={previewText}
+			previewText={summary}
 			title={
 				<>
-					Docker cleanup for <strong>dokploy</strong>
+					Docker cleanup for <strong>Dokploy</strong>
 				</>
 			}
 		>
-			<Text className="text-black text-[14px] leading-[24px]">Hello,</Text>
-			<Text className="text-black text-[14px] leading-[24px]">
-				The docker cleanup for <strong>dokploy</strong> was successful ✅
-			</Text>
-			<Section className="flex text-black text-[14px]  leading-[24px] bg-[#F4F4F5] rounded-lg p-2">
-				<Text className="!leading-3 font-bold">Details: </Text>
-				<Text className="!leading-3">
-					Message: <strong>{message}</strong>
-				</Text>
-				<Text className="!leading-3">
-					Date: <strong>{date}</strong>
-				</Text>
-			</Section>
+			<NotificationEventContent
+				level={meta.level}
+				summary={summary}
+				details={[
+					{ label: "Message", value: message },
+					{ label: "Date", value: date },
+				]}
+			/>
 		</NotificationEmailTemplate>
 	);
 };

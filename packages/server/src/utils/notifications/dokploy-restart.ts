@@ -4,8 +4,8 @@ import DokployRestartEmail from "@dokploy/server/emails/emails/dokploy-restart";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
-	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,

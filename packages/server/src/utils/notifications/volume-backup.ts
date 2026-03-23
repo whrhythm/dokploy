@@ -4,8 +4,8 @@ import { VolumeBackupEmail } from "@dokploy/server/emails/emails/volume-backup";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
-	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -81,7 +81,7 @@ export const sendVolumeBackupNotifications = async ({
 
 		if (email || resend) {
 			const subject = buildNotificationEmailSubject({
-				level: type === "success" ? "Notice" : "Warnning",
+				level: type === "success" ? "Notice" : "Warning",
 				eventObject: "Volume",
 				name: volumeName,
 				event: type === "success" ? "backup succeeded" : "backup failed",

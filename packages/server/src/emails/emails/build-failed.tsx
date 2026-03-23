@@ -1,4 +1,5 @@
-import { Section, Text } from "@react-email/components";
+import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
+import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
 export type TemplateProps = {
@@ -18,42 +19,36 @@ export const BuildFailedEmail = ({
 	buildLink = "https://dokploy.com/projects/dokploy-test/applications/dokploy-test",
 	date = "2023-05-01T00:00:00.000Z",
 }: TemplateProps) => {
-	const previewText = `Build failed for ${applicationName}`;
+	const meta = {
+		level: "Warning" as const,
+		eventObject: "Application",
+		name: applicationName,
+		event: "rebuild failed",
+	};
+	const summary = buildNotificationEmailSummary(meta);
+
 	return (
 		<NotificationEmailTemplate
-			previewText={previewText}
+			previewText={summary}
 			title={
 				<>
-					Build failed for <strong>{applicationName}</strong>
+					Application <strong>#{applicationName}</strong> rebuild failed
 				</>
 			}
 			actionHref={buildLink}
 			actionLabel="View build"
 		>
-			<Text className="text-black text-[14px] leading-[24px]">Hello,</Text>
-			<Text className="text-black text-[14px] leading-[24px]">
-				Your build for <strong>{applicationName}</strong> failed. Please check
-				the error message below.
-			</Text>
-			<Section className="flex text-black text-[14px]  leading-[24px] bg-[#F4F4F5] rounded-lg p-2">
-				<Text className="!leading-3 font-bold">Details: </Text>
-				<Text className="!leading-3">
-					Project Name: <strong>{projectName}</strong>
-				</Text>
-				<Text className="!leading-3">
-					Application Name: <strong>{applicationName}</strong>
-				</Text>
-				<Text className="!leading-3">
-					Application Type: <strong>{applicationType}</strong>
-				</Text>
-				<Text className="!leading-3">
-					Date: <strong>{date}</strong>
-				</Text>
-			</Section>
-			<Section className="flex text-black text-[14px]  mt-4 leading-[24px] bg-[#F4F4F5] rounded-lg p-2">
-				<Text className="!leading-3 font-bold">Reason: </Text>
-				<Text className="text-[12px] leading-[24px]">{errorMessage}</Text>
-			</Section>
+			<NotificationEventContent
+				level={meta.level}
+				summary={summary}
+				details={[
+					{ label: "Project", value: projectName },
+					{ label: "Application", value: applicationName },
+					{ label: "Type", value: applicationType },
+					{ label: "Date", value: date },
+				]}
+				reason={errorMessage}
+			/>
 		</NotificationEmailTemplate>
 	);
 };

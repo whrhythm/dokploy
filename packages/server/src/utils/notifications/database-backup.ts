@@ -4,8 +4,8 @@ import DatabaseBackupEmail from "@dokploy/server/emails/emails/database-backup";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
-	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -75,7 +75,7 @@ export const sendDatabaseBackupNotifications = async ({
 		try {
 			if (email || resend) {
 				const subject = buildNotificationEmailSubject({
-					level: type === "success" ? "Notice" : "Warnning",
+					level: type === "success" ? "Notice" : "Warning",
 					eventObject: "Database",
 					name: databaseName,
 					event: type === "success" ? "backup succeeded" : "backup failed",

@@ -1,4 +1,5 @@
-import { Section, Text } from "@react-email/components";
+import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
+import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
 export type TemplateProps = {
@@ -8,22 +9,24 @@ export type TemplateProps = {
 export const DokployRestartEmail = ({
 	date = "2023-05-01T00:00:00.000Z",
 }: TemplateProps) => {
-	const previewText = "Your dokploy server was restarted";
+	const meta = {
+		level: "Notice" as const,
+		eventObject: "Dokploy",
+		name: "server",
+		event: "restarted",
+	};
+	const summary = buildNotificationEmailSummary(meta);
+
 	return (
 		<NotificationEmailTemplate
-			previewText={previewText}
+			previewText={summary}
 			title="Dokploy Server Restart"
 		>
-			<Text className="text-black text-[14px] leading-[24px]">Hello,</Text>
-			<Text className="text-black text-[14px] leading-[24px]">
-				Your dokploy server was restarted ✅
-			</Text>
-			<Section className="flex text-black text-[14px]  leading-[24px] bg-[#F4F4F5] rounded-lg p-2">
-				<Text className="!leading-3 font-bold">Details: </Text>
-				<Text className="!leading-3">
-					Date: <strong>{date}</strong>
-				</Text>
-			</Section>
+			<NotificationEventContent
+				level={meta.level}
+				summary={summary}
+				details={[{ label: "Date", value: date }]}
+			/>
 		</NotificationEmailTemplate>
 	);
 };
