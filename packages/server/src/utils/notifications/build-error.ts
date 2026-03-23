@@ -5,6 +5,11 @@ import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import {
+	buildNotificationEmailSubject,
+	type NotificationActor,
+	type NotificationTriggerSource,
+} from "./event-metadata";
+import {
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -25,6 +30,9 @@ interface Props {
 	errorMessage: string;
 	buildLink: string;
 	organizationId: string;
+	environmentName: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 }
 
 export const sendBuildErrorNotifications = async ({
@@ -34,6 +42,9 @@ export const sendBuildErrorNotifications = async ({
 	errorMessage,
 	buildLink,
 	organizationId,
+	environmentName,
+	actor,
+	triggerSource,
 }: Props) => {
 	const date = new Date();
 	const unixDate = ~~(Number(date) / 1000);
@@ -73,6 +84,12 @@ export const sendBuildErrorNotifications = async ({
 		} = notification;
 		try {
 			if (email || resend) {
+				const subject = buildNotificationEmailSubject({
+					level: "Warning",
+					eventObject: "Application",
+					event: "rebuild failed",
+				});
+
 				const template = await renderAsync(
 					BuildFailedEmail({
 						projectName,
@@ -81,23 +98,18 @@ export const sendBuildErrorNotifications = async ({
 						errorMessage: errorMessage,
 						buildLink,
 						date: date.toLocaleString(),
+						actor,
+						triggerSource,
+						environmentName,
 					}),
-				).catch();
+				);
 
 				if (email) {
-					await sendEmailNotification(
-						email,
-						"Build failed for dokploy",
-						template,
-					);
+					await sendEmailNotification(email, subject, template);
 				}
 
 				if (resend) {
-					await sendResendNotification(
-						resend,
-						"Build failed for dokploy",
-						template,
-					);
+					await sendResendNotification(resend, subject, template);
 				}
 			}
 

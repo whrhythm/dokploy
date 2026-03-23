@@ -6,6 +6,11 @@ import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import {
+	buildNotificationEmailSubject,
+	type NotificationActor,
+	type NotificationTriggerSource,
+} from "./event-metadata";
+import {
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -27,6 +32,8 @@ interface Props {
 	organizationId: string;
 	domains: Domain[];
 	environmentName: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 }
 
 export const sendBuildSuccessNotifications = async ({
@@ -37,6 +44,8 @@ export const sendBuildSuccessNotifications = async ({
 	organizationId,
 	domains,
 	environmentName,
+	actor,
+	triggerSource,
 }: Props) => {
 	const date = new Date();
 	const unixDate = ~~(Number(date) / 1000);
@@ -76,6 +85,12 @@ export const sendBuildSuccessNotifications = async ({
 		} = notification;
 		try {
 			if (email || resend) {
+				const subject = buildNotificationEmailSubject({
+					level: "Notice",
+					eventObject: "Application",
+					event: "rebuild succeeded",
+				});
+
 				const template = await renderAsync(
 					BuildSuccessEmail({
 						projectName,
@@ -84,23 +99,17 @@ export const sendBuildSuccessNotifications = async ({
 						buildLink,
 						date: date.toLocaleString(),
 						environmentName,
+						actor,
+						triggerSource,
 					}),
 				).catch();
 
 				if (email) {
-					await sendEmailNotification(
-						email,
-						"Build success for dokploy",
-						template,
-					);
+					await sendEmailNotification(email, subject, template);
 				}
 
 				if (resend) {
-					await sendResendNotification(
-						resend,
-						"Build success for dokploy",
-						template,
-					);
+					await sendResendNotification(resend, subject, template);
 				}
 			}
 

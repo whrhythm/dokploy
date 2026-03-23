@@ -4,6 +4,7 @@ import DatabaseBackupEmail from "@dokploy/server/emails/emails/database-backup";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
 	sendCustomNotification,
 	sendDiscordNotification,
@@ -73,6 +74,13 @@ export const sendDatabaseBackupNotifications = async ({
 		} = notification;
 		try {
 			if (email || resend) {
+				const subject = buildNotificationEmailSubject({
+					level: type === "success" ? "Notice" : "Warning",
+					eventObject: "Database",
+					name: databaseName,
+					event: type === "success" ? "backup succeeded" : "backup failed",
+				});
+
 				const template = await renderAsync(
 					DatabaseBackupEmail({
 						projectName,
@@ -82,22 +90,14 @@ export const sendDatabaseBackupNotifications = async ({
 						errorMessage,
 						date: date.toLocaleString(),
 					}),
-				).catch();
+				);
 
 				if (email) {
-					await sendEmailNotification(
-						email,
-						"Database backup for dokploy",
-						template,
-					);
+					await sendEmailNotification(email, subject, template);
 				}
 
 				if (resend) {
-					await sendResendNotification(
-						resend,
-						"Database backup for dokploy",
-						template,
-					);
+					await sendResendNotification(resend, subject, template);
 				}
 			}
 

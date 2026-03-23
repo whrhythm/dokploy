@@ -3,7 +3,8 @@ import { notifications } from "@dokploy/server/db/schema";
 import DokployRestartEmail from "@dokploy/server/emails/emails/dokploy-restart";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
 	sendCustomNotification,
 	sendDiscordNotification,
@@ -18,12 +19,19 @@ import {
 	sendTelegramNotification,
 } from "./utils";
 
-export const sendDokployRestartNotifications = async () => {
+export const sendDokployRestartNotifications = async (
+	organizationId?: string,
+) => {
 	try {
 		const date = new Date();
 		const unixDate = ~~(Number(date) / 1000);
 		const notificationList = await db.query.notifications.findMany({
-			where: eq(notifications.dokployRestart, true),
+			where: organizationId
+				? and(
+						eq(notifications.dokployRestart, true),
+						eq(notifications.organizationId, organizationId),
+					)
+				: eq(notifications.dokployRestart, true),
 			with: {
 				email: true,
 				discord: true,
@@ -56,24 +64,23 @@ export const sendDokployRestartNotifications = async () => {
 
 			try {
 				if (email || resend) {
+					const subject = buildNotificationEmailSubject({
+						level: "Notice",
+						eventObject: "Dokploy",
+						name: "server",
+						event: "restarted",
+					});
+
 					const template = await renderAsync(
 						DokployRestartEmail({ date: date.toLocaleString() }),
 					).catch();
 
 					if (email) {
-						await sendEmailNotification(
-							email,
-							"Dokploy Server Restarted",
-							template,
-						);
+						await sendEmailNotification(email, subject, template);
 					}
 
 					if (resend) {
-						await sendResendNotification(
-							resend,
-							"Dokploy Server Restarted",
-							template,
-						);
+						await sendResendNotification(resend, subject, template);
 					}
 				}
 

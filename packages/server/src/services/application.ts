@@ -12,6 +12,10 @@ import {
 } from "@dokploy/server/utils/builders";
 import { sendBuildErrorNotifications } from "@dokploy/server/utils/notifications/build-error";
 import { sendBuildSuccessNotifications } from "@dokploy/server/utils/notifications/build-success";
+import type {
+	NotificationActor,
+	NotificationTriggerSource,
+} from "@dokploy/server/utils/notifications/event-metadata";
 import {
 	ExecError,
 	execAsync,
@@ -169,10 +173,14 @@ export const deployApplication = async ({
 	applicationId,
 	titleLog = "Manual deployment",
 	descriptionLog = "",
+	actor,
+	triggerSource = "system",
 }: {
 	applicationId: string;
 	titleLog: string;
 	descriptionLog: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 }) => {
 	const application = await findApplicationById(applicationId);
 	const serverId = application.buildServerId || application.serverId;
@@ -233,6 +241,8 @@ export const deployApplication = async ({
 			organizationId: application.environment.project.organizationId,
 			domains: application.domains,
 			environmentName: application.environment.name,
+			actor,
+			triggerSource,
 		});
 	} catch (error) {
 		let command = "";
@@ -261,6 +271,9 @@ export const deployApplication = async ({
 			errorMessage: error?.message || "Error building",
 			buildLink,
 			organizationId: application.environment.project.organizationId,
+			environmentName: application.environment.name,
+			actor,
+			triggerSource,
 		});
 
 		throw error;
@@ -287,10 +300,14 @@ export const rebuildApplication = async ({
 	applicationId,
 	titleLog = "Rebuild deployment",
 	descriptionLog = "",
+	actor,
+	triggerSource = "system",
 }: {
 	applicationId: string;
 	titleLog: string;
 	descriptionLog: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 }) => {
 	const application = await findApplicationById(applicationId);
 	const serverId = application.buildServerId || application.serverId;
@@ -324,6 +341,8 @@ export const rebuildApplication = async ({
 			organizationId: application.environment.project.organizationId,
 			domains: application.domains,
 			environmentName: application.environment.name,
+			actor,
+			triggerSource,
 		});
 	} catch (error) {
 		let command = "";

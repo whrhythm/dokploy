@@ -244,6 +244,7 @@ export default async function handler(
 				type: "deploy",
 				applicationType: "application",
 				server: !!application.serverId,
+				triggerSource: "webhook",
 			};
 
 			if (IS_CLOUD && application.serverId) {

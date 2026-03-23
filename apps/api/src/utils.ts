@@ -21,12 +21,16 @@ export const deploy = async (job: DeployJob) => {
 						applicationId: job.applicationId,
 						titleLog: job.titleLog || "Rebuild deployment",
 						descriptionLog: job.descriptionLog || "",
+						actor: job.actor,
+						triggerSource: job.triggerSource,
 					});
 				} else if (job.type === "deploy") {
 					await deployApplication({
 						applicationId: job.applicationId,
 						titleLog: job.titleLog || "Manual deployment",
 						descriptionLog: job.descriptionLog || "",
+						actor: job.actor,
+						triggerSource: job.triggerSource,
 					});
 				}
 			}
@@ -47,6 +51,8 @@ export const deploy = async (job: DeployJob) => {
 						composeId: job.composeId,
 						titleLog: job.titleLog || "Manual deployment",
 						descriptionLog: job.descriptionLog || "",
+						actor: job.actor,
+						triggerSource: job.triggerSource,
 					});
 				}
 			}

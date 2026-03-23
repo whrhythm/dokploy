@@ -177,6 +177,7 @@ export default async function handler(
 				applicationType: "compose",
 				descriptionLog: `Hash: ${deploymentHash}`,
 				server: !!composeResult.serverId,
+				triggerSource: "webhook",
 			};
 
 			if (IS_CLOUD && composeResult.serverId) {

@@ -4,6 +4,7 @@ import DockerCleanupEmail from "@dokploy/server/emails/emails/docker-cleanup";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
 	sendCustomNotification,
 	sendDiscordNotification,
@@ -60,24 +61,23 @@ export const sendDockerCleanupNotifications = async (
 		} = notification;
 		try {
 			if (email || resend) {
+				const subject = buildNotificationEmailSubject({
+					level: "Notice",
+					eventObject: "Docker",
+					name: "cleanup",
+					event: "completed",
+				});
+
 				const template = await renderAsync(
 					DockerCleanupEmail({ message, date: date.toLocaleString() }),
 				).catch();
 
 				if (email) {
-					await sendEmailNotification(
-						email,
-						"Docker cleanup for dokploy",
-						template,
-					);
+					await sendEmailNotification(email, subject, template);
 				}
 
 				if (resend) {
-					await sendResendNotification(
-						resend,
-						"Docker cleanup for dokploy",
-						template,
-					);
+					await sendResendNotification(resend, subject, template);
 				}
 			}
 

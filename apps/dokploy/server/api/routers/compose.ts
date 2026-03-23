@@ -445,6 +445,12 @@ export const composeRouter = createTRPCRouter({
 				applicationType: "compose",
 				descriptionLog: input.description || "",
 				server: !!compose.serverId,
+				actor: {
+					id: ctx.session.userId,
+					name: ctx.user?.name ?? ctx.user?.email ?? undefined,
+					email: ctx.user?.email ?? undefined,
+				},
+				triggerSource: "manual",
 			};
 
 			if (IS_CLOUD && compose.serverId) {
@@ -488,6 +494,12 @@ export const composeRouter = createTRPCRouter({
 				applicationType: "compose",
 				descriptionLog: input.description || "",
 				server: !!compose.serverId,
+				actor: {
+					id: ctx.session.userId,
+					name: ctx.user?.name ?? ctx.user?.email ?? undefined,
+					email: ctx.user?.email ?? undefined,
+				},
+				triggerSource: "manual",
 			};
 			if (IS_CLOUD && compose.serverId) {
 				jobData.serverId = compose.serverId;
