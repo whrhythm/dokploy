@@ -5,6 +5,7 @@ import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import {
+	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -73,6 +74,13 @@ export const sendDatabaseBackupNotifications = async ({
 		} = notification;
 		try {
 			if (email || resend) {
+				const subject = buildNotificationEmailSubject({
+					level: type === "success" ? "Notice" : "Warnning",
+					eventObject: "Database",
+					name: databaseName,
+					event: type === "success" ? "backup succeeded" : "backup failed",
+				});
+
 				const template = await renderAsync(
 					DatabaseBackupEmail({
 						projectName,
@@ -85,19 +93,11 @@ export const sendDatabaseBackupNotifications = async ({
 				).catch();
 
 				if (email) {
-					await sendEmailNotification(
-						email,
-						"Database backup for dokploy",
-						template,
-					);
+					await sendEmailNotification(email, subject, template);
 				}
 
 				if (resend) {
-					await sendResendNotification(
-						resend,
-						"Database backup for dokploy",
-						template,
-					);
+					await sendResendNotification(resend, subject, template);
 				}
 			}
 

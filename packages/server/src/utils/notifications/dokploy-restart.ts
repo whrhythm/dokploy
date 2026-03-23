@@ -5,6 +5,7 @@ import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import {
+	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -63,24 +64,23 @@ export const sendDokployRestartNotifications = async (
 
 			try {
 				if (email || resend) {
+					const subject = buildNotificationEmailSubject({
+						level: "Notice",
+						eventObject: "Dokploy",
+						name: "server",
+						event: "restarted",
+					});
+
 					const template = await renderAsync(
 						DokployRestartEmail({ date: date.toLocaleString() }),
 					).catch();
 
 					if (email) {
-						await sendEmailNotification(
-							email,
-							"Dokploy Server Restarted",
-							template,
-						);
+						await sendEmailNotification(email, subject, template);
 					}
 
 					if (resend) {
-						await sendResendNotification(
-							resend,
-							"Dokploy Server Restarted",
-							template,
-						);
+						await sendResendNotification(resend, subject, template);
 					}
 				}
 

@@ -6,6 +6,7 @@ import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import {
+	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -76,6 +77,13 @@ export const sendBuildSuccessNotifications = async ({
 		} = notification;
 		try {
 			if (email || resend) {
+				const subject = buildNotificationEmailSubject({
+					level: "Notice",
+					eventObject: "Application",
+					name: applicationName,
+					event: "rebuild succeeded",
+				});
+
 				const template = await renderAsync(
 					BuildSuccessEmail({
 						projectName,
@@ -88,19 +96,11 @@ export const sendBuildSuccessNotifications = async ({
 				).catch();
 
 				if (email) {
-					await sendEmailNotification(
-						email,
-						"Build success for dokploy",
-						template,
-					);
+					await sendEmailNotification(email, subject, template);
 				}
 
 				if (resend) {
-					await sendResendNotification(
-						resend,
-						"Build success for dokploy",
-						template,
-					);
+					await sendResendNotification(resend, subject, template);
 				}
 			}
 

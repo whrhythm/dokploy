@@ -5,6 +5,7 @@ import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import {
+	buildNotificationEmailSubject,
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendEmailNotification,
@@ -79,7 +80,13 @@ export const sendVolumeBackupNotifications = async ({
 		} = notification;
 
 		if (email || resend) {
-			const subject = `Volume Backup ${type === "success" ? "Successful" : "Failed"} - ${applicationName}`;
+			const subject = buildNotificationEmailSubject({
+				level: type === "success" ? "Notice" : "Warnning",
+				eventObject: "Volume",
+				name: volumeName,
+				event: type === "success" ? "backup succeeded" : "backup failed",
+			});
+
 			const htmlContent = await renderAsync(
 				VolumeBackupEmail({
 					projectName,
