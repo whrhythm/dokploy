@@ -342,6 +342,12 @@ export const applicationRouter = createTRPCRouter({
 				type: "redeploy",
 				applicationType: "application",
 				server: !!application.serverId,
+				actor: {
+					id: ctx.session.userId,
+					name: ctx.user?.name ?? ctx.user?.email ?? undefined,
+					email: ctx.user?.email ?? undefined,
+				},
+				triggerSource: "manual",
 			};
 
 			if (IS_CLOUD && application.serverId) {
@@ -711,6 +717,12 @@ export const applicationRouter = createTRPCRouter({
 				type: "deploy",
 				applicationType: "application",
 				server: !!application.serverId,
+				actor: {
+					id: ctx.session.userId,
+					name: ctx.user?.name ?? ctx.user?.email ?? undefined,
+					email: ctx.user?.email ?? undefined,
+				},
+				triggerSource: "manual",
 			};
 			if (IS_CLOUD && application.serverId) {
 				jobData.serverId = application.serverId;
@@ -845,6 +857,12 @@ export const applicationRouter = createTRPCRouter({
 				type: "deploy",
 				applicationType: "application",
 				server: !!app.serverId,
+				actor: {
+					id: ctx.session.userId,
+					name: ctx.user?.name ?? ctx.user?.email ?? undefined,
+					email: ctx.user?.email ?? undefined,
+				},
+				triggerSource: "manual",
 			};
 			if (IS_CLOUD && app.serverId) {
 				jobData.serverId = app.serverId;

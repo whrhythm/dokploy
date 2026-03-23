@@ -124,6 +124,7 @@ export default async function handler(
 					type: "deploy",
 					applicationType: "application",
 					server: !!app.serverId,
+					triggerSource: "webhook",
 				};
 
 				if (IS_CLOUD && app.serverId) {
@@ -163,6 +164,7 @@ export default async function handler(
 					applicationType: "compose",
 					descriptionLog: `Hash: ${deploymentHash}`,
 					server: !!composeApp.serverId,
+					triggerSource: "webhook",
 				};
 
 				if (IS_CLOUD && composeApp.serverId) {
@@ -237,6 +239,7 @@ export default async function handler(
 					type: "deploy",
 					applicationType: "application",
 					server: !!app.serverId,
+					triggerSource: "webhook",
 				};
 
 				const shouldDeployPaths = shouldDeploy(
@@ -285,6 +288,7 @@ export default async function handler(
 					applicationType: "compose",
 					descriptionLog: `Hash: ${deploymentHash}`,
 					server: !!composeApp.serverId,
+					triggerSource: "webhook",
 				};
 
 				const shouldDeployPaths = shouldDeploy(
@@ -500,6 +504,7 @@ export default async function handler(
 					applicationType: "application-preview",
 					server: !!app.serverId,
 					previewDeploymentId,
+					triggerSource: "webhook",
 				};
 
 				if (previewDeploymentId) {

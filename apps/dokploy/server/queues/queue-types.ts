@@ -1,3 +1,8 @@
+import type {
+	NotificationActor,
+	NotificationTriggerSource,
+} from "@dokploy/server";
+
 type DeployJob =
 	| {
 			applicationId: string;
@@ -7,6 +12,8 @@ type DeployJob =
 			type: "deploy" | "redeploy";
 			applicationType: "application";
 			serverId?: string;
+			actor?: NotificationActor;
+			triggerSource?: NotificationTriggerSource;
 	  }
 	| {
 			composeId: string;
@@ -16,6 +23,8 @@ type DeployJob =
 			type: "deploy" | "redeploy";
 			applicationType: "compose";
 			serverId?: string;
+			actor?: NotificationActor;
+			triggerSource?: NotificationTriggerSource;
 	  }
 	| {
 			applicationId: string;
@@ -26,6 +35,8 @@ type DeployJob =
 			applicationType: "application-preview";
 			previewDeploymentId: string;
 			serverId?: string;
+			actor?: NotificationActor;
+			triggerSource?: NotificationTriggerSource;
 	  };
 
 export type DeploymentJob = DeployJob;

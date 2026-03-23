@@ -4,7 +4,11 @@ import BuildFailedEmail from "@dokploy/server/emails/emails/build-failed";
 import { renderAsync } from "@react-email/components";
 import { format } from "date-fns";
 import { and, eq } from "drizzle-orm";
-import { buildNotificationEmailSubject } from "./event-metadata";
+import {
+	buildNotificationEmailSubject,
+	type NotificationActor,
+	type NotificationTriggerSource,
+} from "./event-metadata";
 import {
 	sendCustomNotification,
 	sendDiscordNotification,
@@ -26,6 +30,8 @@ interface Props {
 	errorMessage: string;
 	buildLink: string;
 	organizationId: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 }
 
 export const sendBuildErrorNotifications = async ({
@@ -35,6 +41,8 @@ export const sendBuildErrorNotifications = async ({
 	errorMessage,
 	buildLink,
 	organizationId,
+	actor,
+	triggerSource,
 }: Props) => {
 	const date = new Date();
 	const unixDate = ~~(Number(date) / 1000);
@@ -89,6 +97,8 @@ export const sendBuildErrorNotifications = async ({
 						errorMessage: errorMessage,
 						buildLink,
 						date: date.toLocaleString(),
+						actor,
+						triggerSource,
 					}),
 				).catch();
 

@@ -1,4 +1,8 @@
-import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
+import {
+	buildNotificationEmailSummary,
+	type NotificationActor,
+	type NotificationTriggerSource,
+} from "@dokploy/server/utils/notifications/event-metadata";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -9,6 +13,8 @@ export type TemplateProps = {
 	buildLink: string;
 	date: string;
 	environmentName: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 };
 
 export const BuildSuccessEmail = ({
@@ -18,6 +24,8 @@ export const BuildSuccessEmail = ({
 	buildLink = "https://dokploy.com/projects/dokploy-test/applications/dokploy-test",
 	date = "2023-05-01T00:00:00.000Z",
 	environmentName = "production",
+	actor,
+	triggerSource,
 }: TemplateProps) => {
 	const meta = {
 		level: "Notice" as const,
@@ -48,6 +56,8 @@ export const BuildSuccessEmail = ({
 					{ label: "Type", value: applicationType },
 					{ label: "Date", value: date },
 				]}
+				actor={actor}
+				triggerSource={triggerSource}
 			/>
 		</NotificationEmailTemplate>
 	);

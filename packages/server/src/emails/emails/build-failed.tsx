@@ -1,4 +1,8 @@
-import { buildNotificationEmailSummary } from "@dokploy/server/utils/notifications/event-metadata";
+import {
+	buildNotificationEmailSummary,
+	type NotificationActor,
+	type NotificationTriggerSource,
+} from "@dokploy/server/utils/notifications/event-metadata";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -9,6 +13,8 @@ export type TemplateProps = {
 	errorMessage: string;
 	buildLink: string;
 	date: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 };
 
 export const BuildFailedEmail = ({
@@ -18,6 +24,8 @@ export const BuildFailedEmail = ({
 	errorMessage = "Error array.length is not a function",
 	buildLink = "https://dokploy.com/projects/dokploy-test/applications/dokploy-test",
 	date = "2023-05-01T00:00:00.000Z",
+	actor,
+	triggerSource,
 }: TemplateProps) => {
 	const meta = {
 		level: "Warning" as const,
@@ -48,6 +56,8 @@ export const BuildFailedEmail = ({
 					{ label: "Date", value: date },
 				]}
 				reason={errorMessage}
+				actor={actor}
+				triggerSource={triggerSource}
 			/>
 		</NotificationEmailTemplate>
 	);

@@ -96,6 +96,12 @@ export const previewDeploymentRouter = createTRPCRouter({
 				applicationType: "application-preview",
 				previewDeploymentId: input.previewDeploymentId,
 				server: !!application.serverId,
+				actor: {
+					id: ctx.session.userId,
+					name: ctx.user?.name ?? ctx.user?.email ?? undefined,
+					email: ctx.user?.email ?? undefined,
+				},
+				triggerSource: "manual",
 			};
 
 			if (IS_CLOUD && application.serverId) {

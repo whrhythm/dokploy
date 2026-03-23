@@ -17,6 +17,10 @@ import {
 import type { ComposeSpecification } from "@dokploy/server/utils/docker/types";
 import { sendBuildErrorNotifications } from "@dokploy/server/utils/notifications/build-error";
 import { sendBuildSuccessNotifications } from "@dokploy/server/utils/notifications/build-success";
+import type {
+	NotificationActor,
+	NotificationTriggerSource,
+} from "@dokploy/server/utils/notifications/event-metadata";
 import {
 	ExecError,
 	execAsync,
@@ -209,10 +213,14 @@ export const deployCompose = async ({
 	composeId,
 	titleLog = "Manual deployment",
 	descriptionLog = "",
+	actor,
+	triggerSource = "system",
 }: {
 	composeId: string;
 	titleLog: string;
 	descriptionLog: string;
+	actor?: NotificationActor;
+	triggerSource?: NotificationTriggerSource;
 }) => {
 	const compose = await findComposeById(composeId);
 
@@ -281,6 +289,8 @@ export const deployCompose = async ({
 			organizationId: compose.environment.project.organizationId,
 			domains: compose.domains,
 			environmentName: compose.environment.name,
+			actor,
+			triggerSource,
 		});
 	} catch (error) {
 		let command = "";
@@ -310,6 +320,8 @@ export const deployCompose = async ({
 			errorMessage: error?.message || "Error building",
 			buildLink,
 			organizationId: compose.environment.project.organizationId,
+			actor,
+			triggerSource,
 		});
 		throw error;
 	} finally {

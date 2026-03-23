@@ -27,12 +27,16 @@ const createDeploymentWorker = () =>
 							applicationId: job.data.applicationId,
 							titleLog: job.data.titleLog,
 							descriptionLog: job.data.descriptionLog,
+							actor: job.data.actor,
+							triggerSource: job.data.triggerSource,
 						});
 					} else if (job.data.type === "deploy") {
 						await deployApplication({
 							applicationId: job.data.applicationId,
 							titleLog: job.data.titleLog,
 							descriptionLog: job.data.descriptionLog,
+							actor: job.data.actor,
+							triggerSource: job.data.triggerSource,
 						});
 					}
 				} else if (job.data.applicationType === "compose") {
@@ -44,6 +48,8 @@ const createDeploymentWorker = () =>
 							composeId: job.data.composeId,
 							titleLog: job.data.titleLog,
 							descriptionLog: job.data.descriptionLog,
+							actor: job.data.actor,
+							triggerSource: job.data.triggerSource,
 						});
 					} else if (job.data.type === "redeploy") {
 						await rebuildCompose({
