@@ -60,6 +60,7 @@ export const NotificationEmailTemplate = ({
 					style={{
 						border: "1px solid #eaeaea",
 						borderRadius: "8px",
+						backgroundColor: "#DDDDDD",
 						margin: "40px auto",
 						padding: "20px",
 						maxWidth: "600px",
