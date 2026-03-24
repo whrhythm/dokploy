@@ -35,7 +35,6 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { encodeBase64 } from "../utils/docker/utils";
-import { getDokployUrl } from "./admin";
 import {
 	createDeployment,
 	createDeploymentPreview,
@@ -56,6 +55,10 @@ import {
 } from "./preview-deployment";
 import { validUniqueServerAppName } from "./project";
 export type Application = typeof applications.$inferSelect;
+
+const getNotificationAppBaseUrl = () => {
+	return process.env.DOKPLOY_APP_BASE_URL?.trim().replace(/\/+$/, "");
+};
 
 export const createApplication = async (
 	input: z.infer<typeof apiCreateApplication>,
@@ -189,7 +192,10 @@ export const deployApplication = async ({
 		serverId: serverId,
 	};
 
-	const buildLink = `${await getDokployUrl()}/dashboard/project/${application.environment.projectId}/environment/${application.environmentId}/services/application/${application.applicationId}?tab=deployments`;
+	const notificationAppBaseUrl = getNotificationAppBaseUrl();
+	const buildLink = notificationAppBaseUrl
+		? `${notificationAppBaseUrl}/dashboard/project/${application.environment.projectId}/environment/${application.environmentId}/services/application/${application.applicationId}?tab=deployments`
+		: "#";
 	const deployment = await createDeployment({
 		applicationId: applicationId,
 		title: titleLog,
@@ -311,7 +317,10 @@ export const rebuildApplication = async ({
 }) => {
 	const application = await findApplicationById(applicationId);
 	const serverId = application.buildServerId || application.serverId;
-	const buildLink = `${await getDokployUrl()}/dashboard/project/${application.environment.projectId}/environment/${application.environmentId}/services/application/${application.applicationId}?tab=deployments`;
+	const notificationAppBaseUrl = getNotificationAppBaseUrl();
+	const buildLink = notificationAppBaseUrl
+		? `${notificationAppBaseUrl}/dashboard/project/${application.environment.projectId}/environment/${application.environmentId}/services/application/${application.applicationId}?tab=deployments`
+		: "#";
 
 	const deployment = await createDeployment({
 		applicationId: applicationId,

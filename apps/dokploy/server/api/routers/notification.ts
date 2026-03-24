@@ -531,6 +531,13 @@ export const notificationRouter = createTRPCRouter({
 		)
 		.mutation(async ({ input, ctx }) => {
 			const organizationId = ctx.session.activeOrganizationId;
+			const appBaseUrl = process.env.DOKPLOY_APP_BASE_URL?.trim().replace(
+				/\/+$/,
+				"",
+			);
+			const testBuildLink = appBaseUrl
+				? `${appBaseUrl}/dashboard/deployments`
+				: "#";
 
 			try {
 				switch (input.action) {
@@ -539,7 +546,7 @@ export const notificationRouter = createTRPCRouter({
 							projectName: "Dokploy",
 							applicationName: "notification-test-app",
 							applicationType: "dockerfile",
-							buildLink: "https://dokploy.com/docs",
+							buildLink: testBuildLink,
 							organizationId,
 							domains: [],
 							environmentName: "production",
@@ -558,7 +565,7 @@ export const notificationRouter = createTRPCRouter({
 							applicationName: "notification-test-app",
 							applicationType: "dockerfile",
 							errorMessage: "This is a test build error notification.",
-							buildLink: "https://dokploy.com/docs",
+							buildLink: testBuildLink,
 							organizationId,
 							environmentName: "production",
 							actor: {

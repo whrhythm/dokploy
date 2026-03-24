@@ -39,7 +39,6 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { encodeBase64 } from "../utils/docker/utils";
-import { getDokployUrl } from "./admin";
 import {
 	createDeploymentCompose,
 	updateDeployment,
@@ -49,6 +48,10 @@ import { generateApplyPatchesCommand } from "./patch";
 import { validUniqueServerAppName } from "./project";
 
 export type Compose = typeof compose.$inferSelect;
+
+const getNotificationAppBaseUrl = () => {
+	return process.env.DOKPLOY_APP_BASE_URL?.trim().replace(/\/+$/, "");
+};
 
 export const createCompose = async (
 	input: z.infer<typeof apiCreateCompose>,
@@ -224,9 +227,10 @@ export const deployCompose = async ({
 }) => {
 	const compose = await findComposeById(composeId);
 
-	const buildLink = `${await getDokployUrl()}/dashboard/project/${
-		compose.environment.projectId
-	}/environment/${compose.environmentId}/services/compose/${compose.composeId}?tab=deployments`;
+	const notificationAppBaseUrl = getNotificationAppBaseUrl();
+	const buildLink = notificationAppBaseUrl
+		? `${notificationAppBaseUrl}/dashboard/project/${compose.environment.projectId}/environment/${compose.environmentId}/services/compose/${compose.composeId}?tab=deployments`
+		: "#";
 	const deployment = await createDeploymentCompose({
 		composeId: composeId,
 		title: titleLog,
