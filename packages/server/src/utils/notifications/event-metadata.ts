@@ -10,6 +10,7 @@ export interface NotificationActor {
 	id?: string;
 	name?: string | null;
 	email?: string | null;
+	role?: string | null;
 }
 
 export interface NotificationEventMeta {
@@ -24,12 +25,13 @@ export const buildNotificationEmailSubject = ({
 	eventObject,
 	name,
 	event,
-}: NotificationEventMeta) =>
-	`[Dokploy ${level}] ${eventObject}${name ? `#${name}` : ""} ${event}`;
+}: NotificationEventMeta) => {
+	const levelLabel = level === "Notice" ? "通知" : "警告";
+	return `[Dokploy ${levelLabel}] ${eventObject}${name ? `#${name}` : ""} ${event}`;
+};
 
 export const buildNotificationEmailSummary = ({
 	eventObject,
 	name,
 	event,
-}: NotificationEventMeta) =>
-	`Your ${eventObject}${name ? `#${name}` : ""} ${event}.`;
+}: NotificationEventMeta) => `${eventObject}${name ? `#${name}` : ""}${event}`;

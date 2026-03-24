@@ -547,6 +547,7 @@ export const notificationRouter = createTRPCRouter({
 								id: ctx.session.userId,
 								name: ctx.user?.name ?? ctx.user?.email ?? undefined,
 								email: ctx.user?.email ?? undefined,
+								role: ctx.user?.role,
 							},
 							triggerSource: "manual",
 						});
@@ -564,6 +565,7 @@ export const notificationRouter = createTRPCRouter({
 								id: ctx.session.userId,
 								name: ctx.user?.name ?? ctx.user?.email ?? undefined,
 								email: ctx.user?.email ?? undefined,
+								role: ctx.user?.role,
 							},
 							triggerSource: "manual",
 						});

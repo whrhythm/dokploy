@@ -14,15 +14,14 @@ export const DokployRestartEmail = ({
 		name: "server",
 		event: "restarted",
 	};
-	const summaryText =
-		"System restarted the Dokploy service, and the platform control plane is available again.";
+	const summaryText = "系统已完成 Dokploy 服务重启，平台控制面已恢复可用。";
 	const summary = (
 		<>
-			System{" "}
+			系统已
 			<span style={{ color: "#059669", fontWeight: 600 }}>
-				successfully restarted
-			</span>{" "}
-			the Dokploy service, and the platform control plane is available again.
+				完成 Dokploy 服务重启
+			</span>
+			，平台控制面已恢复可用。
 		</>
 	);
 	const context = "Dokploy / server";
@@ -30,14 +29,14 @@ export const DokployRestartEmail = ({
 	return (
 		<NotificationEmailTemplate
 			previewText={summaryText}
-			title="Dokploy Server Restart"
+			title="Dokploy 服务重启"
 		>
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
 				details={[]}
 				context={context}
-				action="dokploy server restarted"
+				action="Dokploy 服务重启"
 				date={date}
 			/>
 		</NotificationEmailTemplate>

@@ -33,16 +33,23 @@ export const BuildSuccessEmail = ({
 		event: "rebuild succeeded",
 	};
 	const actorName = actor?.email || actor?.name || actor?.id;
-	const actorText = actorName ? `Administrator ${actorName}` : "System";
-	const summaryText = `${actorText} successfully deployed the application ${applicationName} in project ${projectName} (${environmentName}).`;
+	const roleLabel = actor?.role
+		? {
+				owner: "所有者",
+				admin: "管理员",
+				member: "成员",
+			}[actor.role] || actor.role
+		: null;
+	const actorText = actorName ? `${roleLabel || "用户"} ${actorName}` : "系统";
+	const projectScope = environmentName
+		? `${projectName}（${environmentName}）`
+		: projectName;
+	const summaryText = `${actorText} 已在 ${projectScope} 项目中成功部署应用 ${applicationName}。`;
 	const summary = (
 		<>
-			{actorText}{" "}
-			<span style={{ color: "#059669", fontWeight: 600 }}>
-				successfully deployed
-			</span>{" "}
-			the application <strong>{applicationName}</strong> in project{" "}
-			{projectName} ({environmentName}).
+			{actorText} 已在 {projectScope} 项目中
+			<span style={{ color: "#059669", fontWeight: 600 }}>成功部署</span>
+			应用 <strong>{applicationName}</strong>。
 		</>
 	);
 
@@ -51,20 +58,20 @@ export const BuildSuccessEmail = ({
 			previewText={summaryText}
 			title={
 				<>
-					Application <strong>#{applicationName}</strong> rebuild succeeded
+					应用 <strong>{applicationName}</strong> 部署成功
 				</>
 			}
 			actionHref={buildLink}
-			actionLabel="View build"
+			actionLabel="查看构建详情"
 		>
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[{ label: "Type", value: applicationType }]}
+				details={[{ label: "应用类型", value: applicationType }]}
 				actor={actor}
 				triggerSource={triggerSource}
 				context={`${projectName} / ${environmentName} / ${applicationName}`}
-				action="application rebuild succeeded"
+				action="应用部署成功"
 				date={date}
 			/>
 		</NotificationEmailTemplate>

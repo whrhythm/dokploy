@@ -29,8 +29,8 @@ export const NotificationEmailTemplate = ({
 	title,
 	children,
 	actionHref,
-	actionLabel = "View details",
-	actionHelperText = "or copy and paste this URL into your browser:",
+	actionLabel = "查看详情",
+	actionHelperText = "或将以下链接复制到浏览器中打开：",
 }: NotificationEmailTemplateProps) => {
 	return (
 		<Html>

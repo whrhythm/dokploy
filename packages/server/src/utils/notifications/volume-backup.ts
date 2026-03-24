@@ -82,9 +82,8 @@ export const sendVolumeBackupNotifications = async ({
 		if (email || resend) {
 			const subject = buildNotificationEmailSubject({
 				level: type === "success" ? "Notice" : "Warning",
-				eventObject: "Volume",
-				name: volumeName,
-				event: type === "success" ? "backup succeeded" : "backup failed",
+				eventObject: "存储卷",
+				event: type === "success" ? "备份成功" : "备份失败",
 			});
 
 			const htmlContent = await renderAsync(
@@ -96,7 +95,7 @@ export const sendVolumeBackupNotifications = async ({
 					type,
 					errorMessage,
 					backupSize,
-					date: date.toISOString(),
+					date: date.toLocaleString(),
 				}),
 			);
 			if (email) {

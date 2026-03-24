@@ -76,9 +76,8 @@ export const sendDatabaseBackupNotifications = async ({
 			if (email || resend) {
 				const subject = buildNotificationEmailSubject({
 					level: type === "success" ? "Notice" : "Warning",
-					eventObject: "Database",
-					name: databaseName,
-					event: type === "success" ? "backup succeeded" : "backup failed",
+					eventObject: "数据库",
+					event: type === "success" ? "备份成功" : "备份失败",
 				});
 
 				const template = await renderAsync(

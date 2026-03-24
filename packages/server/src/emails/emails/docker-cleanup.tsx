@@ -17,14 +17,14 @@ export const DockerCleanupEmail = ({
 		event: "completed",
 	};
 	const summaryText =
-		"System completed Docker cleanup on the server, and redundant runtime resources were released.";
+		"系统已完成 Dokploy 服务器的 Docker 资源清理，并释放了冗余运行资源。";
 	const summary = (
 		<>
-			System{" "}
+			系统已对 Dokploy 服务器
 			<span style={{ color: "#059669", fontWeight: 600 }}>
-				successfully completed Docker cleanup
-			</span>{" "}
-			on the server, and redundant runtime resources were released.
+				完成 Docker 资源清理
+			</span>
+			，并释放了冗余运行资源。
 		</>
 	);
 	const context = "Dokploy / Docker / cleanup";
@@ -34,16 +34,16 @@ export const DockerCleanupEmail = ({
 			previewText={summaryText}
 			title={
 				<>
-					Docker cleanup for <strong>Dokploy</strong>
+					<strong>Dokploy</strong> Docker 资源清理
 				</>
 			}
 		>
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[{ label: "Message", value: message }]}
+				details={[{ label: "清理信息", value: message }]}
 				context={context}
-				action="docker cleanup completed"
+				action="Docker 清理完成"
 				date={date}
 			/>
 		</NotificationEmailTemplate>
