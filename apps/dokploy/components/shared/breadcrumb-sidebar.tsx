@@ -45,13 +45,17 @@ export const BreadcrumbSidebar = ({ list }: Props) => {
 									<BreadcrumbItem className="block">
 										{item.dropdownItems && item.dropdownItems.length > 0 ? (
 											<DropdownMenu>
-												<DropdownMenuTrigger className="flex items-center gap-1 hover:text-foreground transition-colors outline-none">
+												<DropdownMenuTrigger className="flex cursor-pointer items-center gap-1 hover:text-foreground transition-colors outline-none">
 													{item.name}
 													<ChevronDown className="h-4 w-4 opacity-50" />
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="start">
 													{item.dropdownItems.map((subItem) => (
-														<DropdownMenuItem key={subItem.href} asChild>
+														<DropdownMenuItem
+															key={subItem.href}
+															className="cursor-pointer"
+															asChild
+														>
 															<Link href={subItem.href}>{subItem.name}</Link>
 														</DropdownMenuItem>
 													))}
