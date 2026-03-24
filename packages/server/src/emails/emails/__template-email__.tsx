@@ -21,16 +21,15 @@ export type NotificationEmailTemplateProps = {
 	actionHelperText?: string;
 };
 
-const LOGO_SRC =
-	"https://raw.githubusercontent.com/Dokploy/dokploy/refs/heads/canary/apps/dokploy/logo.png";
+const LOGO_SRC = "https://cognitoaigo.com/images/logo.png";
 
 export const NotificationEmailTemplate = ({
 	previewText,
 	title,
 	children,
 	actionHref,
-	actionLabel = "View details",
-	actionHelperText = "or copy and paste this URL into your browser:",
+	actionLabel = "查看详情",
+	actionHelperText = "或将以下链接复制到浏览器中打开：",
 }: NotificationEmailTemplateProps) => {
 	return (
 		<Html>
@@ -61,6 +60,7 @@ export const NotificationEmailTemplate = ({
 					style={{
 						border: "1px solid #eaeaea",
 						borderRadius: "8px",
+						backgroundColor: "#DDDDDD",
 						margin: "40px auto",
 						padding: "20px",
 						maxWidth: "600px",
@@ -70,8 +70,8 @@ export const NotificationEmailTemplate = ({
 					<Section style={{ marginTop: "32px", textAlign: "center" }}>
 						<Img
 							src={LOGO_SRC}
-							width="100"
-							height="50"
+							width="480"
+							height="60"
 							alt="Dokploy"
 							style={{ margin: "0 auto" }}
 						/>

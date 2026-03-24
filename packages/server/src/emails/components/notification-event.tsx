@@ -27,34 +27,28 @@ const LEVEL_STYLES: Record<
 	NotificationLevel,
 	{ label: string; color: string }
 > = {
-	Notice: { label: "Notice", color: "#059669" },
-	Warning: { label: "Warning", color: "#DC2626" },
+	Notice: { label: "通知", color: "#059669" },
+	Warning: { label: "警告", color: "#DC2626" },
 };
 
 const formatActor = (
 	actor: NotificationActor | undefined,
 	source: NotificationTriggerSource | undefined,
 ): string => {
-	if (actor?.name || actor?.email || actor?.id) {
-		return actor.name || actor.email || actor.id || "System";
-	}
-	if (source === "manual") return "System";
-	return "System";
-};
+	const roleLabel = actor?.role
+		? {
+				owner: "所有者",
+				admin: "管理员",
+				member: "成员",
+			}[actor.role] || actor.role
+		: null;
 
-const formatTriggerSource = (
-	source: NotificationTriggerSource | undefined,
-): string => {
-	switch (source) {
-		case "manual":
-			return "Manual";
-		case "schedule":
-			return "Schedule";
-		case "webhook":
-			return "Webhook";
-		default:
-			return "System";
+	if (actor?.name || actor?.email || actor?.id) {
+		const identity = actor.name || actor.email || actor.id || "系统";
+		return roleLabel ? `${identity}（${roleLabel}）` : identity;
 	}
+	if (source === "manual") return "系统";
+	return "系统";
 };
 
 export const NotificationEventContent = ({
@@ -70,16 +64,12 @@ export const NotificationEventContent = ({
 }: NotificationEventContentProps) => {
 	const { label, color } = LEVEL_STYLES[level];
 	const normalizedDetails: NotificationEmailDetailsItem[] = [
-		{ label: "Context", value: context },
-		{ label: "Action", value: action },
-		{ label: "Date", value: date },
+		{ label: "位置", value: context },
+		{ label: "状态", value: action },
+		{ label: "时间", value: date },
 		{
-			label: "Triggered By",
+			label: "源",
 			value: formatActor(actor, triggerSource),
-		},
-		{
-			label: "Trigger Source",
-			value: formatTriggerSource(triggerSource),
 		},
 		...(details ?? []),
 	];
@@ -88,14 +78,15 @@ export const NotificationEventContent = ({
 		<>
 			<Text
 				style={{
-					color: "#000000",
+					color,
 					fontSize: "14px",
 					lineHeight: "24px",
 					margin: "0 0 8px 0",
 					width: "100%",
+					fontWeight: 600,
 				}}
 			>
-				Hello,
+				{label}
 			</Text>
 			<Text
 				style={{
@@ -106,8 +97,6 @@ export const NotificationEventContent = ({
 					width: "100%",
 				}}
 			>
-				<span style={{ color, fontWeight: 600 }}>{label}</span>
-				{" — "}
 				{summary}
 			</Text>
 			<Section
@@ -121,7 +110,7 @@ export const NotificationEventContent = ({
 					width: "100%",
 				}}
 			>
-				<Text style={{ fontWeight: 700, margin: "0 0 10px 0" }}>Details</Text>
+				<Text style={{ fontWeight: 700, margin: "0 0 10px 0" }}>详情</Text>
 				<table
 					width="100%"
 					cellPadding={0}
@@ -179,7 +168,7 @@ export const NotificationEventContent = ({
 					}}
 				>
 					<Text style={{ fontWeight: 700, color, margin: "0 0 8px 0" }}>
-						Reason
+						系统报错
 					</Text>
 					<Text
 						style={{

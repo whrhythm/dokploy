@@ -236,6 +236,13 @@ export const getUser = publicProcedure
 - Use `cn()` utility from `lib/utils` for conditional classes
 - Follow existing component patterns with Radix UI
 
+## Branding Image/Logo
+
+- Logo must use: `https://cognitoaigo.com/images/logo.png`
+- Logo source image is not square: `1667x209` pixels (aspect ratio ~`7.97:1`).
+- In emails, keep logo display in this ratio (recommended render size: `480x60`) to avoid stretching.
+- If this branding URL changes, update both the email template and top-level documentation.
+
 ## Environment Variables
 
 Required env files (not committed):

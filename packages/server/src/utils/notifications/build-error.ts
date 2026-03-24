@@ -86,8 +86,8 @@ export const sendBuildErrorNotifications = async ({
 			if (email || resend) {
 				const subject = buildNotificationEmailSubject({
 					level: "Warning",
-					eventObject: "Application",
-					event: "rebuild failed",
+					eventObject: "应用",
+					event: "重建失败",
 				});
 
 				const template = await renderAsync(

@@ -67,8 +67,7 @@ export const sendDokployRestartNotifications = async (
 					const subject = buildNotificationEmailSubject({
 						level: "Notice",
 						eventObject: "Dokploy",
-						name: "server",
-						event: "restarted",
+						event: "服务重启",
 					});
 
 					const template = await renderAsync(

@@ -35,17 +35,26 @@ export const BuildFailedEmail = ({
 		event: "rebuild failed",
 	};
 	const actorName = actor?.email || actor?.name || actor?.id;
-	const actorText = actorName ? `Administrator ${actorName}` : "System";
-	const summaryText = `${actorText} encountered an error while rebuilding the application ${applicationName} in project ${projectName} (${environmentName}), which caused the code build to fail. See Reason for details.`;
+	const roleLabel = actor?.role
+		? {
+				owner: "所有者",
+				admin: "管理员",
+				member: "成员",
+			}[actor.role] || actor.role
+		: null;
+	const actorText = actorName ? `${roleLabel || "用户"} ${actorName}` : "系统";
+	const projectScope = environmentName
+		? `${projectName}（${environmentName}）`
+		: projectName;
+	const summaryText = `${actorText} 在 ${projectScope} 项目中重建应用 ${applicationName} 时发生错误，导致代码构建失败，具体错误详见后续系统报错。`;
 	const summary = (
 		<>
-			{actorText}{" "}
+			{actorText} 在 {projectScope} 项目中
 			<span style={{ color: "#DC2626", fontWeight: 600 }}>
-				encountered an error while rebuilding
-			</span>{" "}
-			the application <strong>{applicationName}</strong> in project{" "}
-			{projectName} ({environmentName}), which caused the code build to fail.
-			See Reason for details.
+				在重建应用时发生错误
+			</span>
+			，应用 <strong>{applicationName}</strong>{" "}
+			的代码构建失败，具体错误详见后续系统报错。
 		</>
 	);
 
@@ -54,21 +63,21 @@ export const BuildFailedEmail = ({
 			previewText={summaryText}
 			title={
 				<>
-					Application <strong>#{applicationName}</strong> rebuild failed
+					应用 <strong>{applicationName}</strong> 构建失败
 				</>
 			}
 			actionHref={buildLink}
-			actionLabel="View build"
+			actionLabel="查看构建详情"
 		>
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
-				details={[{ label: "Type", value: applicationType }]}
+				details={[{ label: "应用类型", value: applicationType }]}
 				reason={errorMessage}
 				actor={actor}
 				triggerSource={triggerSource}
 				context={`${projectName} / ${environmentName} / ${applicationName}`}
-				action="application rebuild failed"
+				action="应用重建失败"
 				date={date}
 			/>
 		</NotificationEmailTemplate>

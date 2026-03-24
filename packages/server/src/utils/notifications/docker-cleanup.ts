@@ -64,8 +64,7 @@ export const sendDockerCleanupNotifications = async (
 				const subject = buildNotificationEmailSubject({
 					level: "Notice",
 					eventObject: "Docker",
-					name: "cleanup",
-					event: "completed",
+					event: "清理完成",
 				});
 
 				const template = await renderAsync(

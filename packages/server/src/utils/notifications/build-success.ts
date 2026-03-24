@@ -87,8 +87,8 @@ export const sendBuildSuccessNotifications = async ({
 			if (email || resend) {
 				const subject = buildNotificationEmailSubject({
 					level: "Notice",
-					eventObject: "Application",
-					event: "rebuild succeeded",
+					eventObject: "应用",
+					event: "部署成功",
 				});
 
 				const template = await renderAsync(
