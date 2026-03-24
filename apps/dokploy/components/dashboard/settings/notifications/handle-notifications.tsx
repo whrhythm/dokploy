@@ -40,6 +40,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "@/hooks/use-translation";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 
 const createNotificationSchema = (t: (key: string) => string) => {
@@ -349,13 +350,18 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 
 	const form = useForm({
 		defaultValues: {
-			type: "slack",
-			webhookUrl: "",
-			channel: "",
+			type: "email",
+			smtpServer: "",
+			smtpPort: 587,
+			username: "",
+			password: "",
+			toAddresses: [""],
+			fromAddress: "",
 			name: "",
 		},
 		resolver: zodResolver(notificationSchema),
 	});
+	const enabledProvider = "email";
 	const type = form.watch("type");
 
 	const { fields, append, remove } = useFieldArray({
@@ -813,8 +819,14 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 							: t("notifications.created"),
 					);
 					form.reset({
-						type: "slack",
-						webhookUrl: "",
+						type: "email",
+						smtpServer: "",
+						smtpPort: 587,
+						username: "",
+						password: "",
+						toAddresses: [""],
+						fromAddress: "",
+						name: "",
 					});
 					await utils.notification.all.invalidate();
 					if (notificationId) {
@@ -919,33 +931,47 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 									</FormLabel>
 									<FormControl>
 										<RadioGroup
-											onValueChange={field.onChange}
+											onValueChange={(value) => {
+												if (value === enabledProvider) {
+													field.onChange(value);
+												}
+											}}
 											defaultValue={field.value}
 											className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
 										>
-											{Object.entries(notificationsMap).map(([key, value]) => (
-												<FormItem
-													key={key}
-													className="flex w-full items-center space-x-3 space-y-0"
-												>
-													<FormControl className="w-full">
-														<div>
-															<RadioGroupItem
-																value={key}
-																id={key}
-																className="peer sr-only"
-															/>
-															<Label
-																htmlFor={key}
-																className="h-24 flex flex-col gap-2 items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-															>
-																{value.icon}
-																{value.label}
-															</Label>
-														</div>
-													</FormControl>
-												</FormItem>
-											))}
+											{Object.entries(notificationsMap).map(([key, value]) => {
+												const isProviderDisabled = key !== enabledProvider;
+
+												return (
+													<FormItem
+														key={key}
+														className="flex w-full items-center space-x-3 space-y-0"
+													>
+														<FormControl className="w-full">
+															<div>
+																<RadioGroupItem
+																	value={key}
+																	id={key}
+																	disabled={isProviderDisabled}
+																	className="peer sr-only"
+																/>
+																<Label
+																	htmlFor={key}
+																	className={cn(
+																		"h-24 flex flex-col gap-2 items-center justify-between rounded-md border-2 border-muted bg-popover p-4 peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary",
+																		isProviderDisabled
+																			? "cursor-not-allowed opacity-50"
+																			: "cursor-pointer hover:bg-accent hover:text-accent-foreground",
+																	)}
+																>
+																	{value.icon}
+																	{value.label}
+																</Label>
+															</div>
+														</FormControl>
+													</FormItem>
+												);
+											})}
 										</RadioGroup>
 									</FormControl>
 									<FormMessage />
