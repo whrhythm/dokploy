@@ -277,14 +277,15 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 	const notificationSchema = useMemo(() => createNotificationSchema(t), [t]);
 	const notificationsMap = useMemo(() => getNotificationsMap(t), [t]);
 
-	const { data: notification } = api.notification.one.useQuery(
-		{
-			notificationId: notificationId || "",
-		},
-		{
-			enabled: !!notificationId,
-		},
-	);
+	const { data: notification, refetch: refetchNotification } =
+		api.notification.one.useQuery(
+			{
+				notificationId: notificationId || "",
+			},
+			{
+				enabled: !!notificationId && visible,
+			},
+		);
 	const { mutateAsync: testSlackConnection, isPending: isLoadingSlack } =
 		api.notification.testSlackConnection.useMutation();
 	const { mutateAsync: testTelegramConnection, isPending: isLoadingTelegram } =
@@ -566,6 +567,12 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 		}
 	}, [form, form.reset, form.formState.isSubmitSuccessful, notification]);
 
+	useEffect(() => {
+		if (notificationId && visible) {
+			void refetchNotification();
+		}
+	}, [notificationId, visible, refetchNotification]);
+
 	const activeMutation = {
 		slack: slackMutation,
 		telegram: telegramMutation,
@@ -809,8 +816,11 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 						type: "slack",
 						webhookUrl: "",
 					});
-					setVisible(false);
 					await utils.notification.all.invalidate();
+					if (notificationId) {
+						await utils.notification.one.invalidate({ notificationId });
+					}
+					setVisible(false);
 				})
 				.catch(() => {
 					toast.error(
