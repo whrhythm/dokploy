@@ -291,7 +291,7 @@ export const createProductionEnvironment = async (projectId: string) => {
 	const newEnvironment = await db
 		.insert(environments)
 		.values({
-			name: "production",
+			name: "生产环境",
 			description: "生产环境",
 			projectId,
 			isDefault: true,
