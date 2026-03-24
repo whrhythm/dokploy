@@ -21,8 +21,7 @@ export type NotificationEmailTemplateProps = {
 	actionHelperText?: string;
 };
 
-const LOGO_SRC =
-	"https://raw.githubusercontent.com/Dokploy/dokploy/refs/heads/canary/apps/dokploy/logo.png";
+const LOGO_SRC = "https://cognitoaigo.com/images/logo.png";
 
 export const NotificationEmailTemplate = ({
 	previewText,
@@ -70,8 +69,8 @@ export const NotificationEmailTemplate = ({
 					<Section style={{ marginTop: "32px", textAlign: "center" }}>
 						<Img
 							src={LOGO_SRC}
-							width="100"
-							height="50"
+							width="480"
+							height="60"
 							alt="Dokploy"
 							style={{ margin: "0 auto" }}
 						/>
