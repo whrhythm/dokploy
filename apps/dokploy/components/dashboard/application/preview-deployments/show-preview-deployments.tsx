@@ -31,6 +31,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 import { ShowModalLogs } from "../../settings/web-server/show-modal-logs";
 import { ShowDeploymentsModal } from "../deployments/show-deployments-modal";
@@ -71,8 +72,9 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 				refetchPreviewDeployments();
 				toast.success(t("services.previewDeployments.toast.deleted"));
 			})
-			.catch((error) => {
-				toast.error(error.message);
+			.catch((err) => {
+				logDevError("preview-deployment-delete", err);
+				toast.error(t("services.previewDeployments.toast.deleteError"));
 			});
 	};
 
@@ -230,7 +232,11 @@ export const ShowPreviewDeployments = ({ applicationId }: Props) => {
 																		);
 																		refetchPreviewDeployments();
 																	})
-																	.catch(() => {
+																	.catch((err) => {
+																		logDevError(
+																			"preview-deployment-rebuild",
+																			err,
+																		);
 																		toast.error(
 																			t(
 																				"services.previewDeployments.toast.rebuildError",

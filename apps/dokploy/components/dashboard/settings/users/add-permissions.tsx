@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api, type RouterOutputs } from "@/utils/api";
 
 /** Shape returned by project.allForPermissions (admin only). Used for the permissions UI. */
@@ -192,7 +193,7 @@ export const AddUserPermissions = ({ userId }: Props) => {
 		},
 	);
 
-	const { mutateAsync, isError, error, isPending } =
+	const { mutateAsync, isError, isPending } =
 		api.user.assignPermissions.useMutation();
 
 	const form = useForm({
@@ -259,7 +260,8 @@ export const AddUserPermissions = ({ userId }: Props) => {
 				refetch();
 				setIsOpen(false);
 			})
-			.catch(() => {
+			.catch((err) => {
+				logDevError("user-update-permissions", err);
 				toast.error(t("users.permissions.updateError"));
 			});
 	};
@@ -280,7 +282,11 @@ export const AddUserPermissions = ({ userId }: Props) => {
 						{t("users.permissions.description")}
 					</DialogDescription>
 				</DialogHeader>
-				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
+				{isError && (
+					<AlertBlock type="error">
+						{t("users.permissions.updateError")}
+					</AlertBlock>
+				)}
 
 				<Form {...form}>
 					<form

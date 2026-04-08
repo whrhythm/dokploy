@@ -34,7 +34,9 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
+import { getInvitationErrorMessage } from "./invitation-error-message";
 
 const createAddInvitationSchema = (t: (key: string) => string) =>
 	z.object({
@@ -82,7 +84,7 @@ export const AddInvitation = () => {
 		});
 
 		if (result.error) {
-			setError(result.error.message || "");
+			setError(getInvitationErrorMessage(result.error.message, t));
 		} else {
 			if (!isCloud && data.notificationId) {
 				await sendInvitation({
@@ -92,8 +94,9 @@ export const AddInvitation = () => {
 					.then(() => {
 						toast.success(t("invitations.createdAndSent"));
 					})
-					.catch((error: any) => {
-						toast.error(error.message);
+					.catch((err) => {
+						logDevError("invitation-send-email", err);
+						toast.error(t("invitations.error.sendFailed"));
 					});
 			} else {
 				toast.success(t("invitations.created"));

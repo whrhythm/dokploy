@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -58,7 +59,8 @@ export const KillBuild = ({ id, type }: Props) => {
 									);
 								})
 								.catch((err) => {
-									toast.error(err.message);
+									logDevError("kill-build", err);
+									toast.error(t("services.deployments.killBuild.toast.error"));
 								});
 						}}
 					>

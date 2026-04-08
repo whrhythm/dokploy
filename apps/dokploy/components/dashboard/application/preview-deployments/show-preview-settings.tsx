@@ -42,6 +42,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 const PREVIEW_LABEL_INPUT_ID = "preview-label-input";
@@ -153,8 +154,11 @@ export const ShowPreviewSettings = ({ applicationId }: Props) => {
 			.then(() => {
 				toast.success(t("services.previewDeployments.settings.toast.updated"));
 			})
-			.catch((error) => {
-				toast.error(error.message);
+			.catch((err) => {
+				logDevError("preview-settings-update", err);
+				toast.error(
+					t("services.previewDeployments.settings.toast.updateError"),
+				);
 			});
 	};
 	return (
@@ -468,8 +472,13 @@ export const ShowPreviewSettings = ({ applicationId }: Props) => {
 																	),
 														);
 													})
-													.catch((error) => {
-														toast.error(error.message);
+													.catch((err) => {
+														logDevError("preview-settings-toggle", err);
+														toast.error(
+															t(
+																"services.previewDeployments.settings.toast.toggleError",
+															),
+														);
 													});
 											}}
 										/>

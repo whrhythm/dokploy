@@ -40,6 +40,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { domain } from "@/server/db/validations/domain";
 import { api } from "@/utils/api";
 
@@ -77,7 +78,7 @@ export const AddPreviewDomain = ({
 		},
 	);
 
-	const { mutateAsync, isError, error, isPending } = domainId
+	const { mutateAsync, isError, isPending } = domainId
 		? api.domain.update.useMutation()
 		: api.domain.create.useMutation();
 
@@ -137,7 +138,8 @@ export const AddPreviewDomain = ({
 				}
 				setIsOpen(false);
 			})
-			.catch(() => {
+			.catch((err) => {
+				logDevError("preview-domain-submit", err);
 				toast.error(dictionary.error);
 			});
 	};
@@ -151,7 +153,7 @@ export const AddPreviewDomain = ({
 					<DialogTitle>{t("form.domain")}</DialogTitle>
 					<DialogDescription>{dictionary.dialogDescription}</DialogDescription>
 				</DialogHeader>
-				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
+				{isError && <AlertBlock type="error">{dictionary.error}</AlertBlock>}
 
 				<Form {...form}>
 					<form
@@ -198,7 +200,15 @@ export const AddPreviewDomain = ({
 																			field.onChange(domain);
 																		})
 																		.catch((err) => {
-																			toast.error(err.message);
+																			logDevError(
+																				"preview-domain-generate",
+																				err,
+																			);
+																			toast.error(
+																				t(
+																					"services.domains.toast.generateError",
+																				),
+																			);
 																		});
 																}}
 															>

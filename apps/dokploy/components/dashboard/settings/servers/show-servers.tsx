@@ -38,6 +38,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 import { ShowNodesModal } from "../cluster/nodes/show-nodes-modal";
 import { TerminalModal } from "../web-server/terminal-modal";
@@ -404,7 +405,15 @@ export const ShowServers = () => {
 																											);
 																										})
 																										.catch((err) => {
-																											toast.error(err.message);
+																											logDevError(
+																												"server-delete",
+																												err,
+																											);
+																											toast.error(
+																												t(
+																													"servers.deleteServerActionError",
+																												),
+																											);
 																										});
 																								}}
 																							>

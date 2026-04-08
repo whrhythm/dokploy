@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
+import { logDevError } from "@/lib/dev-error";
 
 const LINKING_CALLBACK_URL = "/dashboard/settings/profile";
 
@@ -54,7 +55,8 @@ export function LinkingAccount() {
 						? (data as { accounts?: AccountItem[] }).accounts
 						: null) ?? []);
 			setAccounts(Array.isArray(list) ? list : []);
-		} catch {
+		} catch (err) {
+			logDevError("linking-list-accounts", err);
 			setAccounts([]);
 		} finally {
 			setAccountsLoading(false);
@@ -78,15 +80,13 @@ export function LinkingAccount() {
 				callbackURL: LINKING_CALLBACK_URL,
 			});
 			if (error) {
-				toast.error(error.message ?? t("settings.linking.toast.linkError"));
+				toast.error(t("settings.linking.toast.linkError"));
 				setLinkingProvider(null);
 				return;
 			}
 		} catch (err) {
-			toast.error(
-				t("settings.linking.toast.linkError"),
-				err instanceof Error ? { description: err.message } : undefined,
-			);
+			logDevError("linking-social", err);
+			toast.error(t("settings.linking.toast.linkError"));
 			setLinkingProvider(null);
 		}
 	};
@@ -99,16 +99,14 @@ export function LinkingAccount() {
 				...(accountId && { accountId }),
 			});
 			if (error) {
-				toast.error(error.message ?? t("settings.linking.toast.unlinkError"));
+				toast.error(t("settings.linking.toast.unlinkError"));
 				return;
 			}
 			toast.success(t("settings.linking.toast.unlinked"));
 			await fetchAccounts();
 		} catch (err) {
-			toast.error(
-				t("settings.linking.toast.unlinkError"),
-				err instanceof Error ? { description: err.message } : undefined,
-			);
+			logDevError("unlink-social", err);
+			toast.error(t("settings.linking.toast.unlinkError"));
 		} finally {
 			setUnlinkingProviderId(null);
 		}
