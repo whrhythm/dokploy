@@ -23,6 +23,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { Logo } from "@/components/shared/logo";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
@@ -182,14 +183,22 @@ export function AddOrganization({ organizationId }: Props) {
 										{t("dashboard.organization.Modal.form.logo")}
 									</FormLabel>
 									<FormControl>
-										<Input
-											placeholder={t(
-												"dashboard.organization.Modal.form.logoPlaceholder",
-											)}
-											{...field}
-											value={field.value || ""}
-											className="col-span-3"
-										/>
+										<div className="flex items-center gap-2">
+											<div className="flex size-8 items-center justify-center rounded-sm border">
+												<Logo
+													className="size-6"
+													logoUrl={field.value || undefined}
+												/>
+											</div>
+											<Input
+												placeholder={t(
+													"dashboard.organization.Modal.form.logoPlaceholder",
+												)}
+												{...field}
+												value={field.value || ""}
+												className="col-span-3"
+											/>
+										</div>
 									</FormControl>
 									<FormMessage className="col-span-3 col-start-2" />
 								</FormItem>
