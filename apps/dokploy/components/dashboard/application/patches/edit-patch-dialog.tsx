@@ -14,6 +14,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -54,7 +55,8 @@ export const EditPatchDialog = ({
 				onSuccess?.();
 			})
 			.catch((err) => {
-				toast.error(err.message);
+				logDevError("patch-save", err);
+				toast.error(t("services.patches.toast.saveError"));
 			});
 	};
 

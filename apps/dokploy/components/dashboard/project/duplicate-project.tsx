@@ -23,6 +23,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 export type Services = {
@@ -116,8 +117,9 @@ export const DuplicateProject = ({
 					);
 				}
 			},
-			onError: (error) => {
-				toast.error(error.message);
+			onError: (err) => {
+				logDevError("duplicate-project", err);
+				toast.error(t("environment.toast.servicesDuplicateError"));
 			},
 		});
 

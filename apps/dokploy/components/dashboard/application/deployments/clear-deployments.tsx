@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -61,7 +62,8 @@ export const ClearDeployments = ({ id, type }: Props) => {
 									});
 								})
 								.catch((err) => {
-									toast.error(err.message);
+									logDevError("clear-deployments", err);
+									toast.error(t("services.deployments.clear.toast.error"));
 								});
 						}}
 					>

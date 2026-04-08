@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { useHealthCheckAfterMutation } from "@/hooks/use-health-check-after-mutation";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 interface Props {
@@ -120,8 +121,9 @@ export const ManageTraefikPorts = ({ children, serverId }: Props) => {
 				}),
 			);
 			setOpen(false);
-		} catch (error) {
-			toast.error((error as Error).message || t("traefikPorts.updateError"));
+		} catch (err) {
+			logDevError("traefik-ports-update", err);
+			toast.error(t("traefikPorts.updateError"));
 		}
 	};
 

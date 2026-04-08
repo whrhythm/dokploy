@@ -12,6 +12,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 interface GPUSupportProps {
@@ -44,8 +45,9 @@ export function GPUSupport({ serverId }: GPUSupportProps) {
 			setIsLoading(false);
 			await utils.settings.checkGPUStatus.invalidate({ serverId });
 		},
-		onError: (error) => {
-			toast.error(error.message || t("gpuSupport.enableError"));
+		onError: (err) => {
+			logDevError("gpu-enable", err);
+			toast.error(t("gpuSupport.enableError"));
 			setIsLoading(false);
 		},
 	});
@@ -55,7 +57,8 @@ export function GPUSupport({ serverId }: GPUSupportProps) {
 		try {
 			await utils.settings.checkGPUStatus.invalidate({ serverId });
 			await refetch();
-		} catch {
+		} catch (err) {
+			logDevError("gpu-refresh", err);
 			toast.error(t("gpuSupport.refreshError"));
 		} finally {
 			setIsRefreshing(false);
@@ -73,7 +76,8 @@ export function GPUSupport({ serverId }: GPUSupportProps) {
 
 		try {
 			await setupGPU.mutateAsync({ serverId });
-		} catch {
+		} catch (err) {
+			logDevError("gpu-enable-mutate", err);
 			// Error handling is done in mutation's onError
 		}
 	};

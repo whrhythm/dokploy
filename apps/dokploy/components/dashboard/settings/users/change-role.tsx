@@ -32,6 +32,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 const changeRoleSchema = z.object({
@@ -51,7 +52,7 @@ export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const utils = api.useUtils();
 
-	const { mutateAsync, isError, error, isPending } =
+	const { mutateAsync, isError, isPending } =
 		api.organization.updateMemberRole.useMutation();
 
 	const form = useForm<ChangeRoleSchema>({
@@ -79,8 +80,9 @@ export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
 				await utils.user.all.invalidate();
 				setIsOpen(false);
 			})
-			.catch((error) => {
-				toast.error(error?.message || t("users.roleUpdateError"));
+			.catch((err) => {
+				logDevError("user-change-role", err);
+				toast.error(t("users.roleUpdateError"));
 			});
 	};
 
@@ -101,7 +103,9 @@ export const ChangeRole = ({ memberId, currentRole, userEmail }: Props) => {
 						{t("users.changeRoleDescription")} <strong>{userEmail}</strong>
 					</DialogDescription>
 				</DialogHeader>
-				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
+				{isError && (
+					<AlertBlock type="error">{t("users.roleUpdateError")}</AlertBlock>
+				)}
 
 				<Form {...form}>
 					<form

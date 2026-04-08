@@ -20,6 +20,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 import { EditPatchDialog } from "./edit-patch-dialog";
 import { PatchEditor } from "./patch-editor";
@@ -76,7 +77,8 @@ export const ShowPatches = ({ id, type }: Props) => {
 			.then((result) => {
 				setRepoPath(result);
 			})
-			.catch(() => {
+			.catch((err) => {
+				logDevError("patch-open-editor", err);
 				toast.error(t("services.patches.toast.createError"));
 			})
 			.finally(() => {
@@ -177,7 +179,10 @@ export const ShowPatches = ({ id, type }: Props) => {
 														});
 													})
 													.catch((err) => {
-														toast.error(err.message);
+														logDevError("patch-toggle", err);
+														toast.error(
+															t("services.patches.toast.updateError"),
+														);
 													})
 													.finally(() => {
 														setIsLoadingRepo(false);
@@ -209,7 +214,10 @@ export const ShowPatches = ({ id, type }: Props) => {
 															});
 														})
 														.catch((err) => {
-															toast.error(err.message);
+															logDevError("patch-delete", err);
+															toast.error(
+																t("services.patches.toast.deleteError"),
+															);
 														});
 												}}
 												title={t("services.patches.deleteTitle")}

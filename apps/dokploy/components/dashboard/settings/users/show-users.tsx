@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 import { AddUserPermissions } from "./add-permissions";
 import { ChangeRole } from "./change-role";
@@ -225,9 +226,9 @@ export const ShowUsers = () => {
 																								refetch();
 																							})
 																							.catch((err) => {
+																								logDevError("user-delete", err);
 																								toast.error(
-																									err?.message ||
-																										t("users.deleteError"),
+																									t("users.deleteError"),
 																								);
 																							});
 																					}}
@@ -267,7 +268,11 @@ export const ShowUsers = () => {
 																										);
 																										refetch();
 																									})
-																									.catch(() => {
+																									.catch((err) => {
+																										logDevError(
+																											"user-delete-last-org",
+																											err,
+																										);
 																										toast.error(
 																											t("users.deleteError"),
 																										);

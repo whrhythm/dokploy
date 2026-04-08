@@ -33,6 +33,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api, type RouterOutputs } from "@/utils/api";
 import { RequestDistributionChart } from "./request-distribution-chart";
 import { RequestsTable } from "./requests-table";
@@ -158,10 +159,9 @@ export const ShowRequests = () => {
 														cronExpression: cronExpression,
 													});
 													toast.success(t("requests.logCleanup.updated"));
-												} catch (error) {
-													toast.error(
-														`${t("requests.logCleanup.updateFailed")}: ${error instanceof Error ? error.message : t("requests.unknownError")}`,
-													);
+												} catch (err) {
+													logDevError("requests-update-log-cleanup", err);
+													toast.error(t("requests.logCleanup.updateFailed"));
 												}
 											}}
 										>
@@ -188,7 +188,8 @@ export const ShowRequests = () => {
 												);
 											})
 											.catch((err) => {
-												toast.error(err.message);
+												logDevError("requests-toggle", err);
+												toast.error(t("requests.toggleFailed"));
 											});
 									}}
 								>

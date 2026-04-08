@@ -29,8 +29,10 @@ import {
 } from "@/components/ui/table";
 import { useTranslation } from "@/hooks/use-translation";
 import { authClient } from "@/lib/auth-client";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 import { AddInvitation } from "./add-invitation";
+import { getInvitationErrorMessage } from "./invitation-error-message";
 
 export const ShowInvitations = () => {
 	const { t } = useTranslation();
@@ -195,7 +197,10 @@ export const ShowInvitations = () => {
 
 																							if (result.error) {
 																								toast.error(
-																									result.error.message,
+																									getInvitationErrorMessage(
+																										result.error.message,
+																										t,
+																									),
 																								);
 																							} else {
 																								toast.success(
@@ -215,12 +220,24 @@ export const ShowInvitations = () => {
 																			onSelect={async () => {
 																				await removeInvitation({
 																					invitationId: invitation.id,
-																				}).then(() => {
-																					refetch();
-																					toast.success(
-																						t("invitations.removed"),
-																					);
-																				});
+																				})
+																					.then(() => {
+																						refetch();
+																						toast.success(
+																							t("invitations.removed"),
+																						);
+																					})
+																					.catch((err) => {
+																						logDevError(
+																							"invitation-remove",
+																							err,
+																						);
+																						toast.error(
+																							t(
+																								"invitations.error.removeFailed",
+																							),
+																						);
+																					});
 																			}}
 																		>
 																			{t("invitations.removeAction")}

@@ -41,6 +41,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslation } from "@/hooks/use-translation";
+import { logDevError } from "@/lib/dev-error";
 import { api } from "@/utils/api";
 
 export type CacheType = "fetch" | "cache";
@@ -160,7 +161,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 					},
 				);
 
-	const { mutateAsync, isError, error, isPending } = domainId
+	const { mutateAsync, isError, isPending } = domainId
 		? api.domain.update.useMutation()
 		: api.domain.create.useMutation();
 
@@ -295,8 +296,8 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 				}
 				setIsOpen(false);
 			})
-			.catch((e) => {
-				console.log(e);
+			.catch((err) => {
+				logDevError("domain-submit", err);
 				toast.error(dictionary.error);
 			});
 	};
@@ -310,7 +311,7 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 					<DialogTitle>{t("form.domain")}</DialogTitle>
 					<DialogDescription>{dictionary.dialogDescription}</DialogDescription>
 				</DialogHeader>
-				{isError && <AlertBlock type="error">{error?.message}</AlertBlock>}
+				{isError && <AlertBlock type="error">{dictionary.error}</AlertBlock>}
 
 				{type === "compose" && (
 					<AlertBlock type="info" className="mb-4">
@@ -550,7 +551,12 @@ export const AddDomain = ({ id, type, domainId = "", children }: Props) => {
 																			field.onChange(domain);
 																		})
 																		.catch((err) => {
-																			toast.error(err.message);
+																			logDevError("domain-generate", err);
+																			toast.error(
+																				t(
+																					"services.domains.toast.generateError",
+																				),
+																			);
 																		});
 																}}
 															>
