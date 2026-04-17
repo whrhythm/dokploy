@@ -27,9 +27,9 @@ import {
     await initializeNetwork();
     createDefaultTraefikConfig();
     createDefaultServerTraefikConfig();
-    await execAsync(
-      `docker pull docker.1ms.run/library/traefik:v${TRAEFIK_VERSION}`,
-    );
+    // await execAsync(
+    //   `docker pull docker.1ms.run/library/traefik:v${TRAEFIK_VERSION}`,
+    // );
     await initializeStandaloneTraefik();
     await initializeRedis();
     await initializePostgres();

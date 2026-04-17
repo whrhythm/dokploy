@@ -1,11 +1,16 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { notifications } from "../../db/schema";
+import ContainerHealthEmail from "@dokploy/server/emails/emails/container-health";
+import { renderAsync } from "@react-email/components";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
 	sendCustomNotification,
 	sendDiscordNotification,
 	sendLarkNotification,
 	sendPushoverNotification,
+	sendEmailNotification,
+	sendResendNotification,
 	sendSlackNotification,
 	sendTeamsNotification,
 	sendTelegramNotification,
@@ -34,6 +39,7 @@ export const sendContainerHealthNotifications = async (
 		),
 		with: {
 			email: true,
+			resend: true,
 			discord: true,
 			telegram: true,
 			slack: true,
@@ -45,8 +51,44 @@ export const sendContainerHealthNotifications = async (
 	});
 
 	for (const notification of notificationList) {
-		const { discord, telegram, slack, custom, lark, pushover, teams } =
-			notification;
+		const {
+			email,
+			resend,
+			discord,
+			telegram,
+			slack,
+			custom,
+			lark,
+			pushover,
+			teams,
+		} = notification;
+
+		if (email || resend) {
+			const subject = buildNotificationEmailSubject({
+				level: "Warning",
+				eventObject: "容器",
+				event: "健康状态变化",
+			});
+
+			const template = await renderAsync(
+				ContainerHealthEmail({
+					serverName: payload.ServerName,
+					containerName: payload.ContainerName,
+					currentStatus: payload.CurrentStatus,
+					previousStatus: payload.PreviousStatus,
+					message: payload.Message,
+					date: date.toLocaleString(),
+				}),
+			).catch();
+
+			if (email) {
+				await sendEmailNotification(email, subject, template);
+			}
+
+			if (resend) {
+				await sendResendNotification(resend, subject, template);
+			}
+		}
 
 		if (discord) {
 			const decorate = (decoration: string, text: string) =>

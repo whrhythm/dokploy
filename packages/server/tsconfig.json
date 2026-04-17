@@ -12,6 +12,7 @@
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"checkJs": true,
+		"ignoreDeprecations": "6.0",
 		/* Bundled projects */
 		"lib": ["dom", "dom.iterable", "ES2022"],
 		"noEmit": true,

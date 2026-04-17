@@ -1,4 +1,8 @@
-import { IS_CLOUD, removeScheduleJob, scheduleJob } from "@dokploy/server";
+import {
+	IS_CLOUD,
+	removeScheduleJob,
+	scheduleJob,
+} from "@dokploy/server/index";
 import { db } from "@dokploy/server/db";
 import { deployments } from "@dokploy/server/db/schema/deployment";
 import {

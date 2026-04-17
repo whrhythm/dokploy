@@ -1,6 +1,5 @@
 {
 	"compilerOptions": {
-		/* Base Options: */
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"target": "es2022",
@@ -8,11 +7,10 @@
 		"resolveJsonModule": true,
 		"moduleDetection": "force",
 		"isolatedModules": true,
-		/* Strictness */
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"checkJs": true,
-		/* Bundled projects */
+		"ignoreDeprecations": "6.0",
 		"lib": ["dom", "dom.iterable", "ES2022"],
 		"noEmit": true,
 		"module": "ESNext",
@@ -24,10 +22,10 @@
 			}
 		],
 		"incremental": true,
-		/* Path Aliases */
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./*"],
+			"@dokploy/server": ["../../packages/server/src/index.ts"],
 			"@dokploy/server/*": ["../../packages/server/src/*"]
 		}
 	},
@@ -46,8 +44,6 @@
 		"dokploy",
 		"config",
 		"dist",
-		"webpack.config.server.js",
-		"migration.ts",
-		"setup.ts"
+		"webpack.config.server.js"
 	]
 }

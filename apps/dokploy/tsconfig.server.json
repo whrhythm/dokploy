@@ -10,8 +10,18 @@
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./*"],
+			"@dokploy/server": ["../../packages/server/src/index.ts"],
 			"@dokploy/server/*": ["../../packages/server/src/*"]
 		}
 	},
-	"include": ["next-env.d.ts", "./server/**/*"]
+	"include": [
+		"next-env.d.ts",
+		"./server/**/*",
+		"./setup.ts",
+		"./migration.ts",
+		"./wait-for-postgres.ts",
+		"./reset-password.ts",
+		"./reset-2fa.ts",
+		"./esbuild.config.ts"
+	]
 }

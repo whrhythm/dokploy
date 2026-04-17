@@ -1,4 +1,4 @@
-import { normalizeTrustedOrigin } from "@dokploy/server";
+import { normalizeTrustedOrigin } from "@dokploy/server/index";
 import { IS_CLOUD } from "@dokploy/server/constants";
 import { db } from "@dokploy/server/db";
 import { member, ssoProvider, user } from "@dokploy/server/db/schema";
