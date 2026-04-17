@@ -1,15 +1,15 @@
+import ContainerHealthEmail from "@dokploy/server/emails/emails/container-health";
+import { renderAsync } from "@react-email/components";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { notifications } from "../../db/schema";
-import ContainerHealthEmail from "@dokploy/server/emails/emails/container-health";
-import { renderAsync } from "@react-email/components";
 import { buildNotificationEmailSubject } from "./event-metadata";
 import {
 	sendCustomNotification,
 	sendDiscordNotification,
+	sendEmailNotification,
 	sendLarkNotification,
 	sendPushoverNotification,
-	sendEmailNotification,
 	sendResendNotification,
 	sendSlackNotification,
 	sendTeamsNotification,
@@ -130,7 +130,7 @@ export const sendContainerHealthNotifications = async (
 				],
 				timestamp: date.toISOString(),
 				footer: {
-					text: "Dokploy Container Health Alert",
+					text: "小智Ops Container Health Alert",
 				},
 			});
 		}
@@ -171,7 +171,7 @@ export const sendContainerHealthNotifications = async (
 							},
 							{ title: "Message", value: payload.Message, short: false },
 						],
-						footer: "Dokploy Notification",
+						footer: "小智Ops Notification",
 						ts: unixDate,
 					},
 				],

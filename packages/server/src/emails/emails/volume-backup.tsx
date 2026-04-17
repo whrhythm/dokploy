@@ -21,7 +21,7 @@ export type TemplateProps = {
 };
 
 export const VolumeBackupEmail = ({
-	projectName = "dokploy",
+	projectName = "小智Ops",
 	applicationName = "frontend",
 	environmentName,
 	volumeName = "app-data",

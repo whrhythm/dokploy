@@ -10,8 +10,9 @@ export type TemplateProps = {
 	date: string;
 };
 
+// 容器健康状态变化通知邮件模板
 export const ContainerHealthEmail = ({
-	serverName = "Dokploy Test Server",
+	serverName = "小智Ops Test Server",
 	containerName = "unknown",
 	currentStatus = "unknown",
 	previousStatus = "unknown",

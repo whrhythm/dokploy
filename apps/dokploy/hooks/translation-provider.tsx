@@ -642,7 +642,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 				"profile.avatarSizeError": "图片大小必须小于 2MB",
 				"profile.allowImpersonation": "允许模拟登录",
 				"profile.allowImpersonationDesc":
-					"启用后，Dokploy Cloud 管理员可临时访问您的账户以便排查问题和提供支持。",
+					"启用后，小智Ops Cloud 管理员可临时访问您的账户以便排查问题和提供支持。",
 				"settings.connection-settings": "连接设置",
 				"settings.server-ip": "服务器 IP",
 				"settings.update-available": "有可用更新",

@@ -110,7 +110,7 @@ export const sendDockerCleanupNotifications = async (
 					],
 					timestamp: date.toISOString(),
 					footer: {
-						text: "Dokploy Docker Cleanup Notification",
+						text: "小智Ops Docker Cleanup Notification",
 					},
 				});
 			}

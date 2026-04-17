@@ -17,10 +17,10 @@ export type TemplateProps = {
 };
 
 export const BuildSuccessEmail = ({
-	projectName = "dokploy",
+	projectName = "小智Ops",
 	applicationName = "frontend",
 	applicationType = "application",
-	buildLink = "https://dokploy.com/projects/dokploy-test/applications/dokploy-test",
+	buildLink = "https://xiaozhiops.com/projects/xiaozhiops-test/applications/xiaozhiops-test",
 	date = "2023-05-01T00:00:00.000Z",
 	environmentName = "production",
 	actor,

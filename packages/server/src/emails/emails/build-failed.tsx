@@ -18,11 +18,11 @@ export type TemplateProps = {
 };
 
 export const BuildFailedEmail = ({
-	projectName = "dokploy",
+	projectName = "小智Ops",
 	applicationName = "frontend",
 	applicationType = "application",
 	errorMessage = "Error array.length is not a function",
-	buildLink = "https://dokploy.com/projects/dokploy-test/applications/dokploy-test",
+	buildLink = "https://xiaozhiops.com/projects/xiaozhiops-test/applications/xiaozhiops-test",
 	date = "2023-05-01T00:00:00.000Z",
 	actor,
 	triggerSource,

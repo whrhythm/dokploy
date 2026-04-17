@@ -88,7 +88,7 @@ export const restoreWebServerBackup = async (
 			);
 
 			if (!postgresContainer) {
-				throw new Error("Dokploy Postgres container not found");
+				throw new Error("小智Ops Postgres container not found");
 			}
 
 			const postgresContainerId = postgresContainer.trim();

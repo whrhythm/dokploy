@@ -58,7 +58,7 @@ const { handler, api } = betterAuth({
 			allowDifferentEmails: true,
 		},
 	},
-	appName: "Dokploy",
+	appName: "小智Ops",
 	socialProviders: {
 		github: {
 			clientId: process.env.GITHUB_CLIENT_ID as string,
@@ -334,7 +334,7 @@ const { handler, api } = betterAuth({
 						email: data.email,
 						subject: "Invitation to join organization",
 						text: `
-					<p>You are invited to join ${data.organization.name} on Dokploy. Click the link to accept the invitation: <a href="${inviteLink}">Accept Invitation</a></p>
+						<p>You are invited to join ${data.organization.name} on 小智Ops. Click the link to accept the invitation: <a href="${inviteLink}">Accept Invitation</a></p>
 					`,
 					});
 				}

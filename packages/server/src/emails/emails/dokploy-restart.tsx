@@ -10,33 +10,33 @@ export const DokployRestartEmail = ({
 }: TemplateProps) => {
 	const meta = {
 		level: "Notice" as const,
-		eventObject: "Dokploy",
+		eventObject: "小智Ops",
 		name: "server",
 		event: "restarted",
 	};
-	const summaryText = "系统已完成 Dokploy 服务重启，平台控制面已恢复可用。";
+	const summaryText = "系统已完成小智Ops服务重启，平台控制面已恢复可用。";
 	const summary = (
 		<>
 			系统已
 			<span style={{ color: "#059669", fontWeight: 600 }}>
-				完成 Dokploy 服务重启
+				完成小智Ops服务重启
 			</span>
 			，平台控制面已恢复可用。
 		</>
 	);
-	const context = "Dokploy / server";
+	const context = "小智Ops / server";
 
 	return (
 		<NotificationEmailTemplate
 			previewText={summaryText}
-			title="Dokploy 服务重启"
+			title="小智Ops 服务重启"
 		>
 			<NotificationEventContent
 				level={meta.level}
 				summary={summary}
 				details={[]}
 				context={context}
-				action="Dokploy 服务重启"
+				action="小智Ops 服务重启"
 				date={date}
 			/>
 		</NotificationEmailTemplate>

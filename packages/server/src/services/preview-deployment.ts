@@ -158,7 +158,7 @@ export const createPreviewDeployment = async (
 		owner: application?.owner || "",
 		repo: application?.repository || "",
 		issue_number: Number.parseInt(schema.pullRequestNumber),
-		body: `### Dokploy Preview Deployment\n\n${runningComment}`,
+		body: `### 小智Ops Preview Deployment\n\n${runningComment}`,
 	});
 
 	const previewDeployment = await db
@@ -236,7 +236,7 @@ const generateWildcardDomain = async (
 	baseDomain: string,
 	appName: string,
 	serverIp: string,
-	userId: string,
+	_userId: string,
 ): Promise<string> => {
 	if (!baseDomain.startsWith("*.")) {
 		throw new Error('The base domain must start with "*."');

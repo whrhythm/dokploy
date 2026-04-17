@@ -27,7 +27,7 @@ export const buildNotificationEmailSubject = ({
 	event,
 }: NotificationEventMeta) => {
 	const levelLabel = level === "Notice" ? "通知" : "警告";
-	return `[Dokploy ${levelLabel}] ${eventObject}${name ? `#${name}` : ""} ${event}`;
+	return `[小智Ops ${levelLabel}] ${eventObject}${name ? `#${name}` : ""} ${event}`;
 };
 
 export const buildNotificationEmailSummary = ({

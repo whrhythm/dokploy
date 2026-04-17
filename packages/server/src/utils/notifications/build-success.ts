@@ -163,7 +163,7 @@ export const sendBuildSuccessNotifications = async ({
 					],
 					timestamp: date.toISOString(),
 					footer: {
-						text: "Dokploy Build Notification",
+						text: "小智Ops Build Notification",
 					},
 				});
 			}

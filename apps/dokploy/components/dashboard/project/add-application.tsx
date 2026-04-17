@@ -83,8 +83,8 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 
 	const hasServers = servers && servers.length > 0;
 	// Show dropdown logic based on cloud environment
-	// Cloud: show only if there are remote servers (no Dokploy option)
-	// Self-hosted: show only if there are remote servers (Dokploy is default, hide if no remote servers)
+	// Cloud: show only if there are remote servers (no 小智Ops option)
+	// Self-hosted: show only if there are remote servers (小智Ops is default, hide if no remote servers)
 	const shouldShowServerDropdown = hasServers;
 
 	const { mutateAsync, isPending, error, isError } =
@@ -210,7 +210,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 												<SelectValue
 													placeholder={
 														!isCloud
-															? "Dokploy"
+															? "小智Ops"
 															: t("environment.serverSelect.placeholder")
 													}
 												/>
@@ -220,7 +220,7 @@ export const AddApplication = ({ environmentId, projectName }: Props) => {
 													{!isCloud && (
 														<SelectItem value="dokploy">
 															<span className="flex items-center gap-2 justify-between w-full">
-																<span>Dokploy</span>
+																<span>小智Ops</span>
 																<span className="text-muted-foreground text-xs self-center">
 																	{t("environment.serverSelect.default")}
 																</span>

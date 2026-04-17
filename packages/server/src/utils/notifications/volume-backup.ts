@@ -174,7 +174,7 @@ export const sendVolumeBackupNotifications = async ({
 				],
 				timestamp: date.toISOString(),
 				footer: {
-					text: "Dokploy Volume Backup Notification",
+					text: "小智Ops Volume Backup Notification",
 				},
 			});
 		}

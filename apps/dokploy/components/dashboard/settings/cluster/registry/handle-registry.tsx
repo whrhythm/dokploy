@@ -527,7 +527,7 @@ export const HandleRegistry = ({ registryId }: Props) => {
 											username,
 											password,
 											registryUrl,
-											registryName: "Dokploy Registry",
+											registryName: "小智Ops Registry",
 											imagePrefix,
 											serverId,
 											isEditing: !!registryId,

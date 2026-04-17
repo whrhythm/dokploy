@@ -12,7 +12,7 @@ export type TemplateProps = {
 };
 
 export const DatabaseBackupEmail = ({
-	projectName = "dokploy",
+	projectName = "小智Ops",
 	applicationName = "frontend",
 	environmentName,
 	databaseType = "postgres",

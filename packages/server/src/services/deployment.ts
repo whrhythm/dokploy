@@ -23,7 +23,7 @@ import {
 } from "@dokploy/server/utils/process/execAsync";
 import { TRPCError } from "@trpc/server";
 import { format } from "date-fns";
-import { desc, eq, and, inArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import type { z } from "zod";
 import {
 	type Application,
@@ -136,7 +136,7 @@ export const createDeployment = async (
 			const command = `
 				mkdir -p ${LOGS_PATH}/${application.appName};
             	echo "Initializing deployment" >> ${logFilePath};
-			    echo "Building on ${serverId ? "Build Server" : "Dokploy Server"}" >> ${logFilePath};
+			    echo "Building on ${serverId ? "Build Server" : "小智Ops Server"}" >> ${logFilePath};
 			`;
 
 			await execAsyncRemote(server.serverId, command);

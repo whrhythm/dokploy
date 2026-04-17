@@ -1,11 +1,11 @@
 {
 	"openapi": "3.0.3",
 	"info": {
-		"title": "Dokploy API",
-		"description": "Complete API documentation for Dokploy - Deploy applications, manage databases, and orchestrate your infrastructure. This API allows you to programmatically manage all aspects of your Dokploy instance.",
+		"title": "小智Ops API",
+		"description": "Complete API documentation for 小智Ops - Deploy applications, manage databases, and orchestrate your infrastructure. This API allows you to programmatically manage all aspects of your 小智Ops instance.",
 		"version": "1.0.0",
 		"contact": {
-			"name": "Dokploy Team",
+			"name": "小智Ops Team",
 			"url": "https://dokploy.com"
 		},
 		"license": {
@@ -15,7 +15,7 @@
 	},
 	"servers": [
 		{
-			"url": "https://your-dokploy-instance.com/api"
+			"url": "https://your-xiaozhiops-instance.com/api"
 		}
 	],
 	"paths": {

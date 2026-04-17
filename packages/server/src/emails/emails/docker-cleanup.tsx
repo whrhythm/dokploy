@@ -7,7 +7,7 @@ export type TemplateProps = {
 };
 
 export const DockerCleanupEmail = ({
-	message = "Docker cleanup for dokploy",
+	message = "Docker cleanup for 小智Ops",
 	date = "2023-05-01T00:00:00.000Z",
 }: TemplateProps) => {
 	const meta = {
@@ -17,24 +17,24 @@ export const DockerCleanupEmail = ({
 		event: "completed",
 	};
 	const summaryText =
-		"系统已完成 Dokploy 服务器的 Docker 资源清理，并释放了冗余运行资源。";
+		"系统已完成小智Ops服务器的 Docker 资源清理，并释放了冗余运行资源。";
 	const summary = (
 		<>
-			系统已对 Dokploy 服务器
+			系统已对小智Ops服务器
 			<span style={{ color: "#059669", fontWeight: 600 }}>
 				完成 Docker 资源清理
 			</span>
 			，并释放了冗余运行资源。
 		</>
 	);
-	const context = "Dokploy / Docker / cleanup";
+	const context = "小智Ops / Docker / cleanup";
 
 	return (
 		<NotificationEmailTemplate
 			previewText={summaryText}
 			title={
 				<>
-					<strong>Dokploy</strong> Docker 资源清理
+					<strong>小智Ops</strong> Docker 资源清理
 				</>
 			}
 		>

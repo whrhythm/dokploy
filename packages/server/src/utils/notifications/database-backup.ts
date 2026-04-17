@@ -159,7 +159,7 @@ export const sendDatabaseBackupNotifications = async ({
 					],
 					timestamp: date.toISOString(),
 					footer: {
-						text: "Dokploy Database Backup Notification",
+						text: "小智Ops Database Backup Notification",
 					},
 				});
 			}

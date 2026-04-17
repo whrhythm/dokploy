@@ -72,7 +72,7 @@ export const NotificationEmailTemplate = ({
 							src={LOGO_SRC}
 							width="480"
 							height="60"
-							alt="Dokploy"
+							alt="小智Ops"
 							style={{ margin: "0 auto" }}
 						/>
 					</Section>
