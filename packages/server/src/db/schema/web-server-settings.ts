@@ -119,6 +119,15 @@ export const apiUpdateWebServerSettings = createSchema.partial().extend({
 					disk: z.number(),
 				}),
 			}),
+			host: z
+				.object({
+					thresholds: z.object({
+						cpu: z.number(),
+						memory: z.number(),
+						disk: z.number(),
+					}),
+				})
+				.optional(),
 			containers: z.object({
 				refreshRate: z.number(),
 				services: z.object({
@@ -177,6 +186,15 @@ export const apiUpdateWebServerMonitoring = z.object({
 					disk: z.number().min(0),
 				}),
 			}),
+			host: z
+				.object({
+					thresholds: z.object({
+						cpu: z.number().min(0),
+						memory: z.number().min(0),
+						disk: z.number().min(0),
+					}),
+				})
+				.optional(),
 			containers: z.object({
 				refreshRate: z.number().min(2),
 				services: z.object({

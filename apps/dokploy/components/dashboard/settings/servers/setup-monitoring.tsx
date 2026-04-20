@@ -62,29 +62,23 @@ const createMonitoringSchema = (t: (key: string) => string) =>
 				thresholds: z.object({
 					cpu: z.number().min(0),
 					memory: z.number().min(0),
+					gpu: z.number().min(0),
+					disk: z.number().min(0),
 				}),
 				cronJob: z.string().min(1, {
 					message: t("setupMonitoring.validation.cronJobRequired"),
 				}),
 			}),
-			port: z.number().min(1, {
-				message: "Port is required",
-			}),
-			token: z.string(),
-			urlCallback: z.string(),
-			retentionDays: z.number().min(1, {
-				message: "Retention days must be at least 1",
-			}),
-			thresholds: z.object({
-				cpu: z.number().min(0),
-				memory: z.number().min(0),
-				gpu: z.number().min(0),
-				disk: z.number().min(0),
-			}),
-			cronJob: z.string().min(1, {
-				message: "Cron Job is required",
-			}),
 		}),
+		host: z
+			.object({
+				thresholds: z.object({
+					cpu: z.number().min(0),
+					memory: z.number().min(0),
+					disk: z.number().min(0),
+				}),
+			})
+			.optional(),
 		containers: z.object({
 			refreshRate: z.number().min(2, {
 				message: t("setupMonitoring.validation.containerRefreshRate"),
@@ -159,6 +153,13 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 					},
 					cronJob: "",
 				},
+				host: {
+					thresholds: {
+						cpu: 0,
+						memory: 0,
+						disk: 0,
+					},
+				},
 				containers: {
 					refreshRate: 20,
 					services: {
@@ -189,6 +190,13 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 							disk: data?.metricsConfig?.server?.thresholds?.disk ?? 0,
 						},
 						cronJob: data?.metricsConfig?.server?.cronJob || "0 0 * * *",
+					},
+					host: {
+						thresholds: {
+							cpu: data?.metricsConfig?.host?.thresholds?.cpu ?? 0,
+							memory: data?.metricsConfig?.host?.thresholds?.memory ?? 0,
+							disk: data?.metricsConfig?.host?.thresholds?.disk ?? 0,
+						},
 					},
 					containers: {
 						refreshRate: data?.metricsConfig?.containers?.refreshRate,
@@ -246,9 +254,16 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 	};
 
 	const onSubmit = async (values: Schema) => {
+		const metricsConfig = serverId
+			? {
+					server: values.metricsConfig.server,
+					containers: values.metricsConfig.containers,
+				}
+			: values.metricsConfig;
+
 		await mutateAsync({
 			serverId: serverId || "",
-			metricsConfig: values.metricsConfig,
+			metricsConfig,
 		})
 			.then(() => {
 				toast.success(t("setupMonitoring.success"));
@@ -642,6 +657,71 @@ export const SetupMonitoring = ({ serverId }: Props) => {
 									</FormItem>
 								)}
 							/>
+
+							{!serverId && (
+								<div className="space-y-4 rounded-lg border bg-muted/20 p-4">
+									<FormLabel className="text-base font-semibold">
+										{t("setupMonitoring.hostThresholdsTitle")}
+									</FormLabel>
+									<FormDescription>
+										{t("setupMonitoring.hostThresholdsDescription")}
+									</FormDescription>
+									<FormField
+										control={form.control}
+										name="metricsConfig.host.thresholds.cpu"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													{t("setupMonitoring.hostCpuThreshold")}
+												</FormLabel>
+												<FormControl>
+													<NumberInput {...field} />
+												</FormControl>
+												<FormDescription>
+													{t("setupMonitoring.hostCpuThresholdDescription")}
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="metricsConfig.host.thresholds.memory"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													{t("setupMonitoring.hostMemoryThreshold")}
+												</FormLabel>
+												<FormControl>
+													<NumberInput {...field} />
+												</FormControl>
+												<FormDescription>
+													{t("setupMonitoring.hostMemoryThresholdDescription")}
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="metricsConfig.host.thresholds.disk"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													{t("setupMonitoring.hostDiskThreshold")}
+												</FormLabel>
+												<FormControl>
+													<NumberInput {...field} />
+												</FormControl>
+												<FormDescription>
+													{t("setupMonitoring.hostDiskThresholdDescription")}
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							)}
 
 							<FormField
 								control={form.control}

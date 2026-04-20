@@ -1763,6 +1763,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 				"time.week": "周",
 				// Monitoring
 				"monitoring.watchUsage": "查看当前应用服务器的使用情况",
+				"monitoring.settings": "监控设置",
 				"monitoring.cpuUsage": "CPU 使用率",
 				"monitoring.memoryUsage": "内存使用率",
 				"monitoring.diskUsage": "磁盘使用率",
@@ -2004,6 +2005,15 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 				"notifications.action.dokployRestartDesc": "当 Jos 重启时触发。",
 				"notifications.action.serverThreshold": "服务器阈值",
 				"notifications.action.serverThresholdDesc": "当达到服务器阈值时触发。",
+				"notifications.action.hostCpuThreshold": "宿主机 CPU 预警",
+				"notifications.action.hostCpuThresholdDesc":
+					"当宿主机 CPU 使用率超过阈值时触发。",
+				"notifications.action.hostMemoryThreshold": "宿主机内存预警",
+				"notifications.action.hostMemoryThresholdDesc":
+					"当宿主机内存使用率超过阈值时触发。",
+				"notifications.action.hostDiskThreshold": "宿主机磁盘预警",
+				"notifications.action.hostDiskThresholdDesc":
+					"当宿主机磁盘使用率超过阈值时触发。",
 				"notifications.action.containerHealth": "容器健康检查",
 				"notifications.action.containerHealthDesc":
 					"当容器健康状态变化或变为不健康时触发。",

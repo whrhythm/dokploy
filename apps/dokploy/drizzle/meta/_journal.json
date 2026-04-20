@@ -1044,6 +1044,13 @@
       "when": 1773906225949,
       "tag": "0148_first_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 149,
+      "version": "7",
+      "when": 1773906225950,
+      "tag": "0149_host_alert_notifications",
+      "breakpoints": true
     }
   ]
 }

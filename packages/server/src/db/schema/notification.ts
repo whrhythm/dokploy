@@ -40,6 +40,9 @@ export const notifications = pgTable("notification", {
 	dockerCleanup: boolean("dockerCleanup").notNull().default(false),
 	serverThreshold: boolean("serverThreshold").notNull().default(false),
 	containerHealth: boolean("containerHealth").notNull().default(false),
+	hostCpuThreshold: boolean("hostCpuThreshold").notNull().default(false),
+	hostMemoryThreshold: boolean("hostMemoryThreshold").notNull().default(false),
+	hostDiskThreshold: boolean("hostDiskThreshold").notNull().default(false),
 	notificationType: notificationType("notificationType").notNull(),
 	createdAt: text("createdAt")
 		.notNull()
@@ -256,6 +259,9 @@ export const apiCreateSlack = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		webhookUrl: z.string().min(1),
@@ -285,6 +291,9 @@ export const apiCreateTelegram = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		botToken: z.string().min(1),
@@ -316,6 +325,9 @@ export const apiCreateDiscord = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		webhookUrl: z.string().min(1),
@@ -348,6 +360,9 @@ export const apiCreateEmail = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		smtpServer: z.string().min(1),
@@ -385,6 +400,9 @@ export const apiCreateResend = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		apiKey: z.string().min(1),
@@ -416,6 +434,9 @@ export const apiCreateGotify = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		serverUrl: z.string().min(1),
@@ -452,6 +473,9 @@ export const apiCreateNtfy = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		serverUrl: z.string().min(1),
@@ -489,6 +513,9 @@ export const apiCreateCustom = notificationsSchema
 		dockerCleanup: true,
 		serverThreshold: true,
 		containerHealth: true,
+		hostCpuThreshold: true,
+		hostMemoryThreshold: true,
+		hostDiskThreshold: true,
 	})
 	.extend({
 		endpoint: z.string().min(1),
@@ -606,6 +633,9 @@ export const apiUpdatePushover = z.object({
 	dockerCleanup: z.boolean().optional(),
 	serverThreshold: z.boolean().optional(),
 	containerHealth: z.boolean().optional(),
+	hostCpuThreshold: z.boolean().optional(),
+	hostMemoryThreshold: z.boolean().optional(),
+	hostDiskThreshold: z.boolean().optional(),
 });
 
 export const apiTestPushoverConnection = z

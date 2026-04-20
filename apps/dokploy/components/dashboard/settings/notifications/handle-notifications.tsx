@@ -56,6 +56,9 @@ const createNotificationSchema = (t: (key: string) => string) => {
 		dockerCleanup: z.boolean().default(false),
 		serverThreshold: z.boolean().default(false),
 		containerHealth: z.boolean().default(false),
+		hostCpuThreshold: z.boolean().default(false),
+		hostMemoryThreshold: z.boolean().default(false),
+		hostDiskThreshold: z.boolean().default(false),
 	});
 
 	return z.discriminatedUnion("type", [
@@ -262,7 +265,38 @@ type NotificationAction =
 	| "dockerCleanup"
 	| "dokployRestart"
 	| "serverThreshold"
+	| "hostCpuThreshold"
+	| "hostMemoryThreshold"
+	| "hostDiskThreshold"
 	| "containerHealth";
+
+const getNotificationActionFields = (
+	source: Partial<{
+		appDeploy: boolean;
+		appBuildError: boolean;
+		databaseBackup: boolean;
+		volumeBackup: boolean;
+		dokployRestart: boolean;
+		dockerCleanup: boolean;
+		serverThreshold: boolean;
+		containerHealth: boolean;
+		hostCpuThreshold: boolean;
+		hostMemoryThreshold: boolean;
+		hostDiskThreshold: boolean;
+	}> = {},
+) => ({
+	appDeploy: source.appDeploy ?? false,
+	appBuildError: source.appBuildError ?? false,
+	databaseBackup: source.databaseBackup ?? false,
+	volumeBackup: source.volumeBackup ?? false,
+	dokployRestart: source.dokployRestart ?? false,
+	dockerCleanup: source.dockerCleanup ?? false,
+	serverThreshold: source.serverThreshold ?? false,
+	containerHealth: source.containerHealth ?? false,
+	hostCpuThreshold: source.hostCpuThreshold ?? false,
+	hostMemoryThreshold: source.hostMemoryThreshold ?? false,
+	hostDiskThreshold: source.hostDiskThreshold ?? false,
+});
 
 const ENABLE_NOTIFICATION_ACTION_TEST_BUTTONS =
 	process.env.NEXT_PUBLIC_ENABLE_NOTIFICATION_ACTION_TESTS !== "false";
@@ -287,6 +321,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				enabled: !!notificationId && visible,
 			},
 		);
+	const notificationActionFields = getNotificationActionFields(notification);
 	const { mutateAsync: testSlackConnection, isPending: isLoadingSlack } =
 		api.notification.testSlackConnection.useMutation();
 	const { mutateAsync: testTelegramConnection, isPending: isLoadingTelegram } =
@@ -350,6 +385,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 
 	const form = useForm({
 		defaultValues: {
+			...getNotificationActionFields(),
 			type: "email",
 			smtpServer: "",
 			smtpPort: 587,
@@ -388,6 +424,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 		if (notification) {
 			if (notification.notificationType === "slack") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -403,6 +440,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "telegram") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -419,6 +457,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "discord") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -434,6 +473,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "email") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -453,6 +493,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "resend") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -469,6 +510,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "gotify") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -484,6 +526,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "ntfy") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -501,6 +544,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "lark") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -515,6 +559,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "teams") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -529,6 +574,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "custom") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -551,6 +597,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				});
 			} else if (notification.notificationType === "pushover") {
 				form.reset({
+					...notificationActionFields,
 					appBuildError: notification.appBuildError,
 					appDeploy: notification.appDeploy,
 					dokployRestart: notification.dokployRestart,
@@ -594,6 +641,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 	};
 
 	const onSubmit = async (data: NotificationSchema) => {
+		const submittedNotificationFields = getNotificationActionFields(data);
 		const {
 			appBuildError,
 			appDeploy,
@@ -607,6 +655,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 		let promise: Promise<unknown> | null = null;
 		if (data.type === "slack") {
 			promise = slackMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -623,6 +672,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "telegram") {
 			promise = telegramMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -640,6 +690,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "discord") {
 			promise = discordMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -656,6 +707,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "email") {
 			promise = emailMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -676,6 +728,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "resend") {
 			promise = resendMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -693,6 +746,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "gotify") {
 			promise = gotifyMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -711,6 +765,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "ntfy") {
 			promise = ntfyMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -729,6 +784,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "lark") {
 			promise = larkMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -744,6 +800,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 			});
 		} else if (data.type === "teams") {
 			promise = teamsMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -771,6 +828,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 					: undefined;
 
 			promise = customMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -791,6 +849,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 				return;
 			}
 			promise = pushoverMutation.mutateAsync({
+				...submittedNotificationFields,
 				appBuildError: appBuildError,
 				appDeploy: appDeploy,
 				dokployRestart: dokployRestart,
@@ -819,6 +878,7 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 							: t("notifications.created"),
 					);
 					form.reset({
+						...notificationActionFields,
 						type: "email",
 						smtpServer: "",
 						smtpPort: 587,
@@ -2034,6 +2094,83 @@ export const HandleNotifications = ({ notificationId }: Props) => {
 													</div>
 													<div className="flex items-center gap-2">
 														{renderActionTestButton("containerHealth")}
+														<FormControl>
+															<Switch
+																checked={field.value}
+																onCheckedChange={field.onChange}
+															/>
+														</FormControl>
+													</div>
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={form.control}
+											name="hostCpuThreshold"
+											render={({ field }) => (
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm gap-2">
+													<div className="space-y-0.5">
+														<FormLabel>
+															{t("notifications.action.hostCpuThreshold")}
+														</FormLabel>
+														<FormDescription>
+															{t("notifications.action.hostCpuThresholdDesc")}
+														</FormDescription>
+													</div>
+													<div className="flex items-center gap-2">
+														{renderActionTestButton("hostCpuThreshold")}
+														<FormControl>
+															<Switch
+																checked={field.value}
+																onCheckedChange={field.onChange}
+															/>
+														</FormControl>
+													</div>
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={form.control}
+											name="hostMemoryThreshold"
+											render={({ field }) => (
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm gap-2">
+													<div className="space-y-0.5">
+														<FormLabel>
+															{t("notifications.action.hostMemoryThreshold")}
+														</FormLabel>
+														<FormDescription>
+															{t(
+																"notifications.action.hostMemoryThresholdDesc",
+															)}
+														</FormDescription>
+													</div>
+													<div className="flex items-center gap-2">
+														{renderActionTestButton("hostMemoryThreshold")}
+														<FormControl>
+															<Switch
+																checked={field.value}
+																onCheckedChange={field.onChange}
+															/>
+														</FormControl>
+													</div>
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={form.control}
+											name="hostDiskThreshold"
+											render={({ field }) => (
+												<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm gap-2">
+													<div className="space-y-0.5">
+														<FormLabel>
+															{t("notifications.action.hostDiskThreshold")}
+														</FormLabel>
+														<FormDescription>
+															{t("notifications.action.hostDiskThresholdDesc")}
+														</FormDescription>
+													</div>
+													<div className="flex items-center gap-2">
+														{renderActionTestButton("hostDiskThreshold")}
 														<FormControl>
 															<Switch
 																checked={field.value}

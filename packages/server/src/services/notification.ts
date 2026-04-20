@@ -41,6 +41,34 @@ import type { z } from "zod";
 
 export type Notification = typeof notifications.$inferSelect;
 
+type NotificationActionFields = {
+	appDeploy: boolean;
+	appBuildError: boolean;
+	databaseBackup: boolean;
+	volumeBackup: boolean;
+	dokployRestart: boolean;
+	dockerCleanup: boolean;
+	serverThreshold: boolean;
+	containerHealth: boolean;
+	hostCpuThreshold: boolean;
+	hostMemoryThreshold: boolean;
+	hostDiskThreshold: boolean;
+};
+
+const notificationActionFields = (input: NotificationActionFields) => ({
+	appDeploy: input.appDeploy,
+	appBuildError: input.appBuildError,
+	databaseBackup: input.databaseBackup,
+	volumeBackup: input.volumeBackup,
+	dokployRestart: input.dokployRestart,
+	dockerCleanup: input.dockerCleanup,
+	serverThreshold: input.serverThreshold,
+	containerHealth: input.containerHealth,
+	hostCpuThreshold: input.hostCpuThreshold,
+	hostMemoryThreshold: input.hostMemoryThreshold,
+	hostDiskThreshold: input.hostDiskThreshold,
+});
+
 export const createSlackNotification = async (
 	input: z.infer<typeof apiCreateSlack>,
 	organizationId: string,
@@ -65,18 +93,11 @@ export const createSlackNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				slackId: newSlack.slackId,
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				notificationType: "slack",
 				organizationId: organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.returning()
 			.then((value) => value[0]);
@@ -99,16 +120,9 @@ export const updateSlackNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				organizationId: input.organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.where(eq(notifications.notificationId, input.notificationId))
 			.returning()
@@ -160,18 +174,11 @@ export const createTelegramNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				telegramId: newTelegram.telegramId,
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				notificationType: "telegram",
 				organizationId: organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.returning()
 			.then((value) => value[0]);
@@ -194,16 +201,9 @@ export const updateTelegramNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				organizationId: input.organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.where(eq(notifications.notificationId, input.notificationId))
 			.returning()
@@ -255,18 +255,11 @@ export const createDiscordNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				discordId: newDiscord.discordId,
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				notificationType: "discord",
 				organizationId: organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.returning()
 			.then((value) => value[0]);
@@ -289,16 +282,9 @@ export const updateDiscordNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				organizationId: input.organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.where(eq(notifications.notificationId, input.notificationId))
 			.returning()
@@ -353,18 +339,11 @@ export const createEmailNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				emailId: newEmail.emailId,
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				notificationType: "email",
 				organizationId: organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.returning()
 			.then((value) => value[0]);
@@ -387,16 +366,9 @@ export const updateEmailNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				organizationId: input.organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.where(eq(notifications.notificationId, input.notificationId))
 			.returning()
@@ -452,18 +424,11 @@ export const createResendNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				resendId: newResend.resendId,
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				notificationType: "resend",
 				organizationId: organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.returning()
 			.then((value) => value[0]);
@@ -486,16 +451,9 @@ export const updateResendNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
-				appDeploy: input.appDeploy,
-				appBuildError: input.appBuildError,
-				databaseBackup: input.databaseBackup,
-				volumeBackup: input.volumeBackup,
-				dokployRestart: input.dokployRestart,
-				dockerCleanup: input.dockerCleanup,
 				organizationId: input.organizationId,
-				serverThreshold: input.serverThreshold,
-				containerHealth: input.containerHealth,
 			})
 			.where(eq(notifications.notificationId, input.notificationId))
 			.returning()
@@ -549,6 +507,7 @@ export const createGotifyNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				gotifyId: newGotify.gotifyId,
 				name: input.name,
 				appDeploy: input.appDeploy,
@@ -583,6 +542,7 @@ export const updateGotifyNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
 				appDeploy: input.appDeploy,
 				appBuildError: input.appBuildError,
@@ -645,6 +605,7 @@ export const createNtfyNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				ntfyId: newNtfy.ntfyId,
 				name: input.name,
 				appDeploy: input.appDeploy,
@@ -679,6 +640,7 @@ export const updateNtfyNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
 				appDeploy: input.appDeploy,
 				appBuildError: input.appBuildError,
@@ -739,6 +701,7 @@ export const createCustomNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				customId: newCustom.customId,
 				name: input.name,
 				appDeploy: input.appDeploy,
@@ -772,6 +735,7 @@ export const updateCustomNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
 				appDeploy: input.appDeploy,
 				appBuildError: input.appBuildError,
@@ -864,6 +828,7 @@ export const createLarkNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				larkId: newLark.larkId,
 				name: input.name,
 				appDeploy: input.appDeploy,
@@ -897,6 +862,7 @@ export const updateLarkNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
 				appDeploy: input.appDeploy,
 				appBuildError: input.appBuildError,
@@ -955,6 +921,7 @@ export const createTeamsNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				teamsId: newTeams.teamsId,
 				name: input.name,
 				appDeploy: input.appDeploy,
@@ -989,6 +956,7 @@ export const updateTeamsNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
 				appDeploy: input.appDeploy,
 				appBuildError: input.appBuildError,
@@ -1066,6 +1034,7 @@ export const createPushoverNotification = async (
 		const newDestination = await tx
 			.insert(notifications)
 			.values({
+				...notificationActionFields(input),
 				pushoverId: newPushover.pushoverId,
 				name: input.name,
 				appDeploy: input.appDeploy,
@@ -1100,6 +1069,7 @@ export const updatePushoverNotification = async (
 		const newDestination = await tx
 			.update(notifications)
 			.set({
+				...notificationActionFields(input),
 				name: input.name,
 				appDeploy: input.appDeploy,
 				appBuildError: input.appBuildError,

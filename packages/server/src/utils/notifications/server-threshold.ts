@@ -12,6 +12,7 @@ import {
 } from "./utils";
 
 interface ServerThresholdPayload {
+	ServerType: "Dokploy" | "Remote";
 	Type: "CPU" | "Memory" | "GPU" | "Disk";
 	Value: number;
 	Threshold: number;
@@ -29,10 +30,13 @@ export const sendServerThresholdNotifications = async (
 	const unixDate = ~~(Number(date) / 1000);
 
 	const notificationList = await db.query.notifications.findMany({
-		where: and(
-			eq(notifications.serverThreshold, true),
-			eq(notifications.organizationId, organizationId),
-		),
+		where:
+			payload.ServerType === "Dokploy"
+				? undefined
+				: and(
+						eq(notifications.serverThreshold, true),
+						eq(notifications.organizationId, organizationId),
+					),
 		with: {
 			email: true,
 			discord: true,
@@ -54,17 +58,36 @@ export const sendServerThresholdNotifications = async (
 					? "🎮"
 					: "💽";
 	const typeColor = 0xff0000; // Rojo para indicar alerta
+	const scopeLabel = payload.ServerType === "Dokploy" ? "Host" : "Server";
+	const shouldNotify = (notification: {
+		serverThreshold: boolean;
+		hostCpuThreshold: boolean;
+		hostMemoryThreshold: boolean;
+		hostDiskThreshold: boolean;
+	}) => {
+		if (payload.ServerType === "Dokploy") {
+			if (payload.Type === "CPU") return notification.hostCpuThreshold;
+			if (payload.Type === "Memory") return notification.hostMemoryThreshold;
+			if (payload.Type === "Disk") return notification.hostDiskThreshold;
+		}
+
+		return notification.serverThreshold;
+	};
 
 	for (const notification of notificationList) {
 		const { discord, telegram, slack, custom, lark, pushover, teams } =
 			notification;
+
+		if (!shouldNotify(notification)) {
+			continue;
+		}
 
 		if (discord) {
 			const decorate = (decoration: string, text: string) =>
 				`${discord.decoration ? decoration : ""} ${text}`.trim();
 
 			await sendDiscordNotification(discord, {
-				title: decorate(">", `\`⚠️\` Server ${payload.Type} Alert`),
+				title: decorate(">", `\`⚠️\` ${scopeLabel} ${payload.Type} Alert`),
 				color: typeColor,
 				fields: [
 					{
@@ -104,7 +127,7 @@ export const sendServerThresholdNotifications = async (
 				],
 				timestamp: date.toISOString(),
 				footer: {
-					text: "小智Ops Server Monitoring Alert",
+					text: `小智Ops ${scopeLabel} Monitoring Alert`,
 				},
 			});
 		}
@@ -113,7 +136,7 @@ export const sendServerThresholdNotifications = async (
 			await sendTelegramNotification(
 				telegram,
 				`
-				<b>⚠️ Server ${payload.Type} Alert</b>
+				<b>⚠️ ${scopeLabel} ${payload.Type} Alert</b>
                 <b>Server Name:</b> ${payload.ServerName}
 				<b>Type:</b> ${payload.Type}
 				<b>Current Value:</b> ${payload.Value.toFixed(2)}%
@@ -131,7 +154,7 @@ export const sendServerThresholdNotifications = async (
 				attachments: [
 					{
 						color: "#FF0000",
-						pretext: `:warning: *Server ${payload.Type} Alert*`,
+						pretext: `:warning: *${scopeLabel} ${payload.Type} Alert*`,
 						fields: [
 							{
 								title: "Server Name",
@@ -170,7 +193,7 @@ export const sendServerThresholdNotifications = async (
 
 		if (custom) {
 			await sendCustomNotification(custom, {
-				title: `Server ${payload.Type} Alert`,
+				title: `${scopeLabel} ${payload.Type} Alert`,
 				message: payload.Message,
 				serverName: payload.ServerName,
 				type: payload.Type,
@@ -203,7 +226,7 @@ export const sendServerThresholdNotifications = async (
 					header: {
 						title: {
 							tag: "plain_text",
-							content: `⚠️ Server ${payload.Type} Alert`,
+							content: `⚠️ ${scopeLabel} ${payload.Type} Alert`,
 						},
 						subtitle: {
 							tag: "plain_text",
@@ -282,16 +305,16 @@ export const sendServerThresholdNotifications = async (
 		if (pushover) {
 			await sendPushoverNotification(
 				pushover,
-				`Server ${payload.Type} Alert`,
-				`Server: ${payload.ServerName}\nType: ${payload.Type}\nCurrent: ${payload.Value.toFixed(2)}%\nThreshold: ${payload.Threshold.toFixed(2)}%\nMessage: ${payload.Message}\nTime: ${date.toLocaleString()}`,
+				`${scopeLabel} ${payload.Type} Alert`,
+				`${scopeLabel}: ${payload.ServerName}\nType: ${payload.Type}\nCurrent: ${payload.Value.toFixed(2)}%\nThreshold: ${payload.Threshold.toFixed(2)}%\nMessage: ${payload.Message}\nTime: ${date.toLocaleString()}`,
 			);
 		}
 
 		if (teams) {
 			await sendTeamsNotification(teams, {
-				title: `⚠️ Server ${payload.Type} Alert`,
+				title: `⚠️ ${scopeLabel} ${payload.Type} Alert`,
 				facts: [
-					{ name: "Server Name", value: payload.ServerName },
+					{ name: `${scopeLabel} Name`, value: payload.ServerName },
 					{ name: "Type", value: payload.Type },
 					{ name: "Current Value", value: `${payload.Value.toFixed(2)}%` },
 					{ name: "Threshold", value: `${payload.Threshold.toFixed(2)}%` },

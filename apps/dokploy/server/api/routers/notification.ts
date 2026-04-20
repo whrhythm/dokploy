@@ -463,10 +463,8 @@ export const notificationRouter = createTRPCRouter({
 						});
 					}
 
-					// For Dokploy server type, we don't have a specific organizationId
-					// This might need to be adjusted based on your business logic
 					organizationId = "";
-					ServerName = "Dokploy";
+					ServerName = "小智Ops Host";
 				} else {
 					const result = await db
 						.select()
@@ -497,6 +495,7 @@ export const notificationRouter = createTRPCRouter({
 					});
 				} else {
 					await sendServerThresholdNotifications(organizationId, {
+						ServerType: input.ServerType,
 						Type: input.Type,
 						Value: input.Value,
 						Threshold: input.Threshold,
@@ -525,6 +524,9 @@ export const notificationRouter = createTRPCRouter({
 					"dockerCleanup",
 					"dokployRestart",
 					"serverThreshold",
+					"hostCpuThreshold",
+					"hostMemoryThreshold",
+					"hostDiskThreshold",
 					"containerHealth",
 				]),
 			}),
@@ -609,6 +611,7 @@ export const notificationRouter = createTRPCRouter({
 						break;
 					case "serverThreshold":
 						await sendServerThresholdNotifications(organizationId, {
+							ServerType: "Remote",
 							Type: "CPU",
 							Value: 92,
 							Threshold: 80,
@@ -616,6 +619,42 @@ export const notificationRouter = createTRPCRouter({
 							Timestamp: new Date().toISOString(),
 							Token: "test-token",
 							ServerName: "Dokploy Test Server",
+						});
+						break;
+					case "hostCpuThreshold":
+						await sendServerThresholdNotifications(organizationId, {
+							ServerType: "Dokploy",
+							Type: "CPU",
+							Value: 92,
+							Threshold: 80,
+							Message: "This is a test host CPU notification.",
+							Timestamp: new Date().toISOString(),
+							Token: "test-token",
+							ServerName: "小智Ops Host",
+						});
+						break;
+					case "hostMemoryThreshold":
+						await sendServerThresholdNotifications(organizationId, {
+							ServerType: "Dokploy",
+							Type: "Memory",
+							Value: 92,
+							Threshold: 80,
+							Message: "This is a test host memory notification.",
+							Timestamp: new Date().toISOString(),
+							Token: "test-token",
+							ServerName: "小智Ops Host",
+						});
+						break;
+					case "hostDiskThreshold":
+						await sendServerThresholdNotifications(organizationId, {
+							ServerType: "Dokploy",
+							Type: "Disk",
+							Value: 92,
+							Threshold: 80,
+							Message: "This is a test host disk notification.",
+							Timestamp: new Date().toISOString(),
+							Token: "test-token",
+							ServerName: "小智Ops Host",
 						});
 						break;
 					case "containerHealth":

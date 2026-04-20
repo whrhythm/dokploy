@@ -44,6 +44,15 @@ export const adminRouter = createTRPCRouter({
 								exclude: input.metricsConfig.containers.services.exclude || [],
 							},
 						},
+						host: input.metricsConfig.host
+							? {
+									thresholds: {
+										cpu: input.metricsConfig.host.thresholds.cpu,
+										memory: input.metricsConfig.host.thresholds.memory,
+										disk: input.metricsConfig.host.thresholds.disk,
+									},
+								}
+							: undefined,
 					},
 				});
 
