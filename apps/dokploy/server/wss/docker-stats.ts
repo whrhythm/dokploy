@@ -6,8 +6,8 @@ import {
 	getLastAdvancedStatsFile,
 	getWebServerSettings,
 	IS_CLOUD,
+	notifyHostThreshold,
 	recordAdvancedStats,
-	sendServerThresholdNotifications,
 	validateRequest,
 } from "@dokploy/server";
 import { WebSocketServer } from "ws";
@@ -37,77 +37,6 @@ const getLatestStat = (series: unknown) => {
 	}
 
 	return series[series.length - 1] as Record<string, unknown>;
-};
-
-const hostAlertState = new Map<string, boolean>();
-
-const maybeSendHostAlert = async ({
-	organizationId,
-	type,
-	value,
-	threshold,
-	serverName,
-}: {
-	organizationId: string;
-	type: "CPU" | "Memory" | "Disk";
-	value: number | null;
-	threshold: number;
-	serverName: string;
-}) => {
-	const alertKey = `${organizationId}:${type}`;
-	const wasAbove = hostAlertState.get(alertKey) ?? false;
-	const isAbove = value != null ? value > threshold : false;
-
-	if (value == null) {
-		return;
-	}
-
-	if (isAbove && !wasAbove) {
-		console.log(
-			"+++++++++++++++++++++++++++++++++++++++++++++ host alert triggered",
-			{
-				organizationId,
-				serverName,
-				type,
-				value,
-				threshold,
-				above: true,
-			},
-		);
-		hostAlertState.set(alertKey, true);
-
-		try {
-			await sendServerThresholdNotifications(organizationId, {
-				ServerType: "Dokploy",
-				Type: type,
-				Value: value,
-				Threshold: threshold,
-				Message: `${type} usage is above the configured threshold.`,
-				Timestamp: new Date().toISOString(),
-				Token: "host-monitoring",
-				ServerName: serverName,
-			});
-		} catch (error) {
-			console.error("Failed to send host threshold notification", error);
-		}
-		return;
-	}
-
-	if (!isAbove && wasAbove) {
-		console.log(
-			"+++++++++++++++++++++++++++++++++++++++++++++ host alert reset",
-			{
-				organizationId,
-				serverName,
-				type,
-				value,
-				threshold,
-				above: false,
-			},
-		);
-		hostAlertState.set(alertKey, false);
-	}
-	return;
 };
 
 export const setupDockerStatsMonitoringSocketServer = (
@@ -199,7 +128,7 @@ export const setupDockerStatsMonitoringSocketServer = (
 					);
 
 					if (hostThresholds) {
-						await maybeSendHostAlert({
+						await notifyHostThreshold({
 							organizationId: session.activeOrganizationId,
 							type: "CPU",
 							value: getMetricValue(stat.CPUPerc),
@@ -207,7 +136,7 @@ export const setupDockerStatsMonitoringSocketServer = (
 							serverName,
 						});
 
-						await maybeSendHostAlert({
+						await notifyHostThreshold({
 							organizationId: session.activeOrganizationId,
 							type: "Memory",
 							value: getMetricValue(stat.MemPerc),
@@ -216,7 +145,7 @@ export const setupDockerStatsMonitoringSocketServer = (
 						});
 
 						const latestDisk = getLatestStat(data.disk);
-						await maybeSendHostAlert({
+						await notifyHostThreshold({
 							organizationId: session.activeOrganizationId,
 							type: "Disk",
 							value: getMetricValue(latestDisk?.value, "diskUsedPercentage"),

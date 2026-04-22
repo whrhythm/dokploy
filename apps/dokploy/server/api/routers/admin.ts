@@ -1,6 +1,9 @@
 import {
+	getAdvancedStats,
+	getHostSystemStats,
 	getWebServerSettings,
 	IS_CLOUD,
+	notifyHostThreshold,
 	setupWebMonitoring,
 	updateWebServerSettings,
 } from "@dokploy/server";
@@ -22,6 +25,14 @@ export const adminRouter = createTRPCRouter({
 						message: "Feature disabled on cloud",
 					});
 				}
+
+				const hostConfig = input.metricsConfig.host ?? {
+					thresholds: {
+						cpu: 0,
+						memory: 0,
+						disk: 0,
+					},
+				};
 
 				await updateWebServerSettings({
 					metricsConfig: {
@@ -47,15 +58,7 @@ export const adminRouter = createTRPCRouter({
 								exclude: input.metricsConfig.containers.services.exclude || [],
 							},
 						},
-						host: input.metricsConfig.host
-							? {
-									thresholds: {
-										cpu: input.metricsConfig.host.thresholds.cpu,
-										memory: input.metricsConfig.host.thresholds.memory,
-										disk: input.metricsConfig.host.thresholds.disk,
-									},
-								}
-							: undefined,
+						host: hostConfig,
 					},
 				});
 
@@ -68,7 +71,7 @@ export const adminRouter = createTRPCRouter({
 		}),
 	updateHostMonitoring: adminProcedure
 		.input(apiUpdateWebServerHostMonitoring)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
 			if (IS_CLOUD) {
 				throw new TRPCError({
 					code: "UNAUTHORIZED",
@@ -77,12 +80,60 @@ export const adminRouter = createTRPCRouter({
 			}
 
 			const settings = await getWebServerSettings();
+			if (!settings) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Web server settings not found",
+				});
+			}
+
+			const hostConfig = input.host ?? settings.metricsConfig.host;
+			if (!hostConfig) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Host monitoring settings are missing",
+				});
+			}
+
 			await updateWebServerSettings({
 				metricsConfig: {
-					server: settings?.metricsConfig.server,
-					containers: settings?.metricsConfig.containers,
-					host: input.host,
+					server: settings.metricsConfig.server,
+					containers: settings.metricsConfig.containers,
+					host: hostConfig,
 				},
+			});
+
+			const currentHostStats = await getHostSystemStats();
+			const hostStats = await getAdvancedStats("dokploy", "host");
+			const latestDisk = hostStats.disk[hostStats.disk.length - 1]?.value;
+			const serverName = "小智Ops Host";
+			const organizationId = ctx.session.activeOrganizationId;
+
+			await notifyHostThreshold({
+				organizationId,
+				type: "CPU",
+				value: Number.parseFloat(currentHostStats.CPUPerc),
+				threshold: input.host.thresholds.cpu,
+				serverName,
+				force: true,
+			});
+
+			await notifyHostThreshold({
+				organizationId,
+				type: "Memory",
+				value: Number.parseFloat(currentHostStats.MemPerc),
+				threshold: input.host.thresholds.memory,
+				serverName,
+				force: true,
+			});
+
+			await notifyHostThreshold({
+				organizationId,
+				type: "Disk",
+				value: (latestDisk as any)?.diskUsedPercentage ?? null,
+				threshold: input.host.thresholds.disk,
+				serverName,
+				force: true,
 			});
 
 			return getWebServerSettings();

@@ -149,7 +149,7 @@ export const NotificationEventContent = ({
 										wordWrap: "break-word",
 									},
 								},
-								e(detail.label, ":"),
+								`${detail.label}:`,
 							),
 							e(
 								"td",
