@@ -55,18 +55,18 @@ type NotificationActionFields = {
 	hostDiskThreshold: boolean;
 };
 
-const notificationActionFields = (input: NotificationActionFields) => ({
-	appDeploy: input.appDeploy,
-	appBuildError: input.appBuildError,
-	databaseBackup: input.databaseBackup,
-	volumeBackup: input.volumeBackup,
-	dokployRestart: input.dokployRestart,
-	dockerCleanup: input.dockerCleanup,
-	serverThreshold: input.serverThreshold,
-	containerHealth: input.containerHealth,
-	hostCpuThreshold: input.hostCpuThreshold,
-	hostMemoryThreshold: input.hostMemoryThreshold,
-	hostDiskThreshold: input.hostDiskThreshold,
+const notificationActionFields = (input: Partial<NotificationActionFields>) => ({
+	appDeploy: input.appDeploy ?? false,
+	appBuildError: input.appBuildError ?? false,
+	databaseBackup: input.databaseBackup ?? false,
+	volumeBackup: input.volumeBackup ?? false,
+	dokployRestart: input.dokployRestart ?? false,
+	dockerCleanup: input.dockerCleanup ?? false,
+	serverThreshold: input.serverThreshold ?? false,
+	containerHealth: input.containerHealth ?? false,
+	hostCpuThreshold: input.hostCpuThreshold ?? false,
+	hostMemoryThreshold: input.hostMemoryThreshold ?? false,
+	hostDiskThreshold: input.hostDiskThreshold ?? false,
 });
 
 export const createSlackNotification = async (
