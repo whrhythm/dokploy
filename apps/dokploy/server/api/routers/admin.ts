@@ -95,6 +95,13 @@ export const adminRouter = createTRPCRouter({
 				});
 			}
 
+			const previousHostThresholds = settings.metricsConfig.host
+				?.thresholds ?? {
+				cpu: 0,
+				memory: 0,
+				disk: 0,
+			};
+
 			await updateWebServerSettings({
 				metricsConfig: {
 					server: settings.metricsConfig.server,
@@ -109,32 +116,37 @@ export const adminRouter = createTRPCRouter({
 			const serverName = "小智Ops Host";
 			const organizationId = ctx.session.activeOrganizationId;
 
-			await notifyHostThreshold({
-				organizationId,
-				type: "CPU",
-				value: Number.parseFloat(currentHostStats.CPUPerc),
-				threshold: input.host.thresholds.cpu,
-				serverName,
-				force: true,
-			});
+			const changedThresholds = [
+				{
+					type: "CPU" as const,
+					value: Number.parseFloat(currentHostStats.CPUPerc),
+					previous: previousHostThresholds.cpu,
+					current: hostConfig.thresholds.cpu,
+				},
+				{
+					type: "Memory" as const,
+					value: Number.parseFloat(currentHostStats.MemPerc),
+					previous: previousHostThresholds.memory,
+					current: hostConfig.thresholds.memory,
+				},
+				{
+					type: "Disk" as const,
+					value: (latestDisk as any)?.diskUsedPercentage ?? null,
+					previous: previousHostThresholds.disk,
+					current: hostConfig.thresholds.disk,
+				},
+			].filter(({ previous, current }) => previous !== current);
 
-			await notifyHostThreshold({
-				organizationId,
-				type: "Memory",
-				value: Number.parseFloat(currentHostStats.MemPerc),
-				threshold: input.host.thresholds.memory,
-				serverName,
-				force: true,
-			});
-
-			await notifyHostThreshold({
-				organizationId,
-				type: "Disk",
-				value: (latestDisk as any)?.diskUsedPercentage ?? null,
-				threshold: input.host.thresholds.disk,
-				serverName,
-				force: true,
-			});
+			for (const threshold of changedThresholds) {
+				await notifyHostThreshold({
+					organizationId,
+					type: threshold.type,
+					value: threshold.value,
+					threshold: threshold.current,
+					serverName,
+					force: true,
+				});
+			}
 
 			return getWebServerSettings();
 		}),
