@@ -1,13 +1,12 @@
 import { IS_CLOUD } from "@dokploy/server/constants";
 import { validateRequest } from "@dokploy/server/lib/auth";
-import { Loader2, Settings2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { GetServerSidePropsContext } from "next";
-import Link from "next/link";
 import type { ReactElement } from "react";
 import { ContainerFreeMonitoring } from "@/components/dashboard/monitoring/free/container/show-free-container-monitoring";
+import { ShowHostMonitoringSettings } from "@/components/dashboard/monitoring/host/show-host-monitoring-settings";
 import { ShowPaidMonitoring } from "@/components/dashboard/monitoring/paid/servers/show-paid-monitoring";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useTranslation } from "@/hooks/use-translation";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -36,12 +35,7 @@ const Dashboard = () => {
 						{t("monitoring.watchUsage")}
 					</p>
 				</div>
-				<Button asChild variant="outline">
-					<Link href="/dashboard/settings/servers">
-						<Settings2 className="mr-2 h-4 w-4" />
-						{t("monitoring.settings")}
-					</Link>
-				</Button>
+				<ShowHostMonitoringSettings />
 			</div>
 			{/* <AlertBlock>
 				You are watching the <strong>Free</strong> plan.{" "}

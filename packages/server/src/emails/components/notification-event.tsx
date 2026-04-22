@@ -5,6 +5,7 @@ import type {
 } from "@dokploy/server/utils/notifications/event-metadata";
 import { Section, Text } from "@react-email/components";
 import type { ReactNode } from "react";
+import * as React from "react";
 
 export interface NotificationEmailDetailsItem {
 	label: string;
@@ -62,6 +63,7 @@ export const NotificationEventContent = ({
 	action,
 	date,
 }: NotificationEventContentProps) => {
+	const e = React.createElement;
 	const { label, color } = LEVEL_STYLES[level];
 	const normalizedDetails: NotificationEmailDetailsItem[] = [
 		{ label: "位置", value: context },
@@ -74,33 +76,40 @@ export const NotificationEventContent = ({
 		...(details ?? []),
 	];
 
-	return (
-		<>
-			<Text
-				style={{
+	return e(
+		React.Fragment,
+		null,
+		e(
+			Text,
+			{
+				style: {
 					color,
 					fontSize: "14px",
 					lineHeight: "24px",
 					margin: "0 0 8px 0",
 					width: "100%",
 					fontWeight: 600,
-				}}
-			>
-				{label}
-			</Text>
-			<Text
-				style={{
+				},
+			},
+			label,
+		),
+		e(
+			Text,
+			{
+				style: {
 					color: "#000000",
 					fontSize: "14px",
 					lineHeight: "24px",
 					margin: "0 0 12px 0",
 					width: "100%",
-				}}
-			>
-				{summary}
-			</Text>
-			<Section
-				style={{
+				},
+			},
+			summary,
+		),
+		e(
+			Section,
+			{
+				style: {
 					color: "#000000",
 					fontSize: "14px",
 					lineHeight: "24px",
@@ -108,21 +117,28 @@ export const NotificationEventContent = ({
 					borderRadius: "8px",
 					padding: "12px",
 					width: "100%",
-				}}
-			>
-				<Text style={{ fontWeight: 700, margin: "0 0 10px 0" }}>详情</Text>
-				<table
-					width="100%"
-					cellPadding={0}
-					cellSpacing={0}
-					role="presentation"
-					style={{ tableLayout: "fixed", width: "100%" }}
-				>
-					<tbody>
-						{normalizedDetails.map((detail, index) => (
-							<tr key={`${detail.label}-${index}`}>
-								<td
-									style={{
+				},
+			},
+			e(Text, { style: { fontWeight: 700, margin: "0 0 10px 0" } }, "详情"),
+			e(
+				"table",
+				{
+					width: "100%",
+					cellPadding: 0,
+					cellSpacing: 0,
+					role: "presentation",
+					style: { tableLayout: "fixed", width: "100%" },
+				},
+				e(
+					"tbody",
+					normalizedDetails.map((detail, index) =>
+						e(
+							"tr",
+							{ key: `${detail.label}-${index}` },
+							e(
+								"td",
+								{
+									style: {
 										verticalAlign: "top",
 										width: "112px",
 										padding: "2px 8px 2px 0",
@@ -131,12 +147,14 @@ export const NotificationEventContent = ({
 										wordBreak: "break-word",
 										overflowWrap: "anywhere",
 										wordWrap: "break-word",
-									}}
-								>
-									{detail.label}:
-								</td>
-								<td
-									style={{
+									},
+								},
+								e(detail.label, ":"),
+							),
+							e(
+								"td",
+								{
+									style: {
 										verticalAlign: "top",
 										padding: "2px 0",
 										fontSize: "14px",
@@ -145,48 +163,53 @@ export const NotificationEventContent = ({
 										wordBreak: "break-word",
 										overflowWrap: "anywhere",
 										wordWrap: "break-word",
-									}}
-								>
-									<strong>{detail.value}</strong>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</Section>
-			{reason ? (
-				<Section
-					style={{
-						color: "#000000",
-						fontSize: "14px",
-						lineHeight: "24px",
-						backgroundColor: "#FEF2F2",
-						borderRadius: "8px",
-						padding: "12px",
-						marginTop: "16px",
-						width: "100%",
-					}}
-				>
-					<Text style={{ fontWeight: 700, color, margin: "0 0 8px 0" }}>
-						系统报错
-					</Text>
-					<Text
-						style={{
-							fontSize: "12px",
-							lineHeight: "20px",
-							whiteSpace: "pre-wrap",
-							wordBreak: "break-word",
-							overflowWrap: "anywhere",
-							wordWrap: "break-word",
-							maxWidth: "100%",
-							margin: "0",
-						}}
-					>
-						{reason}
-					</Text>
-				</Section>
-			) : null}
-		</>
+									},
+								},
+								e("strong", null, detail.value),
+							),
+						),
+					),
+				),
+			),
+			reason
+				? e(
+						Section,
+						{
+							style: {
+								color: "#000000",
+								fontSize: "14px",
+								lineHeight: "24px",
+								backgroundColor: "#FEF2F2",
+								borderRadius: "8px",
+								padding: "12px",
+								marginTop: "16px",
+								width: "100%",
+							},
+						},
+						e(
+							Text,
+							{ style: { fontWeight: 700, color, margin: "0 0 8px 0" } },
+							"系统报错",
+						),
+						e(
+							Text,
+							{
+								style: {
+									fontSize: "12px",
+									lineHeight: "20px",
+									whiteSpace: "pre-wrap",
+									wordBreak: "break-word",
+									overflowWrap: "anywhere",
+									wordWrap: "break-word",
+									maxWidth: "100%",
+									margin: "0",
+								},
+							},
+							reason,
+						),
+					)
+				: null,
+		),
 	);
 };
 

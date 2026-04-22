@@ -13,7 +13,6 @@ import {
 	Tailwind,
 	Text,
 } from "@react-email/components";
-
 export type TemplateProps = {
 	email: string;
 	name: string;

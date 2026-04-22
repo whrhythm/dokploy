@@ -5,7 +5,10 @@ import {
 	updateWebServerSettings,
 } from "@dokploy/server";
 import { TRPCError } from "@trpc/server";
-import { apiUpdateWebServerMonitoring } from "@/server/db/schema";
+import {
+	apiUpdateWebServerHostMonitoring,
+	apiUpdateWebServerMonitoring,
+} from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter } from "../trpc";
 
 export const adminRouter = createTRPCRouter({
@@ -62,5 +65,26 @@ export const adminRouter = createTRPCRouter({
 			} catch (error) {
 				throw error;
 			}
+		}),
+	updateHostMonitoring: adminProcedure
+		.input(apiUpdateWebServerHostMonitoring)
+		.mutation(async ({ input }) => {
+			if (IS_CLOUD) {
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Feature disabled on cloud",
+				});
+			}
+
+			const settings = await getWebServerSettings();
+			await updateWebServerSettings({
+				metricsConfig: {
+					server: settings?.metricsConfig.server,
+					containers: settings?.metricsConfig.containers,
+					host: input.host,
+				},
+			});
+
+			return getWebServerSettings();
 		}),
 });

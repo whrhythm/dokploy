@@ -44,6 +44,13 @@ export const webServerSettings = pgTable("webServerSettings", {
 					exclude: string[];
 				};
 			};
+			host: {
+				thresholds: {
+					cpu: number;
+					memory: number;
+					disk: number;
+				};
+			};
 		}>()
 		.notNull()
 		.default({
@@ -67,6 +74,13 @@ export const webServerSettings = pgTable("webServerSettings", {
 				services: {
 					include: [],
 					exclude: [],
+				},
+			},
+			host: {
+				thresholds: {
+					cpu: 0,
+					memory: 0,
+					disk: 0,
 				},
 			},
 		}),
@@ -204,4 +218,14 @@ export const apiUpdateWebServerMonitoring = z.object({
 			}),
 		})
 		.required(),
+});
+
+export const apiUpdateWebServerHostMonitoring = z.object({
+	host: z.object({
+		thresholds: z.object({
+			cpu: z.number().min(0),
+			memory: z.number().min(0),
+			disk: z.number().min(0),
+		}),
+	}),
 });

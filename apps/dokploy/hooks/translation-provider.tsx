@@ -1763,6 +1763,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 				"time.week": "周",
 				// Monitoring
 				"monitoring.watchUsage": "查看当前应用服务器的使用情况",
+				"monitoring.hostSettings": "宿主机监控设置",
 				"monitoring.settings": "监控设置",
 				"monitoring.cpuUsage": "CPU 使用率",
 				"monitoring.memoryUsage": "内存使用率",

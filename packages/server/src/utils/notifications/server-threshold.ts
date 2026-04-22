@@ -1,11 +1,16 @@
-import { and, eq } from "drizzle-orm";
+import ServerThresholdEmail from "@dokploy/server/emails/emails/server-threshold";
+import { renderAsync } from "@react-email/components";
+import { and, eq, or } from "drizzle-orm";
 import { db } from "../../db";
 import { notifications } from "../../db/schema";
+import { buildNotificationEmailSubject } from "./event-metadata";
 import {
 	sendCustomNotification,
 	sendDiscordNotification,
+	sendEmailNotification,
 	sendLarkNotification,
 	sendPushoverNotification,
+	sendResendNotification,
 	sendSlackNotification,
 	sendTeamsNotification,
 	sendTelegramNotification,
@@ -32,13 +37,21 @@ export const sendServerThresholdNotifications = async (
 	const notificationList = await db.query.notifications.findMany({
 		where:
 			payload.ServerType === "Dokploy"
-				? undefined
+				? and(
+						or(
+							eq(notifications.hostCpuThreshold, true),
+							eq(notifications.hostMemoryThreshold, true),
+							eq(notifications.hostDiskThreshold, true),
+						),
+						eq(notifications.organizationId, organizationId),
+					)
 				: and(
 						eq(notifications.serverThreshold, true),
 						eq(notifications.organizationId, organizationId),
 					),
 		with: {
 			email: true,
+			resend: true,
 			discord: true,
 			telegram: true,
 			slack: true,
@@ -75,11 +88,49 @@ export const sendServerThresholdNotifications = async (
 	};
 
 	for (const notification of notificationList) {
-		const { discord, telegram, slack, custom, lark, pushover, teams } =
-			notification;
+		const {
+			email,
+			resend,
+			discord,
+			telegram,
+			slack,
+			custom,
+			lark,
+			pushover,
+			teams,
+		} = notification;
 
 		if (!shouldNotify(notification)) {
 			continue;
+		}
+
+		if (email || resend) {
+			const subject = buildNotificationEmailSubject({
+				level: "Warning",
+				eventObject: payload.ServerType === "Dokploy" ? "宿主机" : "服务器",
+				name: payload.ServerName,
+				event: `${payload.Type} 资源告警`,
+			});
+
+			const template = await renderAsync(
+				ServerThresholdEmail({
+					serverName: payload.ServerName,
+					serverType: payload.ServerType,
+					type: payload.Type,
+					value: payload.Value,
+					threshold: payload.Threshold,
+					message: payload.Message,
+					date: date.toLocaleString(),
+				}),
+			).catch();
+
+			if (email) {
+				await sendEmailNotification(email, subject, template);
+			}
+
+			if (resend) {
+				await sendResendNotification(resend, subject, template);
+			}
 		}
 
 		if (discord) {

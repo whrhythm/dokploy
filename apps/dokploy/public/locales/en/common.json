@@ -2944,6 +2944,7 @@
 	"monitoring.chart.point": "Point {index}",
 	"monitoring.chart.date": "Date: {value}",
 	"monitoring.paid.title": "System monitoring",
+	"monitoring.hostSettings": "Host monitoring settings",
 	"monitoring.settings": "Monitoring settings",
 	"monitoring.paid.errorTitle": "Error fetching metrics",
 	"monitoring.paid.uptime": "Uptime",

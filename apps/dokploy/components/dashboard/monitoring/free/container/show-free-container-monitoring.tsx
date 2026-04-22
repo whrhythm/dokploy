@@ -197,7 +197,39 @@ export const ContainerFreeMonitoring = ({
 	useEffect(() => {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const wsUrl = `${protocol}//${window.location.host}/listen-docker-stats-monitoring?appName=${appName}&appType=${appType}&gpuScope=${gpuScope}`;
+		console.log(
+			"+++++++++++++++++++++++++++++++++++++++++++++ websocket connect",
+			{
+				appName,
+				appType,
+				gpuScope,
+				wsUrl,
+			},
+		);
 		const ws = new WebSocket(wsUrl);
+
+		ws.onopen = () => {
+			console.log(
+				"+++++++++++++++++++++++++++++++++++++++++++++ websocket open",
+				{
+					appName,
+					appType,
+					gpuScope,
+				},
+			);
+		};
+
+		ws.onerror = (event) => {
+			console.log(
+				"+++++++++++++++++++++++++++++++++++++++++++++ websocket error",
+				{
+					appName,
+					appType,
+					gpuScope,
+					event,
+				},
+			);
+		};
 
 		ws.onmessage = (e) => {
 			const value = JSON.parse(e.data);
@@ -226,7 +258,17 @@ export const ContainerFreeMonitoring = ({
 		};
 
 		ws.onclose = (e) => {
-			console.log(e.reason);
+			console.log(
+				"+++++++++++++++++++++++++++++++++++++++++++++ websocket close",
+				{
+					appName,
+					appType,
+					gpuScope,
+					code: e.code,
+					reason: e.reason,
+					wasClean: e.wasClean,
+				},
+			);
 		};
 
 		return () => ws.close();

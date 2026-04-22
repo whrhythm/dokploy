@@ -3262,6 +3262,7 @@
 	"monitoring.chart.point": "点 {index}",
 	"monitoring.chart.date": "日期：{value}",
 	"monitoring.paid.title": "系统监控",
+	"monitoring.hostSettings": "宿主机监控设置",
 	"monitoring.settings": "监控设置",
 	"monitoring.paid.errorTitle": "获取监控数据失败",
 	"monitoring.paid.uptime": "运行时长",
