@@ -2,6 +2,7 @@ import type {
 	NotificationActor,
 	NotificationTriggerSource,
 } from "@dokploy/server/utils/notifications/event-metadata";
+import * as React from "react";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -45,22 +46,33 @@ export const BuildSuccessEmail = ({
 		? `${projectName}（${environmentName}）`
 		: projectName;
 	const summaryText = `${actorText} 已在 ${projectScope} 项目中成功部署应用 ${applicationName}。`;
-	const summary = (
-		<>
-			{actorText} 已在 {projectScope} 项目中
-			<span style={{ color: "#059669", fontWeight: 600 }}>成功部署</span>
-			应用 <strong>{applicationName}</strong>。
-		</>
+	const summary = React.createElement(
+		React.Fragment,
+		null,
+		actorText,
+		" 已在 ",
+		projectScope,
+		" 项目中",
+		React.createElement(
+			"span",
+			{ style: { color: "#059669", fontWeight: 600 } },
+			"成功部署",
+		),
+		"应用 ",
+		React.createElement("strong", null, applicationName),
+		"。",
 	);
 
 	return (
 		<NotificationEmailTemplate
 			previewText={summaryText}
-			title={
-				<>
-					应用 <strong>{applicationName}</strong> 部署成功
-				</>
-			}
+			title={React.createElement(
+				React.Fragment,
+				null,
+				"应用 ",
+				React.createElement("strong", null, applicationName),
+				" 部署成功",
+			)}
 			actionHref={buildLink}
 			actionLabel="查看构建详情"
 		>

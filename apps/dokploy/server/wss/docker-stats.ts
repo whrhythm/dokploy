@@ -8,6 +8,7 @@ import {
 	IS_CLOUD,
 	notifyHostThreshold,
 	recordAdvancedStats,
+	sendContainerHealthNotifications,
 	validateRequest,
 } from "@dokploy/server";
 import { WebSocketServer } from "ws";
@@ -163,7 +164,6 @@ export const setupDockerStatsMonitoringSocketServer = (
 				}
 
 				const filter = {
-					status: ["running"],
 					...(appType === "application" && {
 						label: [`com.docker.swarm.service.name=${appName}`],
 					}),
@@ -176,16 +176,43 @@ export const setupDockerStatsMonitoringSocketServer = (
 				};
 
 				const containers = await docker.listContainers({
+					all: true,
 					filters: JSON.stringify(filter),
 				});
 
-				const container = containers[0];
-				if (!container || container?.State !== "running") {
+				const runningContainer = containers.find(
+					(container) => container.State === "running",
+				);
+				const targetContainer = runningContainer || containers[0];
+				if (!runningContainer) {
+					console.log(
+						"+++++++++++++++++++++++++++++++++++++++++++++ checkAndSendContainerHealth",
+						{
+							appName,
+							appType,
+							gpuScope,
+							containerState: targetContainer?.State,
+							containerName: targetContainer?.Names?.[0],
+						},
+					);
+
+					await sendContainerHealthNotifications(session.activeOrganizationId, {
+						Message: targetContainer
+							? `Container ${targetContainer.Names?.[0]?.replace(/^\//, "") || appName} is not running`
+							: `Container ${appName} is not running`,
+						Timestamp: new Date().toISOString(),
+						ServerName: "小智Ops Host",
+						ContainerName:
+							targetContainer?.Names?.[0]?.replace(/^\//, "") || appName,
+						CurrentStatus: targetContainer?.State || "not found",
+						PreviousStatus: "running",
+					});
+
 					ws.close(4000, "Container not running");
 					return;
 				}
 				const { stdout, stderr } = await execAsync(
-					`docker stats ${container.Id} --no-stream --format \'{"BlockIO":"{{.BlockIO}}","CPUPerc":"{{.CPUPerc}}","Container":"{{.Container}}","ID":"{{.ID}}","MemPerc":"{{.MemPerc}}","MemUsage":"{{.MemUsage}}","Name":"{{.Name}}","NetIO":"{{.NetIO}}"}\'`,
+					`docker stats ${runningContainer.Id} --no-stream --format \'{"BlockIO":"{{.BlockIO}}","CPUPerc":"{{.CPUPerc}}","Container":"{{.Container}}","ID":"{{.ID}}","MemPerc":"{{.MemPerc}}","MemUsage":"{{.MemUsage}}","Name":"{{.Name}}","NetIO":"{{.NetIO}}"}\'`,
 				);
 				if (stderr) {
 					console.error("Docker stats error:", stderr);
