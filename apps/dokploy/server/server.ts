@@ -12,6 +12,7 @@ import {
 	initVolumeBackupsCronJobs,
 	sendDokployRestartNotifications,
 	setupDirectories,
+	startContainerHealthMonitoring,
 } from "@dokploy/server";
 import { config } from "dotenv";
 import next from "next";
@@ -69,6 +70,9 @@ void app.prepare().then(async () => {
 		server.listen(PORT, HOST);
 		console.log(`Server Started on: http://${HOST}:${PORT}`);
 		await initEnterpriseBackupCronJobs();
+		if (!IS_CLOUD) {
+			startContainerHealthMonitoring();
+		}
 
 		if (!IS_CLOUD) {
 			console.log("Starting Deployment Worker");

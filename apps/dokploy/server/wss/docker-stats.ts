@@ -8,7 +8,6 @@ import {
 	IS_CLOUD,
 	notifyHostThreshold,
 	recordAdvancedStats,
-	sendContainerHealthNotifications,
 	validateRequest,
 } from "@dokploy/server";
 import { WebSocketServer } from "ws";
@@ -195,18 +194,6 @@ export const setupDockerStatsMonitoringSocketServer = (
 							containerName: targetContainer?.Names?.[0],
 						},
 					);
-
-					await sendContainerHealthNotifications(session.activeOrganizationId, {
-						Message: targetContainer
-							? `Container ${targetContainer.Names?.[0]?.replace(/^\//, "") || appName} is not running`
-							: `Container ${appName} is not running`,
-						Timestamp: new Date().toISOString(),
-						ServerName: "小智Ops Host",
-						ContainerName:
-							targetContainer?.Names?.[0]?.replace(/^\//, "") || appName,
-						CurrentStatus: targetContainer?.State || "not found",
-						PreviousStatus: "running",
-					});
 
 					ws.close(4000, "Container not running");
 					return;
