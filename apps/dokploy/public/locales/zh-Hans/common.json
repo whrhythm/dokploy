@@ -1167,6 +1167,8 @@
 	"webDomain.changeWarningTitle": "⚠️ 重要：URL 变更影响",
 	"webDomain.changeWarningDesc": "如果你更改 Jos 服务器 URL，请同步更新 GitHub Apps，以保持自动部署和预览部署可用。",
 	"webDomain.domain": "域名",
+	"webDomain.publicUrl": "公网 URL",
+	"webDomain.publicUrlDesc": "用于邀请和账户链接，请填写外部可访问的地址。",
 	"webDomain.letsEncryptEmail": "Let's Encrypt 邮箱",
 	"webDomain.httpsDesc": "自动签发 SSL 证书。",
 	"webDomain.certificateProvider": "证书提供商",

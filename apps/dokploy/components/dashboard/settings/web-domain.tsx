@@ -38,6 +38,7 @@ const createServerDomainSchema = (t: (key: string) => string) =>
 	z
 		.object({
 			domain: z.string().trim().toLowerCase(),
+			publicUrl: z.string().trim().optional(),
 			letsEncryptEmail: z.string(),
 			https: z.boolean().optional(),
 			certificateType: z.enum(["letsencrypt", "none", "custom"]),
@@ -78,6 +79,7 @@ export const WebDomain = () => {
 			certificateType: "none",
 			letsEncryptEmail: "",
 			https: false,
+			publicUrl: "",
 		},
 		resolver: zodResolver(addServerDomain),
 	});
@@ -92,6 +94,7 @@ export const WebDomain = () => {
 				certificateType: data?.certificateType || "none",
 				letsEncryptEmail: data?.letsEncryptEmail || "",
 				https: data?.https || false,
+				publicUrl: data?.publicUrl || "",
 			});
 		}
 	}, [form, form.reset, data]);
@@ -99,6 +102,7 @@ export const WebDomain = () => {
 	const onSubmit = async (data: AddServerDomain) => {
 		await mutateAsync({
 			host: data.domain,
+			publicUrl: data.publicUrl ?? null,
 			letsEncryptEmail: data.letsEncryptEmail,
 			certificateType: data.certificateType,
 			https: data.https,
@@ -145,41 +149,58 @@ export const WebDomain = () => {
 								<FormField
 									control={form.control}
 									name="domain"
-									render={({ field }) => {
-										return (
-											<FormItem>
-												<FormLabel>{t("webDomain.domain")}</FormLabel>
-												<FormControl>
-													<Input
-														className="w-full"
-														placeholder={"dokploy.com"}
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										);
-									}}
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t("webDomain.domain")}</FormLabel>
+											<FormControl>
+												<Input
+													className="w-full"
+													placeholder="dokploy.com"
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="publicUrl"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t("webDomain.publicUrl")}</FormLabel>
+											<FormControl>
+												<Input
+													className="w-full"
+													placeholder="https://dokploy.example.com"
+													{...field}
+												/>
+											</FormControl>
+											<FormDescription>
+												{t("webDomain.publicUrlDesc")}
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
 
 								<FormField
 									control={form.control}
 									name="letsEncryptEmail"
-									render={({ field }) => {
-										return (
-											<FormItem>
-												<FormLabel>{t("webDomain.letsEncryptEmail")}</FormLabel>
-												<FormControl>
-													<Input
-														className="w-full"
-														placeholder={"Dp4kz@example.com"}
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										);
-									}}
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t("webDomain.letsEncryptEmail")}</FormLabel>
+											<FormControl>
+												<Input
+													className="w-full"
+													placeholder="Dp4kz@example.com"
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
 								<FormField
 									control={form.control}

@@ -244,6 +244,7 @@ export const settingsRouter = createTRPCRouter({
 			}
 			const settings = await updateWebServerSettings({
 				host: input.host,
+				publicUrl: input.publicUrl?.trim() || null,
 				letsEncryptEmail: input.letsEncryptEmail,
 				certificateType: input.certificateType,
 				https: input.https,

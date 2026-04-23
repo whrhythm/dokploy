@@ -3802,6 +3802,8 @@
 	"webDomain.changeWarningTitle": "⚠️ Important: URL Change Impact",
 	"webDomain.changeWarningDesc": "If you change the Jos server URL, update GitHub Apps as well to keep automatic deploys and preview deploys working.",
 	"webDomain.domain": "Domain",
+	"webDomain.publicUrl": "Public URL",
+	"webDomain.publicUrlDesc": "Used for invitation and account links. Set this to the external URL people can reach.",
 	"webDomain.letsEncryptEmail": "Let's Encrypt Email",
 	"webDomain.httpsDesc": "Automatically issue SSL certificates.",
 	"webDomain.certificateProvider": "Certificate Provider",

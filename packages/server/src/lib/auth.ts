@@ -10,6 +10,7 @@ import { BETTER_AUTH_SECRET, IS_CLOUD } from "../constants";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import {
+	getDokployUrl,
 	getTrustedOrigins,
 	getTrustedProviders,
 	getUserByToken,
@@ -21,6 +22,23 @@ import {
 import { getHubSpotUTK, submitToHubSpot } from "../utils/tracking/hubspot";
 import { sendEmail } from "../verification/send-verification-email";
 import { getPublicIpWithFallback } from "../wss/utils";
+
+const normalizeOrigin = (value: string, https: boolean) => {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return null;
+	}
+
+	const withProtocol = /^https?:\/\//i.test(trimmed)
+		? trimmed
+		: `${https ? "https" : "http"}://${trimmed}`;
+
+	try {
+		return new URL(withProtocol).origin;
+	} catch {
+		return null;
+	}
+};
 
 const { handler, api } = betterAuth({
 	database: drizzleAdapter(db, {
@@ -89,11 +107,18 @@ const { handler, api } = betterAuth({
 					]
 				: [];
 		return [
-			...(settings?.serverIp ? [`http://${settings?.serverIp}:3000`] : []),
-			...(settings?.host ? [`https://${settings?.host}`] : []),
+			...(settings?.publicUrl
+				? [normalizeOrigin(settings.publicUrl, settings.https)]
+				: []),
+			...(settings?.serverIp
+				? [normalizeOrigin(`${settings.serverIp}:3000`, false)]
+				: []),
+			...(settings?.host
+				? [normalizeOrigin(settings.host, settings.https)]
+				: []),
 			...devOrigins,
 			...trustedOrigins,
-		];
+		].filter((origin): origin is string => Boolean(origin));
 	},
 	emailVerification: {
 		sendOnSignUp: true,
@@ -324,10 +349,7 @@ const { handler, api } = betterAuth({
 		organization({
 			async sendInvitationEmail(data, _request) {
 				if (IS_CLOUD) {
-					const host =
-						process.env.NODE_ENV === "development"
-							? "http://localhost:3000"
-							: "https://app.dokploy.com";
+					const host = await getDokployUrl();
 					const inviteLink = `${host}/invitation?token=${data.id}`;
 
 					await sendEmail({

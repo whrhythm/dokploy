@@ -10,6 +10,19 @@ import { eq } from "drizzle-orm";
 import { IS_CLOUD } from "../constants";
 import { getWebServerSettings } from "./web-server-settings";
 
+const normalizeBaseUrl = (value: string, https: boolean) => {
+	const trimmed = value.trim().replace(/\/$/, "");
+	if (!trimmed) {
+		return "";
+	}
+
+	if (/^https?:\/\//i.test(trimmed)) {
+		return trimmed;
+	}
+
+	return `${https ? "https" : "http"}://${trimmed}`;
+};
+
 export const findUserById = async (userId: string) => {
 	const userResult = await db.query.user.findFirst({
 		where: eq(user.id, userId),
@@ -110,10 +123,19 @@ export const getDokployUrl = async () => {
 	}
 	const settings = await getWebServerSettings();
 
+	if (settings?.publicUrl) {
+		return normalizeBaseUrl(settings.publicUrl, settings.https);
+	}
+
 	if (settings?.host) {
 		const protocol = settings?.https ? "https" : "http";
 		return `${protocol}://${settings?.host}`;
 	}
+
+	if (process.env.NODE_ENV === "development") {
+		return "http://localhost:3000";
+	}
+
 	return `http://${settings?.serverIp}:${process.env.PORT}`;
 };
 

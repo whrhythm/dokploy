@@ -1051,6 +1051,13 @@
       "when": 1773906225950,
       "tag": "0149_host_alert_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1773906225951,
+      "tag": "0150_public_url",
+      "breakpoints": true
     }
   ]
 }
