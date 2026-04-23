@@ -316,6 +316,20 @@ const evaluateContainer = async (
 
 	lastContainerStatus.set(key, status);
 
+	console.log(
+		"+++++++++++++++++++++++++++++++++++++++++++++ container health status",
+		{
+			resource: resource.kind,
+			resourceId: resource.resourceId,
+			appName: resource.appName,
+			serverId: resource.serverId,
+			containerName: name,
+			previousStatus,
+			currentStatus: status,
+			alerting: currentAlerting,
+		},
+	);
+
 	if (!currentAlerting || previousAlerting) {
 		return;
 	}
@@ -349,6 +363,14 @@ const scanServerContainers = async (
 ) => {
 	const dockerClient = await getDockerClient(serverId);
 	const containers = await dockerClient.listContainers({ all: true });
+	console.log(
+		"+++++++++++++++++++++++++++++++++++++++++++++ container health scan server",
+		{
+			serverId,
+			resourceCount: resources.length,
+			containerCount: containers.length,
+		},
+	);
 
 	for (const resource of resources) {
 		const matched = containers.filter((container) => {
@@ -385,6 +407,12 @@ const scanManagedContainers = async () => {
 	isHealthScanRunning = true;
 	try {
 		const resources = await collectManagedResources();
+		console.log(
+			"+++++++++++++++++++++++++++++++++++++++++++++ container health scan tick",
+			{
+				resourceCount: resources.length,
+			},
+		);
 		const grouped = new Map<string, ManagedResource[]>();
 
 		for (const resource of resources) {
@@ -410,6 +438,13 @@ export const startContainerHealthMonitoring = () => {
 	if (healthMonitorTimer) {
 		return;
 	}
+
+	console.log(
+		"+++++++++++++++++++++++++++++++++++++++++++++ container health monitor started",
+		{
+			intervalMs: HEALTH_CHECK_INTERVAL_MS,
+		},
+	);
 
 	void scanManagedContainers();
 	healthMonitorTimer = setInterval(() => {
