@@ -354,9 +354,11 @@ const { handler, api } = betterAuth({
 
 					await sendEmail({
 						email: data.email,
-						subject: "Invitation to join organization",
+						subject: "邀请你加入小智Ops",
 						text: `
-						<p>You are invited to join ${data.organization.name} on 小智Ops. Click the link to accept the invitation: <a href="${inviteLink}">Accept Invitation</a></p>
+						<p>您好！我们诚挚邀请您加入「${data.organization.name}」，共同使用小智Ops开展工作。请点击链接接受邀请，开启高效协作：
+							<a href="${inviteLink}">立即加入</a>
+						</p>
 					`,
 					});
 				}
