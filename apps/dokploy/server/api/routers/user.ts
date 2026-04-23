@@ -532,7 +532,7 @@ export const userRouter = createTRPCRouter({
 
 			try {
 				const htmlContent = `
-\t\t\t\t<p>您好！我们诚挚邀请您加入「${data.organization.name}」，共同使用小智Ops开展工作。请点击链接接受邀请，开启高效协作： <a href="${inviteLink}">立即加入</a></p>
+\t\t\t\t<p>您好！我们诚挚邀请您加入 「${organization?.name || "organization"}」,共同使用小智Ops开展工作。请点击链接接受邀请，开启高效协作： <a href="${inviteLink}">立即加入</a></p>
 \t\t\t\t`;
 
 				if (email) {
@@ -550,7 +550,7 @@ export const userRouter = createTRPCRouter({
 							...resend,
 							toAddresses: [currentInvitation?.email || ""],
 						},
-						"诚邀加入小智Ops",
+						"Invitation to join organization",
 						htmlContent,
 					);
 				}
