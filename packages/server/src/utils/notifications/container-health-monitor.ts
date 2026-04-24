@@ -9,7 +9,7 @@ type ManagedResource =
 			kind: "application";
 			resourceId: string;
 			appName: string;
-			serverId: string;
+			serverId: string | null;
 			organizationId: string;
 	  }
 	| {
@@ -17,14 +17,14 @@ type ManagedResource =
 			resourceId: string;
 			appName: string;
 			composeType: "docker-compose" | "stack";
-			serverId: string;
+			serverId: string | null;
 			organizationId: string;
 	  }
 	| {
 			kind: "service";
 			resourceId: string;
 			appName: string;
-			serverId: string;
+			serverId: string | null;
 			organizationId: string;
 	  };
 
@@ -38,7 +38,7 @@ const normalizeContainerName = (name: string) => name.replace(/^\/+/, "");
 const isAlertStatus = (status: string) =>
 	status === "unhealthy" || status === "exited" || status === "dead";
 
-const getDockerClient = async (serverId: string) => {
+const getDockerClient = async (serverId: string | null) => {
 	return serverId ? await getRemoteDocker(serverId) : docker;
 };
 
@@ -142,6 +142,15 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 				appName: true,
 			},
 			with: {
+				environment: {
+					with: {
+						project: {
+							columns: {
+								organizationId: true,
+							},
+						},
+					},
+				},
 				server: {
 					columns: {
 						serverId: true,
@@ -163,6 +172,15 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 				composeType: true,
 			},
 			with: {
+				environment: {
+					with: {
+						project: {
+							columns: {
+								organizationId: true,
+							},
+						},
+					},
+				},
 				server: {
 					columns: {
 						serverId: true,
@@ -177,6 +195,15 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 				appName: true,
 			},
 			with: {
+				environment: {
+					with: {
+						project: {
+							columns: {
+								organizationId: true,
+							},
+						},
+					},
+				},
 				server: {
 					columns: {
 						serverId: true,
@@ -191,6 +218,15 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 				appName: true,
 			},
 			with: {
+				environment: {
+					with: {
+						project: {
+							columns: {
+								organizationId: true,
+							},
+						},
+					},
+				},
 				server: {
 					columns: {
 						serverId: true,
@@ -205,6 +241,15 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 				appName: true,
 			},
 			with: {
+				environment: {
+					with: {
+						project: {
+							columns: {
+								organizationId: true,
+							},
+						},
+					},
+				},
 				server: {
 					columns: {
 						serverId: true,
@@ -219,6 +264,15 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 				appName: true,
 			},
 			with: {
+				environment: {
+					with: {
+						project: {
+							columns: {
+								organizationId: true,
+							},
+						},
+					},
+				},
 				server: {
 					columns: {
 						serverId: true,
@@ -233,6 +287,15 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 				appName: true,
 			},
 			with: {
+				environment: {
+					with: {
+						project: {
+							columns: {
+								organizationId: true,
+							},
+						},
+					},
+				},
 				server: {
 					columns: {
 						serverId: true,
@@ -247,25 +310,31 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 
 	for (const app of apps) {
 		const serverInfo = app.buildServer || app.server;
-		if (!serverInfo?.serverId) continue;
+		const organizationId =
+			serverInfo?.organizationId ||
+			app.environment?.project?.organizationId ||
+			"";
 		managedResources.push({
 			kind: "application",
 			resourceId: app.applicationId,
 			appName: app.appName,
-			serverId: serverInfo.serverId,
-			organizationId: serverInfo.organizationId,
+			serverId: serverInfo?.serverId || null,
+			organizationId,
 		});
 	}
 
 	for (const entry of composes) {
-		if (!entry.server?.serverId) continue;
+		const organizationId =
+			entry.server?.organizationId ||
+			entry.environment?.project?.organizationId ||
+			"";
 		managedResources.push({
 			kind: "compose",
 			resourceId: entry.composeId,
 			appName: entry.appName,
 			composeType: entry.composeType,
-			serverId: entry.server.serverId,
-			organizationId: entry.server.organizationId,
+			serverId: entry.server?.serverId || null,
+			organizationId,
 		});
 	}
 
@@ -276,7 +345,10 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 		...mysqlRows,
 		...postgresRows,
 	]) {
-		if (!entry.server?.serverId) continue;
+		const organizationId =
+			entry.server?.organizationId ||
+			entry.environment?.project?.organizationId ||
+			"";
 		managedResources.push({
 			kind: "service",
 			resourceId:
@@ -290,8 +362,8 @@ const collectManagedResources = async (): Promise<ManagedResource[]> => {
 								? entry.mysqlId
 								: entry.postgresId,
 			appName: entry.appName,
-			serverId: entry.server.serverId,
-			organizationId: entry.server.organizationId,
+			serverId: entry.server?.serverId || null,
+			organizationId,
 		});
 	}
 
@@ -358,7 +430,7 @@ const evaluateContainer = async (
 };
 
 const scanServerContainers = async (
-	serverId: string,
+	serverId: string | null,
 	resources: ManagedResource[],
 ) => {
 	const dockerClient = await getDockerClient(serverId);
@@ -394,6 +466,18 @@ const scanServerContainers = async (
 		}
 
 		for (const container of pickContainersForCheck(matched)) {
+			if (!resource.organizationId) {
+				console.log(
+					"+++++++++++++++++++++++++++++++++++++++++++++ container health skipped resource missing organization",
+					{
+						resource: resource.kind,
+						resourceId: resource.resourceId,
+						appName: resource.appName,
+						serverId,
+					},
+				);
+				continue;
+			}
 			await evaluateContainer(resource, dockerClient, container);
 		}
 	}
@@ -416,7 +500,7 @@ const scanManagedContainers = async () => {
 		const grouped = new Map<string, ManagedResource[]>();
 
 		for (const resource of resources) {
-			const key = resource.serverId;
+			const key = resource.serverId || "__local__";
 			const current = grouped.get(key) || [];
 			current.push(resource);
 			grouped.set(key, current);
@@ -424,7 +508,7 @@ const scanManagedContainers = async () => {
 
 		await Promise.all(
 			Array.from(grouped.entries()).map(([serverId, items]) =>
-				scanServerContainers(serverId, items),
+				scanServerContainers(serverId === "__local__" ? null : serverId, items),
 			),
 		);
 	} catch (error) {

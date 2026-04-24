@@ -1,3 +1,4 @@
+import * as React from "react";
 import { NotificationEventContent } from "../components/notification-event";
 import { NotificationEmailTemplate } from "./__template-email__";
 
@@ -27,15 +28,19 @@ export const ContainerHealthEmail = ({
 	};
 
 	const summaryText = `容器 ${containerName} 的健康状态发生变化，当前状态为 ${currentStatus}。`;
-	const summary = (
-		<>
-			容器 <strong>{containerName}</strong> 的健康状态发生变化，当前状态为
-			<span style={{ color: "#DC2626", fontWeight: 600 }}>
-				{" "}
-				{currentStatus}
-			</span>
-			。
-		</>
+	const summary = React.createElement(
+		React.Fragment,
+		null,
+		"容器 ",
+		React.createElement("strong", null, containerName),
+		" 的健康状态发生变化，当前状态为",
+		React.createElement(
+			"span",
+			{ style: { color: "#DC2626", fontWeight: 600 } },
+			" ",
+			currentStatus,
+		),
+		"。",
 	);
 
 	return (
