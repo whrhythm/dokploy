@@ -30,6 +30,7 @@ type ManagedResource =
 
 const HEALTH_CHECK_INTERVAL_MS = 60_000;
 const lastContainerStatus = new Map<string, string>();
+const activeEventListeners = new Set<string>();
 let healthMonitorTimer: ReturnType<typeof setInterval> | null = null;
 let isHealthScanRunning = false;
 
@@ -40,6 +41,121 @@ const isAlertStatus = (status: string) =>
 
 const getDockerClient = async (serverId: string | null) => {
 	return serverId ? await getRemoteDocker(serverId) : docker;
+};
+
+const startDockerEventListener = async (serverId: string | null) => {
+	const listenerKey = serverId || "__local__";
+	if (activeEventListeners.has(listenerKey)) {
+		return;
+	}
+
+	activeEventListeners.add(listenerKey);
+	try {
+		const dockerClient = await getDockerClient(serverId);
+		if (
+			!("getEvents" in dockerClient) ||
+			typeof dockerClient.getEvents !== "function"
+		) {
+			console.log(
+				"+++++++++++++++++++++++++++++++++++++++++++++ container health events unavailable",
+				{ serverId },
+			);
+			activeEventListeners.delete(listenerKey);
+			return;
+		}
+
+		dockerClient.getEvents(
+			{
+				filters: {
+					type: ["container"],
+					event: ["start", "die", "destroy", "health_status"],
+				},
+			},
+			(err, stream) => {
+				if (err || !stream) {
+					console.error("Container health event listener failed", {
+						serverId,
+						error: err,
+					});
+					activeEventListeners.delete(listenerKey);
+					return;
+				}
+
+				console.log(
+					"+++++++++++++++++++++++++++++++++++++++++++++ container health event listener started",
+					{ serverId },
+				);
+
+				stream.on("data", (chunk) => {
+					const payload = chunk.toString("utf-8");
+					for (const line of payload
+						.split("\n")
+						.map((value: string) => value.trim())) {
+						if (!line) continue;
+						try {
+							const event = JSON.parse(line) as {
+								Type?: string;
+								Action?: string;
+								status?: string;
+							};
+							const eventType = event.Type || "";
+							const eventAction = event.Action || event.status || "";
+							if (
+								eventType === "container" &&
+								["start", "die", "destroy", "health_status"].includes(
+									eventAction,
+								)
+							) {
+								console.log(
+									"+++++++++++++++++++++++++++++++++++++++++++++ container health event received",
+									{
+										serverId,
+										action: eventAction,
+									},
+								);
+								void scanManagedContainers();
+							}
+						} catch (error) {
+							console.error("Container health event parse failed", {
+								serverId,
+								line,
+								error,
+							});
+						}
+					}
+				});
+
+				stream.on("error", (error) => {
+					console.error("Container health event stream error", {
+						serverId,
+						error,
+					});
+					activeEventListeners.delete(listenerKey);
+				});
+
+				stream.on("end", () => {
+					activeEventListeners.delete(listenerKey);
+				});
+			},
+		);
+	} catch (error) {
+		console.error("Container health event listener setup failed", {
+			serverId,
+			error,
+		});
+		activeEventListeners.delete(listenerKey);
+	}
+};
+
+const ensureEventListeners = async (resources: ManagedResource[]) => {
+	const keys = new Set<string | null>();
+	for (const resource of resources) {
+		keys.add(resource.serverId);
+	}
+
+	await Promise.all(
+		Array.from(keys).map((serverId) => startDockerEventListener(serverId)),
+	);
 };
 
 const getContainerStatus = async (
@@ -497,6 +613,7 @@ const scanManagedContainers = async () => {
 				resourceCount: resources.length,
 			},
 		);
+		await ensureEventListeners(resources);
 		const grouped = new Map<string, ManagedResource[]>();
 
 		for (const resource of resources) {

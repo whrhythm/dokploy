@@ -131,7 +131,8 @@ export const NotificationEventContent = ({
 				},
 				e(
 					"tbody",
-					normalizedDetails.map((detail, index) =>
+					null,
+					...normalizedDetails.map((detail, index) =>
 						e(
 							"tr",
 							{ key: `${detail.label}-${index}` },
